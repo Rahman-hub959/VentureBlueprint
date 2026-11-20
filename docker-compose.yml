@@ -1,0 +1,53 @@
+
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vb-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ventureblueprint
+      POSTGRES_USER: vb_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - vb-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vb_user -d ventureblueprint"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile.backend
+    container_name: vb-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+     DATABASE_URL: postgresql://vb_user:${POSTGRES_PASSWORD}@postgres:5432/ventureblueprint
+      SECRET_KEY: ventureblueprint-production-secret-key-2026-local
+      STORAGE_DIR: /app/storage
+    ports:
+      - "8000:8000"
+    volumes:
+      - vb-storage:/app/storage
+
+  frontend:
+    build:
+      context: .
+      dockerfile: deployment/Dockerfile.frontend
+    container_name: vb-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  vb-pgdata:
+  vb-storage:

@@ -1,0 +1,305 @@
+/* VentureBlueprint Liquid Glassmorphism & Spatial UI Design System */
+/* Clean Three-Color Foundation: Green, Blue, White */
+
+:root,
+[data-theme="light"],
+html:not(.dark) {
+  /* Day Mode: Pure White Background, Solid High-Contrast Black Text */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-elevated: #ffffff;
+  --bg-surface-hover: #f1f5f9;
+  --bg-glass: #ffffff;
+  --bg-glass-strong: #ffffff;
+
+  /* Border & Rim Light Tokens - Crisp Light Slate */
+  --border-glass: #e2e8f0;
+  --border-glass-highlight: #3b82f6;
+  --border-glass-focus: #10b981;
+
+  /* The 3 Core Colors: GREEN, BLUE, WHITE */
+  --color-green-primary: #059669;
+  --color-green-accent: #10b981;
+  --color-green-dark: #065f46;
+  --color-green-light: #ecfdf5;
+  --color-green-border: #a7f3d0;
+
+  --color-blue-primary: #1d4ed8;
+  --color-blue-accent: #2563eb;
+  --color-blue-dark: #0f172a;
+  --color-blue-light: #eff6ff;
+  --color-blue-border: #bfdbfe;
+
+  --color-white-pure: #ffffff;
+  --color-white-surface: #ffffff;
+  --color-white-off: #f8fafc;
+
+  /* Text & Typography Tokens - High Contrast Solid Black & Deep Slate (Zero faint text) */
+  --text-primary: #000000;
+  --text-secondary: #0f172a;
+  --text-muted: #1e293b;
+  --text-blue: #1d4ed8;
+  --text-green: #047857;
+  --text-invert: #ffffff;
+
+  /* Form & Input Controls */
+  --input-bg: #ffffff;
+  --input-text: #000000;
+  --input-border: #cbd5e1;
+
+  /* Depth & Shadows */
+  --shadow-glass-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --shadow-glass-md: 0 4px 12px -2px rgba(0, 0, 0, 0.07), 0 2px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glass-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.09), 0 4px 12px -4px rgba(0, 0, 0, 0.04);
+  --shadow-glow-emerald: 0 4px 14px 0 rgba(16, 185, 129, 0.28);
+  --shadow-glow-blue: 0 4px 14px 0 rgba(37, 99, 235, 0.24);
+
+  /* Corner Radius */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+/* Night Mode Tokens: Pure Black Background, Solid High-Contrast White Text */
+[data-theme="dark"],
+html.dark {
+  --bg-primary: #000000;
+  --bg-secondary: #090d16;
+  --bg-surface: #111827;
+  --bg-surface-elevated: #1f2937;
+  --bg-surface-hover: #1f2937;
+  --bg-glass: rgba(17, 24, 39, 0.95);
+  --bg-glass-strong: #111827;
+
+  /* Borders in dark mode */
+  --border-glass: #1f293d;
+  --border-glass-highlight: #3b82f6;
+  --border-glass-focus: #10b981;
+
+  /* The 3 Core Colors in Dark: Vibrant Green, Electric Blue, Clean White */
+  --color-green-primary: #10b981;
+  --color-green-accent: #34d399;
+  --color-green-dark: #064e3b;
+  --color-green-light: rgba(16, 185, 129, 0.15);
+  --color-green-border: #059669;
+
+  --color-blue-primary: #3b82f6;
+  --color-blue-accent: #60a5fa;
+  --color-blue-dark: #1e3a8a;
+  --color-blue-light: rgba(59, 130, 246, 0.15);
+  --color-blue-border: #2563eb;
+
+  --color-white-pure: #ffffff;
+  --color-white-surface: #1f2937;
+  --color-white-off: #f3f4f6;
+
+  /* Text & Typography Tokens in Dark - Bright & Crisp Solid White */
+  --text-primary: #ffffff;
+  --text-secondary: #f3f4f6;
+  --text-muted: #d1d5db;
+  --text-blue: #60a5fa;
+  --text-green: #34d399;
+  --text-invert: #000000;
+
+  /* Form & Input Controls */
+  --input-bg: #111827;
+  --input-text: #ffffff;
+  --input-border: #374151;
+
+  /* Shadows in dark mode */
+  --shadow-glass-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-glass-md: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
+  --shadow-glass-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.6);
+  --shadow-glow-emerald: 0 4px 16px 0 rgba(16, 185, 129, 0.35);
+  --shadow-glow-blue: 0 4px 16px 0 rgba(59, 130, 246, 0.35);
+}
+
+/* Base Body Application Styling */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Universal Dropdown & Select Readability Fix */
+select {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  border-color: var(--input-border) !important;
+}
+
+select option {
+  background-color: var(--input-bg) !important;
+  color: var(--input-text) !important;
+  padding: 8px 12px;
+}
+
+[data-theme="light"] select option,
+html:not(.dark) select option {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+[data-theme="dark"] select option,
+html.dark select option {
+  background-color: #111827 !important;
+  color: #ffffff !important;
+}
+
+/* Glass Surface Utility Classes */
+.glass-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass-md);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.glass-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass-sm);
+  border-radius: var(--radius-md);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-primary);
+}
+
+.glass-card:hover {
+  border-color: var(--border-glass-highlight);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glass-md);
+}
+
+.glass-card-interactive {
+  cursor: pointer;
+}
+
+.glass-modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-glass-lg);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+}
+
+.glass-input {
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--input-text);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.glass-input:focus {
+  border-color: var(--color-green-accent);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* Primary Button: GREEN (Action & Momentum) */
+.glass-button-primary {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff !important;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-glow-emerald);
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.glass-button-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4);
+}
+
+/* Secondary Button: BLUE (Structure & Corporate Navigation) */
+.glass-button-secondary {
+  background: var(--color-blue-light);
+  color: var(--text-blue) !important;
+  border: 1px solid var(--color-blue-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.glass-button-secondary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+/* Badges: Green & Blue */
+.glass-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-glass);
+}
+
+.glass-badge-emerald {
+  background: var(--color-green-light);
+  border-color: var(--color-green-border);
+  color: var(--text-green);
+}
+
+.glass-badge-blue {
+  background: var(--color-blue-light);
+  border-color: var(--color-blue-border);
+  color: var(--text-blue);
+}
+
+.glass-badge-neutral {
+  background: var(--bg-secondary);
+  border-color: var(--border-glass);
+  color: var(--text-muted);
+}
+
+/* Spatial Ambient Lighting background */
+.spatial-bg {
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+.spatial-glow-top-right {
+  position: absolute;
+  top: -150px;
+  right: -100px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.spatial-glow-bottom-left {
+  position: absolute;
+  bottom: -200px;
+  left: -150px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}

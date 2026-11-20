@@ -11,7 +11,7 @@ import {
 
 type IconName = "arrow-right" | "bell" | "check" | "chevron-down" | "close" | "document" | "download" | "filter" | "grid" | "layers" | "menu" | "palette" | "plus" | "refresh" | "route" | "search" | "sliders" | "spark" | "user"
 
-export function Icon({ name, size = 18 }: { name: IconName size?: number }) {
+export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, ReactNode> = {
     "arrow-right": (
       <>
@@ -407,7 +407,7 @@ export function TextInput({
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string
-  options: { value: string label: string }[]
+  options: { value: string; label: string }[]
 }
 export function Select({ label, options, ...props }: SelectProps) {
   const id = useId()

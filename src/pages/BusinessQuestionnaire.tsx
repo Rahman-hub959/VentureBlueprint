@@ -187,7 +187,7 @@ export default function BusinessQuestionnaire({ onComplete, homeHref = '/' }: Bu
   const [status, setStatus] = useState<'idle' | 'generating' | 'done'>('idle');
   const headingRef = useRef<HTMLHeadingElement>(null);
   const formRef = useRef<HTMLDivElement>(null);
-  const timer = useRef<number>();
+  const timer = useRef<number | undefined>(undefined);
   const firstRender = useRef(true);
 
   useEffect(() => () => window.clearTimeout(timer.current), []);

@@ -1,40 +1,44 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap');
 @import 'tailwindcss';
+@custom-variant dark (&:where(.dark, .dark *));
+@import './styles/glassmorphism.css';
 
 @theme {
-  --color-navy-900: #172b4d;
-  --color-green-700: #176b52;
-  --color-canvas: #f8f7f3;
+  --color-navy-900: #0f172a;
+  --color-blue-800: #1e40af;
+  --color-blue-600: #2563eb;
+  --color-green-700: #059669;
+  --color-green-600: #10b981;
+  --color-canvas: #ffffff;
   --color-white: #ffffff;
   --color-slate-500: #64748b;
-  --color-sage-100: #e7f1eb;
-  --color-gold-500: #c8a96b;
-  --color-border: #e5e7eb;
+  --color-sage-100: #ecfdf5;
+  --color-border: #e2e8f0;
   --color-error: #b42318;
   --color-warning: #b54708;
-  --color-success: #15803d;
+  --color-success: #059669;
 }
 
 :root {
-  --navy: #172b4d;
-  --navy-deep: #0e1c33;
-  --green: #176b52;
-  --green-dark: #105440;
-  --canvas: #f8f7f3;
+  --navy: #0f172a;
+  --navy-deep: #1e3a8a;
+  --blue: #2563eb;
+  --green: #059669;
+  --green-dark: #065f46;
+  --canvas: #ffffff;
   --white: #ffffff;
-  --secondary: #64748b;
-  --sage: #e7f1eb;
-  --gold: #c8a96b;
-  --border: #e5e7eb;
+  --secondary: #1e293b;
+  --sage: #ecfdf5;
+  --border: #e2e8f0;
   --error: #b42318;
   --warning: #b54708;
-  --success: #15803d;
-  --text: #25344f;
-  --muted: #f3f5f5;
-  --focus: rgba(23, 107, 82, 0.18);
-  --shadow-sm: 0 1px 2px rgba(23, 43, 77, 0.04);
-  --shadow-md: 0 12px 32px rgba(23, 43, 77, 0.08);
-  --shadow-lg: 0 28px 70px rgba(14, 28, 51, 0.18);
+  --success: #059669;
+  --text: #000000;
+  --muted: #f8fafc;
+  --focus: rgba(16, 185, 129, 0.2);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.08);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
@@ -44,10 +48,16 @@
 
 @layer base {
   html { scroll-behavior: smooth; }
-  body { background: var(--canvas); color: var(--text); font-family: var(--body); font-size: 14px; -webkit-font-smoothing: antialiased; }
+  body {
+    background-color: var(--bg-primary, #ffffff);
+    color: var(--text-primary, #000000);
+    font-family: var(--body);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
   button, input, select { font: inherit; }
   button, a { -webkit-tap-highlight-color: transparent; }
-  ::selection { background: var(--sage); color: var(--navy); }
+  ::selection { background: #d1fae5; color: #065f46; }
 }
 
 * { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
@@ -334,92 +344,38 @@ td .button { min-height: 30px; }
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 /* =================================
-   GLOBAL THEME SYSTEM
+   GLOBAL THEME HARMONIZATION
 ================================= */
 
-:root {
+:root,
+[data-theme="light"],
+html:not(.dark) {
   color-scheme: light;
-  --app-bg: #F8F7F3;
-  --surface: #FFFFFF;
-  --text-primary: #172B4D;
-  --text-secondary: #64748B;
-  --border-color: #E5E7EB;
-  --input-bg: #FFFFFF;
+  --app-bg: #ffffff;
+  --surface: #ffffff;
+  --text-primary: #000000;
+  --text-secondary: #0f172a;
+  --border-color: #e2e8f0;
+  --input-bg: #ffffff;
 }
 
-:root[data-theme="dark"] {
+[data-theme="dark"],
+html.dark {
   color-scheme: dark;
-  --app-bg: #111827;
-  --surface: #1F2937;
-  --text-primary: #F9FAFB;
-  --text-secondary: #CBD5E1;
-  --border-color: #374151;
-  --input-bg: #273449;
+  --app-bg: #000000;
+  --surface: #111827;
+  --text-primary: #ffffff;
+  --text-secondary: #f3f4f6;
+  --border-color: #1f293d;
+  --input-bg: #111827;
 }
 
-body {
-  background: var(--app-bg);
-  color: var(--text-primary);
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease;
-}
-
-:root[data-theme="dark"] body {
-  background: var(--app-bg);
-  color: var(--text-primary);
-}
-
-/* Main surfaces */
-:root[data-theme="dark"] .vbd-page,
-:root[data-theme="dark"] .pj-page,
-:root[data-theme="dark"] .st-page,
-:root[data-theme="dark"] .st-card,
-:root[data-theme="dark"] .vbd-block,
-:root[data-theme="dark"] .vbd-blueprint-card,
-:root[data-theme="dark"] .pj-card {
+/* Card surfaces respond cleanly to Day / Night modes */
+.card,
+.glass-panel,
+.glass-card,
+.glass-modal {
   background-color: var(--surface);
   color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-/* Typography */
-:root[data-theme="dark"] h1,
-:root[data-theme="dark"] h2,
-:root[data-theme="dark"] h3,
-:root[data-theme="dark"] p,
-:root[data-theme="dark"] label,
-:root[data-theme="dark"] span {
-  color: inherit;
-}
-
-/* Secondary text */
-:root[data-theme="dark"] .st-muted,
-:root[data-theme="dark"] .st-hint,
-:root[data-theme="dark"] .pj-muted {
-  color: var(--text-secondary);
-}
-
-/* Inputs */
-:root[data-theme="dark"] input,
-:root[data-theme="dark"] textarea,
-:root[data-theme="dark"] select,
-:root[data-theme="dark"] .st-input {
-  background: var(--input-bg);
-  color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-/* Borders */
-:root[data-theme="dark"] .st-nav,
-:root[data-theme="dark"] .st-savebar,
-:root[data-theme="dark"] .st-header {
-  border-color: var(--border-color);
-}
-
-/* Navigation */
-:root[data-theme="dark"] .vbd-sidebar {
-  background: #172033;
-  color: #F9FAFB;
   border-color: var(--border-color);
 }
