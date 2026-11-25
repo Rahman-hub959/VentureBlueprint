@@ -54,7 +54,10 @@ def get_questionnaire_schema():
                     {"name": "postal_code", "label": "Postal PIN Code", "type": "text", "required": True},
                     {"name": "premise_type", "label": "Premises Type", "type": "select", "options": ["Owned", "Rented", "Leased", "Co-working / Virtual Office"]},
                     {"name": "operation_mode", "label": "Operation Model", "type": "select", "options": ["Physical Location", "Online Only", "Hybrid"]},
-                    {"name": "multi_state_operations", "label": "Do you plan to operate or have branches in multiple states?", "type": "boolean"}
+                    {"name": "multi_state_operations", "label": "State Operation", "type": "select", "options": ["Single State", "Multi-State Presence"]},
+                    {"name": "secondary_state", "label": "Additional Operating State", "type": "select"},
+                    {"name": "secondary_city", "label": "Additional Operating City", "type": "text"},
+                    {"name": "secondary_office_address", "label": "Detailed Address of Additional Establishment", "type": "textarea"}
                 ]
             },
             {
@@ -62,7 +65,7 @@ def get_questionnaire_schema():
                 "title": "Section 4: Financial Planning & Capitalization",
                 "description": "Define authorized and paid-up share capital, expected startup investments, and revenue expectations.",
                 "fields": [
-                    {"name": "initial_investment_range", "label": "Initial Investment Budget", "type": "select", "options": ["Below ₹1 Lakh", "₹1L – ₹5L", "₹5L – ₹10L", "₹10L – ₹25L", "₹25L – ₹50L", "Above ₹50 Lakhs"]},
+                    {"name": "initial_investment_range", "label": "Initial Investment Budget", "type": "select", "options": ["₹1L – ₹5L", "₹5L – ₹10L", "₹10L – ₹25L", "₹25L – ₹50L", "Above ₹50 Lakhs"]},
                     {"name": "proposed_authorized_capital", "label": "Proposed Authorized Capital (INR)", "type": "number", "default": 100000},
                     {"name": "proposed_paid_up_capital", "label": "Proposed Paid-up Capital (INR)", "type": "number", "default": 100000},
                     {"name": "revenue_models", "label": "Revenue Models", "type": "multiselect", "options": ["Direct Product Sales", "Subscription / SaaS", "Service Fees", "Marketplace Commission", "Licensing", "Advertising"]},
@@ -121,6 +124,9 @@ def get_project_answers(project: StartupProject = Depends(get_user_project), db:
             "premise_type": profile.premise_type if profile else "",
             "operation_mode": profile.operation_mode if profile else "Physical",
             "multi_state_operations": profile.multi_state_operations if profile else False,
+            "secondary_state": profile.secondary_state if profile else "",
+            "secondary_city": profile.secondary_city if profile else "",
+            "secondary_office_address": profile.secondary_office_address if profile else "",
             "initial_investment_range": profile.initial_investment_range if profile else "",
             "proposed_authorized_capital": profile.proposed_authorized_capital if profile else 100000.0,
             "proposed_paid_up_capital": profile.proposed_paid_up_capital if profile else 100000.0,
@@ -130,13 +136,15 @@ def get_project_answers(project: StartupProject = Depends(get_user_project), db:
             "departments": profile.departments if profile else [],
             "collects_personal_data": profile.collects_personal_data if profile else False,
             "imports_or_exports": profile.imports_or_exports if profile else False,
-            "has_investor_participation": profile.has_investor_participation if profile else False
+            "has_investor_participation": profile.has_investor_participation if profile else False,
+            "requires_ca_cs_support": True
         },
         "founders": [
             {
                 "id": f.id,
                 "full_name": f.full_name,
                 "email": f.email,
+                "phone": f.phone or "",
                 "proposed_shareholding_percentage": f.proposed_shareholding_percentage,
                 "is_resident_of_india": f.is_resident_of_india,
                 "executive_role": f.executive_role
@@ -172,7 +180,8 @@ def save_project_answers(
     for field in [
         "business_description", "products_and_services", "target_audience", "business_stage",
         "country", "state", "city", "registered_office_address", "postal_code", "premise_type",
-        "operation_mode", "multi_state_operations", "initial_investment_range",
+        "operation_mode", "multi_state_operations", "secondary_state", "secondary_city",
+        "secondary_office_address", "initial_investment_range",
         "proposed_authorized_capital", "proposed_paid_up_capital", "revenue_models",
         "sales_channels", "expected_employee_count", "departments", "collects_personal_data",
         "imports_or_exports", "has_investor_participation"
@@ -189,6 +198,7 @@ def save_project_answers(
                 project_id=project.id,
                 full_name=f_data.get("full_name", "Founder"),
                 email=f_data.get("email"),
+                phone=f_data.get("phone"),
                 proposed_shareholding_percentage=float(f_data.get("proposed_shareholding_percentage", 50.0)),
                 is_resident_of_india=bool(f_data.get("is_resident_of_india", True)),
                 executive_role=f_data.get("executive_role", "Director")

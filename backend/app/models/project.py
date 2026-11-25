@@ -61,6 +61,9 @@ class BusinessProfile(Base):
     premise_type = Column(String(50), nullable=True)  # Owned, Rented, Leased, Shared Workspace
     operation_mode = Column(String(50), default="Physical")  # Physical, Online, Hybrid
     multi_state_operations = Column(Boolean, default=False)
+    secondary_state = Column(String(100), nullable=True)
+    secondary_city = Column(String(100), nullable=True)
+    secondary_office_address = Column(Text, nullable=True)
     
     # Financials
     initial_investment_range = Column(String(100), nullable=True)

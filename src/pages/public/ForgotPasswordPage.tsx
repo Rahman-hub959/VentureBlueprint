@@ -46,14 +46,16 @@ export const ForgotPasswordPage: React.FC = () => {
             <div>
               <label className="block text-xs font-bold text-slate-900 dark:text-white mb-1.5">Email Address</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-3.5" />
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                  <Mail className="w-4 h-4" />
+                </div>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="founder@ventureblueprint.in"
-                  className="w-full glass-input pl-10"
+                  className="w-full glass-input !pl-11"
                 />
               </div>
             </div>

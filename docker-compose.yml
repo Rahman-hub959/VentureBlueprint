@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: ventureblueprint
       POSTGRES_USER: vb_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: vb_secure_password_2026
     ports:
       - "5432:5432"
     volumes:
@@ -29,7 +29,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-     DATABASE_URL: postgresql://vb_user:${POSTGRES_PASSWORD}@postgres:5432/ventureblueprint
+      DATABASE_URL: postgresql://vb_user:vb_secure_password_2026@postgres:5432/ventureblueprint
       SECRET_KEY: ventureblueprint-production-secret-key-2026-local
       STORAGE_DIR: /app/storage
     ports:

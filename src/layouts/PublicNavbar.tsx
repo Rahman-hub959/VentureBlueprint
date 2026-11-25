@@ -67,9 +67,14 @@ export const PublicNavbar: React.FC = () => {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="w-9 h-9 rounded-lg flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-slate-800 dark:text-slate-100"
+            title={resolvedTheme === "dark" ? "Switch to Day Mode (Light)" : "Switch to Night Mode (Dark)"}
+            className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-emerald-500/50 transition-all duration-300 hover:rotate-12 active:scale-95 text-slate-800 dark:text-slate-100 group shadow-xs"
           >
-            {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+            {resolvedTheme === "dark" ? (
+              <Sun className="w-4 h-4 text-amber-400 transform transition-transform duration-500 rotate-0 group-hover:rotate-90 group-hover:scale-110" />
+            ) : (
+              <Moon className="w-4 h-4 text-blue-600 transform transition-transform duration-500 -rotate-12 group-hover:rotate-0 group-hover:scale-110" />
+            )}
           </button>
 
           {isAuthenticated ? (
@@ -131,12 +136,16 @@ export const PublicNavbar: React.FC = () => {
           ))}
           <hr className="border-slate-100 dark:border-slate-800 my-2" />
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-800 dark:text-slate-200 font-medium">Theme</span>
+            <span className="text-sm text-slate-800 dark:text-slate-200 font-medium">Theme Mode</span>
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
+              className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 transition-all duration-300 hover:rotate-12 active:scale-95 group"
             >
-              {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+              {resolvedTheme === "dark" ? (
+                <Sun className="w-4 h-4 text-amber-400 transform transition-transform duration-500 group-hover:rotate-90" />
+              ) : (
+                <Moon className="w-4 h-4 text-blue-600 transform transition-transform duration-500 group-hover:-rotate-12" />
+              )}
             </button>
           </div>
           {isAuthenticated ? (

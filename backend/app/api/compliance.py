@@ -215,8 +215,44 @@ def update_task(
     db.refresh(task)
     return {"id": task.id, "status": task.status, "message": "Task updated"}
 
+@router.get("/roles/default")
+def get_default_roles():
+    """Returns statutory and operational role recommendations for standard Indian corporate structure."""
+    return recommend_roles({
+        "domain": "Information Technology",
+        "preferred_structure": "Private Limited Company",
+        "expected_employee_count": "1-5"
+    })
+
 @router.get("/projects/{project_id}/roles")
-def get_recommended_roles(project: StartupProject = Depends(get_user_project)):
+def get_recommended_roles(
+    project_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Returns statutory and operational role recommendations tailored to the project.
+    Provides graceful fallback to standard private limited corporate structure if project is uninitialized ('new').
+    """
+    if project_id in ["new", "default", "none", ""]:
+        return recommend_roles({
+            "domain": "Information Technology",
+            "preferred_structure": "Private Limited Company",
+            "expected_employee_count": "1-5"
+        })
+    
+    project = db.query(StartupProject).filter(StartupProject.id == project_id).first()
+    if not project:
+        return recommend_roles({
+            "domain": "Information Technology",
+            "preferred_structure": "Private Limited Company",
+            "expected_employee_count": "1-5"
+        })
+
+    is_admin = current_user.role and current_user.role.name == "Administrator"
+    if project.user_id != current_user.id and not is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this project")
+
     profile = project.business_profile.__dict__ if project.business_profile else {}
     return recommend_roles({
         "domain": project.domain,

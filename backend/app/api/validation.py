@@ -12,8 +12,13 @@ from app.rules_engine.structure_evaluator import evaluate_legal_structure
 router = APIRouter(prefix="/validation", tags=["Validation Engine"])
 
 @router.post("/name-prescreen", response_model=NameValidationResponse)
-def prescreen_name(req: NameValidationRequest):
-    result = assess_company_name(req.name, req.legal_structure or "Private Limited Company")
+def prescreen_name(req: NameValidationRequest, db: Session = Depends(get_db)):
+    existing_names = [p[0] for p in db.query(StartupProject.name).all() if p[0]]
+    result = assess_company_name(
+        req.name, 
+        req.legal_structure or "Private Limited Company",
+        existing_names=existing_names
+    )
     return result
 
 @router.post("/structure-recommendation")
@@ -27,7 +32,7 @@ def run_project_validation(
 ):
     """
     Executes cross-field validation on the company project:
-    1. Name pre-screening
+    1. Name pre-screening against Rule 8, trademarks, and existing database entities
     2. Director and founder count compatibility with structure
     3. Shareholding percentages consistency (must sum to 100% if provided)
     4. Registered office address completeness
@@ -41,8 +46,11 @@ def run_project_validation(
     founders = project.founders
     structure = project.preferred_structure or "Private Limited Company"
 
-    # 1. Name Check
-    name_check = assess_company_name(project.name, structure)
+    # 1. Name Check against existing companies (excluding self) & trademarks
+    existing_names = [
+        p[0] for p in db.query(StartupProject.name).filter(StartupProject.id != project.id).all() if p[0]
+    ]
+    name_check = assess_company_name(project.name, structure, existing_names=existing_names)
     if not name_check["is_valid"]:
         vr = ValidationResult(
             project_id=project.id,
@@ -52,8 +60,8 @@ def run_project_validation(
             status="Failed",
             severity="high",
             explanation="; ".join(name_check["errors"]),
-            corrective_action="Revise proposed company name to conform with MCA Rule 8 guidelines.",
-            legal_reference="Rule 8, Companies (Incorporation) Rules, 2014"
+            corrective_action="; ".join(name_check["recommendations"]) or "Revise proposed company name to conform with MCA Rule 8 guidelines.",
+            legal_reference="Rule 8, Companies (Incorporation) Rules, 2014 & Trade Marks Act, 1999"
         )
         db.add(vr)
         results.append(vr)
@@ -79,9 +87,9 @@ def run_project_validation(
             field_name="name",
             status="Passed",
             severity="info",
-            explanation=f"Name '{project.name}' passed preliminary automated MCA Rule 8 pre-screening.",
+            explanation=f"Name '{project.name}' passed preliminary automated MCA Rule 8 and Trademark conflict pre-screening.",
             corrective_action="Proceed to formal name reservation on SPICe+ Part A.",
-            legal_reference="Section 4(2), Companies Act, 2013"
+            legal_reference="Section 4(2), Companies Act, 2013 & Rule 8(2)(b)"
         )
         db.add(vr)
         results.append(vr)

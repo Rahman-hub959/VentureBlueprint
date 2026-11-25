@@ -1,7 +1,10 @@
 import os
+import logging
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
+
+logger = logging.getLogger("ventureblueprint.documents")
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -20,7 +23,7 @@ from app.document_engine.docx_generator import build_docx_document
 router = APIRouter(prefix="/documents", tags=["Document Generation Engine"])
 
 DOC_TITLES = {
-    "formation_blueprint": "Company Startup Blueprint",
+    "formation_blueprint": "Company Setup Blueprint",
     "mca_compliance": "MCA Compliance Assessment Report",
     "founder_director": "Founder and Director Report",
     "document_requirements": "Document Requirement Report",
@@ -119,9 +122,49 @@ def generate_document(
         {c.name: getattr(f, c.name) for c in f.__table__.columns}
         for f in project.founders
     ]
-    # If founders_list is in profile_dict but not in founders table, supplement it
-    if not founders_dict and "founders_list" in profile_dict and isinstance(profile_dict["founders_list"], list):
-        founders_dict = profile_dict["founders_list"]
+    # Always merge rich questionnaire data (phone numbers, roles, percentages) if present
+    if "founders_list" in profile_dict and isinstance(profile_dict["founders_list"], list) and len(profile_dict["founders_list"]) > 0:
+        q_founders = profile_dict["founders_list"]
+        if not founders_dict:
+            founders_dict = q_founders
+        else:
+            # Match by full_name or index to merge phone numbers
+            for i, f_dict in enumerate(founders_dict):
+                matched = None
+                for q_f in q_founders:
+                    if q_f.get("full_name") and f_dict.get("full_name") and q_f.get("full_name").strip().lower() == f_dict.get("full_name").strip().lower():
+                        matched = q_f
+                        break
+                if not matched and i < len(q_founders):
+                    matched = q_founders[i]
+                
+                if matched:
+                    if not f_dict.get("phone") and matched.get("phone"):
+                        f_dict["phone"] = matched.get("phone")
+                    if not f_dict.get("phone_number") and matched.get("phone"):
+                        f_dict["phone_number"] = matched.get("phone")
+                    if matched.get("proposed_shareholding_percentage") is not None:
+                        f_dict["ownership_percentage"] = matched.get("proposed_shareholding_percentage")
+                    if matched.get("is_resident_of_india") is not None:
+                        f_dict["is_resident_of_india"] = matched.get("is_resident_of_india")
+                    if matched.get("executive_role"):
+                        f_dict["executive_role"] = matched.get("executive_role")
+
+        # Also sync back to database project.founders table if missing
+        for f in project.founders:
+            for q_f in q_founders:
+                if q_f.get("full_name") and f.full_name and q_f.get("full_name").strip().lower() == f.full_name.strip().lower():
+                    if not f.phone and q_f.get("phone"):
+                        f.phone = q_f.get("phone")
+                        db.add(f)
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+
+    # Fallback to current user phone for primary promoter if missing
+    if founders_dict and not founders_dict[0].get("phone") and current_user.phone_number:
+        founders_dict[0]["phone"] = current_user.phone_number
 
     directors_dict = [
         {c.name: getattr(d, c.name) for c in d.__table__.columns}
@@ -191,6 +234,21 @@ def generate_document(
     project.status = "blueprint_ready"
     db.commit()
     db.refresh(target_doc)
+
+    # Dispatch Blueprint Ready Email Notification (Item 10)
+    try:
+        from app.services.email_service import send_blueprint_ready_email
+        rec_struct = project.preferred_structure or "Private Limited Company"
+        send_blueprint_ready_email(
+            recipient_email=current_user.email,
+            recipient_name=current_user.full_name,
+            project_name=project.name,
+            project_id=project.id,
+            recommended_structure=rec_struct,
+            doc_id=target_doc.id
+        )
+    except Exception as email_err:
+        logger.error(f"Failed to dispatch blueprint notification email: {email_err}")
 
     return {
         "id": target_doc.id,

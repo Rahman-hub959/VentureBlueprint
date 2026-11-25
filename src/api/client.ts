@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+// Resilient API Base URL: handles both root url (e.g. https://api.railway.app) and subpath (/api/v1)
+const rawBase = (import.meta.env.VITE_API_BASE_URL || "/api/v1").replace(/\/+$/, "");
+const API_BASE = rawBase.endsWith("/api/v1") ? rawBase : `${rawBase}/api/v1`;
 
 export interface ApiResponse<T = any> {
   data?: T;

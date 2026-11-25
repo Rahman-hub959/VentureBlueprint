@@ -196,6 +196,13 @@ html.dark select option {
   outline: none;
 }
 
+.glass-input.has-icon,
+.glass-input.pl-10,
+.glass-input.pl-11,
+.glass-input[class*="pl-"] {
+  padding-left: 2.75rem !important; /* 44px to provide clear separation from leading icons */
+}
+
 .glass-input:focus {
   border-color: var(--color-green-accent);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);

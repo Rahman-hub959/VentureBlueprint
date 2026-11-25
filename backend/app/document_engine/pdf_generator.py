@@ -78,7 +78,7 @@ class NumberedCanvas(canvas.Canvas):
         self.setFillColor(TEXT_MUTED)
 
         # Running Header
-        self.drawString(48, 11 * inch - 32, "VENTUREBLUEPRINT | COMPANY STARTUP BLUEPRINT")
+        self.drawString(48, 11 * inch - 32, "VENTUREBLUEPRINT | COMPANY SETUP BLUEPRINT")
         self.setFont("Helvetica", 7.5)
         self.drawRightString(8.5 * inch - 48, 11 * inch - 32, "SRS v0.1 • STATUTORY PLANNING DOSSIER")
         self.setStrokeColor(BORDER_COLOR)
@@ -223,6 +223,40 @@ def _create_styles():
         spaceBefore=4,
         spaceAfter=6
     )
+    toc_th_left = ParagraphStyle(
+        "TOCTHLeft",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=8.5,
+        leading=11,
+        textColor=colors.white
+    )
+    toc_th_right = ParagraphStyle(
+        "TOCTHRight",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=8.5,
+        leading=11,
+        textColor=colors.white,
+        alignment=2
+    )
+    toc_td_left = ParagraphStyle(
+        "TOCTDLeft",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=8,
+        leading=11,
+        textColor=NAVY_PRIMARY
+    )
+    toc_td_right = ParagraphStyle(
+        "TOCTDRight",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=8,
+        leading=11,
+        textColor=EMERALD_DARK,
+        alignment=2
+    )
 
     return {
         "title": title_style,
@@ -238,14 +272,18 @@ def _create_styles():
         "box_title": box_title_style,
         "box_body": box_body_style,
         "disclaimer": disclaimer_style,
-        "footnote": footnote_style
+        "footnote": footnote_style,
+        "toc_th_left": toc_th_left,
+        "toc_th_right": toc_th_right,
+        "toc_td_left": toc_td_left,
+        "toc_td_right": toc_td_right
     }
 
 def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draft: bool = False) -> List[Any]:
     st = _create_styles()
     story = []
 
-    title = doc_data.get("title", "COMPANY STARTUP BLUEPRINT")
+    title = doc_data.get("title", "COMPANY SETUP BLUEPRINT")
     company_name = doc_data.get("company_name", "Lumora Labs")
     ref_output_desc = doc_data.get("ref_output_desc", "single founder who prefers a Private Limited company (India)")
     metadata_table_data = doc_data.get("metadata_table", [])
@@ -332,27 +370,42 @@ def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draf
     story.append(status_tbl)
     story.append(Spacer(1, 12))
 
+    story.append(Spacer(1, 10))
+    story.append(PageBreak())
+
     # ─────────────────────────────────────────────────────────────────
-    # CONTENTS SUMMARY (WITH DYNAMIC PAGE NUMBERS)
+    # TABLE OF CONTENTS (TABULAR FORMAT: LEFT CONTENT, RIGHT PAGE NUMBER)
     # ─────────────────────────────────────────────────────────────────
-    story.append(Paragraph("<b>Contents</b>", st["side_heading"]))
-    toc_tokens = []
+    story.append(Paragraph("<b>Table of Contents</b>", st["sec_title"]))
+    story.append(Paragraph("Structured corporate formation dossier sections and verified page references:", st["body"]))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=EMERALD_DARK, spaceBefore=2, spaceAfter=8))
+
+    toc_rows = [
+        [
+            Paragraph("<b>Content</b>", st["toc_th_left"]),
+            Paragraph("<b>Page Number</b>", st["toc_th_right"])
+        ]
+    ]
     for i, item in enumerate(contents_list, start=1):
         sec_key = f"sec_{i}"
-        pg = page_tracker.get(sec_key, i + 1)
-        toc_tokens.append(f"{item} (p. {pg})")
-    toc_line = " &nbsp;·&nbsp; ".join(toc_tokens)
-    
-    toc_box = Table([[Paragraph(toc_line, st["td"])]], colWidths=[content_w])
-    toc_box.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), BG_LIGHT),
-        ('BOX', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
-        ('TOPPADDING', (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        pg = page_tracker.get(sec_key, i + 2)
+        toc_rows.append([
+            Paragraph(item, st["toc_td_left"]),
+            Paragraph(f"Page {pg}", st["toc_td_right"])
+        ])
+
+    toc_tbl = Table(toc_rows, colWidths=[5.5 * inch, 1.65 * inch])
+    toc_tbl.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), NAVY_PRIMARY),
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, BG_LIGHT]),
+        ('TOPPADDING', (0, 0), (-1, -1), 3.5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 3.5),
         ('LEFTPADDING', (0, 0), (-1, -1), 8),
         ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
     ]))
-    story.append(toc_box)
+    story.append(toc_tbl)
     story.append(Spacer(1, 14))
     story.append(PageBreak())
 
@@ -411,7 +464,10 @@ def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draf
             elif n_cols == 3:
                 col_w = [1.8 * inch, 3.2 * inch, 2.15 * inch]
             elif n_cols == 4:
-                col_w = [1.5 * inch, 2.2 * inch, 1.45 * inch, 2.0 * inch]
+                if sec_num == 11 or "Cost Estimate" in sec.get("title", ""):
+                    col_w = [1.55 * inch, 2.1 * inch, 2.3 * inch, 1.2 * inch]
+                else:
+                    col_w = [1.5 * inch, 2.2 * inch, 1.45 * inch, 2.0 * inch]
             elif n_cols == 5:
                 col_w = [0.4 * inch, 2.8 * inch, 1.1 * inch, 1.45 * inch, 1.4 * inch]
             elif n_cols == 6:
@@ -458,7 +514,10 @@ def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draf
                 elif n_cols == 4:
                     col_w = [1.5 * inch, 2.2 * inch, 1.45 * inch, 2.0 * inch]
                 elif n_cols == 5:
-                    col_w = [1.3 * inch, 1.8 * inch, 1.0 * inch, 0.85 * inch, 2.2 * inch]
+                    if "Founder" in sub.get("side_heading", "") or "Promoter" in sub.get("side_heading", ""):
+                        col_w = [1.6 * inch, 1.45 * inch, 1.1 * inch, 1.35 * inch, 1.65 * inch]
+                    else:
+                        col_w = [1.3 * inch, 1.8 * inch, 1.0 * inch, 0.85 * inch, 2.2 * inch]
                 elif n_cols == 6:
                     col_w = [1.3 * inch, 1.3 * inch, 1.3 * inch, 1.0 * inch, 1.15 * inch, 1.1 * inch]
 
@@ -481,8 +540,8 @@ def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draf
             story.append(Paragraph(sec["footnote"], st["footnote"]))
 
         # Intelligent Page Breaks: group sections naturally across 10-15 pages
-        # Page breaks after: Sec 1, Sec 2, Sec 4, Sec 6, Sec 8, Sec 10, Sec 12, Sec 14, Sec 17
-        if sec_num in [1, 2, 4, 6, 8, 10, 12, 14, 17] and idx < len(sections):
+        # Section breaks: Sec 2, Sec 4, Sec 5, Sec 6, Sec 8, Sec 9, Sec 10, Sec 11, Sec 13, Sec 14, Sec 17, Sec 18
+        if sec_num in [2, 4, 5, 6, 8, 9, 10, 11, 13, 14, 17, 18] and idx < len(sections):
             story.append(PageBreak())
         else:
             story.append(Spacer(1, 10))

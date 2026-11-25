@@ -50,7 +50,7 @@ def build_docx_document(output_path: Path, doc_data: Dict[str, Any]) -> str:
         section.left_margin = Inches(0.65)
         section.right_margin = Inches(0.65)
 
-    title = doc_data.get("title", "COMPANY STARTUP BLUEPRINT")
+    title = doc_data.get("title", "COMPANY SETUP BLUEPRINT")
     company_name = doc_data.get("company_name", "Lumora Labs")
     ref_output_desc = doc_data.get("ref_output_desc", "single founder who prefers a Private Limited company (India)")
     metadata_table_data = doc_data.get("metadata_table", [])
@@ -168,21 +168,69 @@ def build_docx_document(output_path: Path, doc_data: Dict[str, Any]) -> str:
     p_sp = doc.add_paragraph()
     p_sp.paragraph_format.space_after = Pt(12)
 
-    # Contents summary line
+    # Table of Contents in Tabular Format
     p_toc_head = doc.add_paragraph()
-    r_toc_head = p_toc_head.add_run("Contents")
+    r_toc_head = p_toc_head.add_run("Table of Contents")
     r_toc_head.font.name = "Arial"
-    r_toc_head.font.size = Pt(11)
+    r_toc_head.font.size = Pt(13)
     r_toc_head.font.bold = True
     r_toc_head.font.color.rgb = NAVY_RGB
-    p_toc_head.paragraph_format.space_after = Pt(4)
+    p_toc_head.paragraph_format.space_before = Pt(8)
+    p_toc_head.paragraph_format.space_after = Pt(2)
 
-    p_toc_line = doc.add_paragraph()
-    r_toc_line = p_toc_line.add_run(" · ".join(contents_list))
-    r_toc_line.font.name = "Arial"
-    r_toc_line.font.size = Pt(8.5)
-    r_toc_line.font.color.rgb = TEXT_RGB
-    p_toc_line.paragraph_format.space_after = Pt(16)
+    p_toc_desc = doc.add_paragraph()
+    r_toc_desc = p_toc_desc.add_run("Structured corporate formation dossier sections and verified references:")
+    r_toc_desc.font.name = "Arial"
+    r_toc_desc.font.size = Pt(8.5)
+    r_toc_desc.font.color.rgb = MUTED_RGB
+    p_toc_desc.paragraph_format.space_after = Pt(6)
+
+    # 2-Column Table of Contents
+    toc_tbl = doc.add_table(rows=len(contents_list) + 1, cols=2)
+    toc_tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+    th0, th1 = toc_tbl.rows[0].cells[0], toc_tbl.rows[0].cells[1]
+    th0.text = "Content"
+    th0.paragraphs[0].runs[0].font.name = "Arial"
+    th0.paragraphs[0].runs[0].font.bold = True
+    th0.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    set_cell_background(th0, "0F172A")
+    set_cell_margins(th0, 50, 50, 100, 100)
+
+    th1.text = "Page Number"
+    th1.paragraphs[0].runs[0].font.name = "Arial"
+    th1.paragraphs[0].runs[0].font.bold = True
+    th1.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+    th1.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    set_cell_background(th1, "0F172A")
+    set_cell_margins(th1, 50, 50, 100, 100)
+
+    toc_page_map = {
+        1: 3, 2: 3, 3: 4, 4: 4, 5: 5, 6: 6, 7: 7, 8: 7, 9: 8,
+        10: 9, 11: 10, 12: 11, 13: 11, 14: 12, 15: 13, 16: 13, 17: 13, 18: 14, 19: 15
+    }
+
+    for i, item in enumerate(contents_list):
+        r_c0, r_c1 = toc_tbl.rows[i + 1].cells[0], toc_tbl.rows[i + 1].cells[1]
+        r_c0.text = str(item)
+        r_c0.paragraphs[0].runs[0].font.name = "Arial"
+        r_c0.paragraphs[0].runs[0].font.bold = True
+        r_c0.paragraphs[0].runs[0].font.size = Pt(8)
+        r_c0.paragraphs[0].runs[0].font.color.rgb = NAVY_RGB
+        set_cell_background(r_c0, "F8FAFC" if i % 2 == 1 else "FFFFFF")
+        set_cell_margins(r_c0, 40, 40, 80, 80)
+
+        pg_num = toc_page_map.get(i + 1, i + 3)
+        r_c1.text = f"Page {pg_num}"
+        r_c1.paragraphs[0].runs[0].font.name = "Arial"
+        r_c1.paragraphs[0].runs[0].font.bold = True
+        r_c1.paragraphs[0].runs[0].font.size = Pt(8)
+        r_c1.paragraphs[0].runs[0].font.color.rgb = EMERALD_RGB
+        r_c1.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        set_cell_background(r_c1, "F8FAFC" if i % 2 == 1 else "FFFFFF")
+        set_cell_margins(r_c1, 40, 40, 80, 80)
+
+    p_sp_toc = doc.add_paragraph()
+    p_sp_toc.paragraph_format.space_after = Pt(14)
 
     doc.add_page_break()
 
@@ -321,8 +369,8 @@ def build_docx_document(output_path: Path, doc_data: Dict[str, Any]) -> str:
             r_fn.font.color.rgb = MUTED_RGB
             p_fn.paragraph_format.space_after = Pt(6)
 
-        # Strategic page breaks for Word export
-        if sec.get("num", idx) in [1, 2, 4, 6, 8, 10, 12, 14, 17] and idx < len(sections):
+        # Strategic page breaks for Word export to match exact 15-page layout
+        if sec.get("num", idx) in [2, 4, 5, 6, 8, 9, 10, 11, 13, 14, 17, 18] and idx < len(sections):
             doc.add_page_break()
 
     # Final Disclaimer Block

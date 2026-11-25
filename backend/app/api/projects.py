@@ -103,6 +103,7 @@ def create_project(
         project_id=project.id,
         full_name=current_user.full_name,
         email=current_user.email,
+        phone=getattr(current_user, "phone_number", None),
         proposed_shareholding_percentage=100.0,
         is_director=True,
         executive_role="Managing Director / CEO"

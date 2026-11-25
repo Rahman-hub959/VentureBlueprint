@@ -90,13 +90,15 @@ export const ProjectsListPage: React.FC = () => {
       {/* Filters and Search Bar */}
       <div className="glass-panel p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+            <Search className="w-4 h-4" />
+          </div>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search projects by name..."
-            className="w-full glass-input pl-10 text-xs py-2 font-medium"
+            className="w-full glass-input !pl-11 text-xs py-2 font-medium"
           />
         </div>
 

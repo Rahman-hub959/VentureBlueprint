@@ -60,7 +60,11 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="flex flex-col gap-24 overflow-hidden bg-white dark:bg-black text-slate-900 dark:text-white transition-colors">
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-12 pt-12 text-center lg:text-left flex flex-col lg:flex-row items-center gap-16">
+      <section className="max-w-7xl mx-auto px-6 sm:px-12 pt-12 text-center lg:text-left flex flex-col lg:flex-row items-center gap-16 relative">
+        {/* Soft Ambient Liquid-Glass Lighting Orbs */}
+        <div className="absolute -top-16 left-1/4 w-96 h-96 bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full blur-3xl pointer-events-none -z-10" />
+        <div className="absolute top-1/4 right-1/10 w-[420px] h-[420px] bg-blue-500/8 dark:bg-blue-500/15 rounded-full blur-3xl pointer-events-none -z-10" />
+
         <div className="flex-1 flex flex-col gap-6">
           <div className="inline-flex items-center gap-2 self-center lg:self-start px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
@@ -69,7 +73,7 @@ export const LandingPage: React.FC = () => {
 
           <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
             Turn your business idea into an{" "}
-            <span className="text-emerald-600 dark:text-emerald-400 underline decoration-emerald-300 dark:decoration-emerald-600 decoration-wavy decoration-2">
+            <span className="text-emerald-600 dark:text-emerald-400">
               enterprise-ready blueprint.
             </span>
           </h1>
@@ -112,12 +116,12 @@ export const LandingPage: React.FC = () => {
 
         {/* Hero Visual Card */}
         <div className="flex-1 w-full max-w-lg lg:max-w-none relative">
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl relative z-10 transition-colors">
+          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-black/50 relative z-10 transition-all hover:border-emerald-300 dark:hover:border-emerald-700/60 duration-300">
             <div className="flex items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-                  Formation Dossier v1.0
+                  Formation Dossier v1.1
                 </span>
               </div>
               <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Republic of India</span>
@@ -151,7 +155,7 @@ export const LandingPage: React.FC = () => {
             </div>
 
             <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 font-medium">
-              <span>8 Dossier Reports Ready</span>
+              <span>18-Section Master Dossier Ready</span>
               <span className="text-emerald-700 dark:text-emerald-400 font-bold">100% Deterministic</span>
             </div>
           </div>

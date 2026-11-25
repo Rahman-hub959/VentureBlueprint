@@ -15,17 +15,22 @@ import {
   FileCheck2,
   Sparkles,
   Plus,
-  Trash2
+  Trash2,
+  Info,
+  Loader2
 } from "lucide-react";
 import { questionnairesApi, validationApi, complianceApi } from "../../api/client";
+import { useToast } from "../../context/ToastContext";
 
 export const QuestionnaireWizardPage: React.FC = () => {
   const { id: projectId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [activeStep, setActiveStep] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [saving, setSaving] = useState<boolean>(false);
+  const [validating, setValidating] = useState<boolean>(false);
   const [validationData, setValidationData] = useState<any | null>(null);
 
   // Form State
@@ -42,8 +47,8 @@ export const QuestionnaireWizardPage: React.FC = () => {
     // Section 2
     founder_count: 2,
     founders_list: [
-      { full_name: "Founder One", email: "", proposed_shareholding_percentage: 60, is_resident_of_india: true, executive_role: "Managing Director" },
-      { full_name: "Founder Two", email: "", proposed_shareholding_percentage: 40, is_resident_of_india: true, executive_role: "Director" }
+      { full_name: "Founder One", email: "", phone: "", proposed_shareholding_percentage: 60, is_resident_of_india: true, executive_role: "Managing Director" },
+      { full_name: "Founder Two", email: "", phone: "", proposed_shareholding_percentage: 40, is_resident_of_india: true, executive_role: "Director" }
     ],
     preferred_structure: "Private Limited Company",
     has_foreign_founders: false,
@@ -58,9 +63,12 @@ export const QuestionnaireWizardPage: React.FC = () => {
     premise_type: "Rented",
     operation_mode: "Physical",
     multi_state_operations: false,
+    secondary_state: "",
+    secondary_city: "",
+    secondary_office_address: "",
 
     // Section 4
-    initial_investment_range: "₹5L – ₹10L",
+    initial_investment_range: "₹1L – ₹5L",
     proposed_authorized_capital: 100000,
     proposed_paid_up_capital: 100000,
     revenue_models: ["Direct Product Sales", "Subscription / SaaS"],
@@ -72,9 +80,11 @@ export const QuestionnaireWizardPage: React.FC = () => {
     manufacturing_involved: false,
 
     // Section 6
-    collects_personal_data: true,
+    collects_personal_data: false,
+    collects_personal_data_confirmed: false,
     imports_or_exports: false,
-    requires_ca_cs_support: true,
+    requires_ca_cs_support: false,
+    requires_ca_cs_support_confirmed: false,
   });
 
   const steps = [
@@ -93,12 +103,20 @@ export const QuestionnaireWizardPage: React.FC = () => {
       try {
         const data = await questionnairesApi.getProjectAnswers(projectId);
         if (data) {
+          const prof = data.profile || {};
           setFormData((prev) => ({
             ...prev,
             company_name: data.name || prev.company_name,
             business_domain: data.domain || prev.business_domain,
             preferred_structure: data.preferred_structure || prev.preferred_structure,
-            ...data.profile,
+            ...prof,
+            secondary_state: prof.secondary_state || "",
+            secondary_city: prof.secondary_city || "",
+            secondary_office_address: prof.secondary_office_address || "",
+            collects_personal_data: Boolean(prof.collects_personal_data),
+            collects_personal_data_confirmed: Boolean(prof.collects_personal_data_confirmed ?? prof.collects_personal_data),
+            requires_ca_cs_support: Boolean(prof.requires_ca_cs_support),
+            requires_ca_cs_support_confirmed: Boolean(prof.requires_ca_cs_support_confirmed ?? prof.requires_ca_cs_support),
             founders_list: data.founders?.length > 0 ? data.founders : prev.founders_list,
             founder_count: data.founders?.length || prev.founder_count
           }));
@@ -125,13 +143,59 @@ export const QuestionnaireWizardPage: React.FC = () => {
   };
 
   const handleNext = async () => {
+    // Step 3 (index 2: Location & Registered Office) Validation
+    if (activeStep === 2) {
+      if (!formData.registered_office_address?.trim()) {
+        showToast("Please enter the Complete Registered Office Address.", "warning");
+        return;
+      }
+      if (!formData.postal_code?.trim()) {
+        showToast("Please enter the Postal PIN Code.", "warning");
+        return;
+      }
+      if (formData.multi_state_operations) {
+        if (!formData.secondary_state) {
+          showToast("Please select the operating state for your additional establishment.", "warning");
+          return;
+        }
+        if (!formData.secondary_office_address?.trim()) {
+          showToast("Detailed address of the additional establishment is mandatory.", "warning");
+          return;
+        }
+      }
+    }
+
+    // Step 4 (index 3: Financials & Capital) Validation
+    if (activeStep === 3) {
+      if (formData.proposed_authorized_capital === "" || Number(formData.proposed_authorized_capital) < 100000) {
+        showToast("Enter the amount more than 100000 for Proposed Authorized Share Capital.", "warning");
+        return;
+      }
+      if (formData.proposed_paid_up_capital === "" || Number(formData.proposed_paid_up_capital) < 100000) {
+        showToast("Enter the amount more than 100000 for Proposed Paid-Up Capital.", "warning");
+        return;
+      }
+      if (Number(formData.proposed_paid_up_capital) > Number(formData.proposed_authorized_capital)) {
+        showToast("Proposed Paid-Up Capital cannot exceed Proposed Authorized Share Capital.", "warning");
+        return;
+      }
+    }
+
+    // Step 6 (index 5: Regulatory & Statutory Needs) Validation
+    if (activeStep === 5) {
+      if (!formData.collects_personal_data_confirmed) {
+        showToast("Please check and confirm the mandatory Digital Personal Data Collection acknowledgment to proceed.", "warning");
+        return;
+      }
+      if (!formData.requires_ca_cs_support_confirmed) {
+        showToast("Please check and confirm the mandatory External CA/CS Retainer Assistance acknowledgment to proceed.", "warning");
+        return;
+      }
+    }
+
     await handleSaveStep(activeStep);
     if (activeStep < steps.length - 1) {
       setActiveStep(activeStep + 1);
-      if (activeStep + 1 === 6) {
-        // Run validation on the review screen
-        runValidation();
-      }
     }
   };
 
@@ -144,10 +208,15 @@ export const QuestionnaireWizardPage: React.FC = () => {
   const runValidation = async () => {
     if (!projectId) return;
     try {
+      setValidating(true);
       const res = await validationApi.runProjectValidation(projectId);
       setValidationData(res);
+      showToast("Statutory compliance validation completed successfully.", "success");
     } catch (err) {
       console.error("Validation error:", err);
+      showToast("Compliance validation failed. Please check network/server.", "error");
+    } finally {
+      setValidating(false);
     }
   };
 
@@ -160,6 +229,7 @@ export const QuestionnaireWizardPage: React.FC = () => {
         {
           full_name: `Co-Founder ${prev.founders_list.length + 1}`,
           email: "",
+          phone: "",
           proposed_shareholding_percentage: 0,
           is_resident_of_india: true,
           executive_role: "Director"
@@ -201,7 +271,9 @@ export const QuestionnaireWizardPage: React.FC = () => {
     "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala",
     "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
     "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-    "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi", "Chandigarh", "Puducherry"
+    "Uttar Pradesh", "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands",
+    "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir",
+    "Ladakh", "Lakshadweep", "Puducherry"
   ];
 
   return (
@@ -219,7 +291,6 @@ export const QuestionnaireWizardPage: React.FC = () => {
                 onClick={() => {
                   handleSaveStep();
                   setActiveStep(idx);
-                  if (idx === 6) runValidation();
                 }}
                 className={`flex items-center gap-2 p-2 rounded-xl text-xs transition-all ${
                   isCurrent
@@ -264,7 +335,7 @@ export const QuestionnaireWizardPage: React.FC = () => {
                   required
                   value={formData.company_name}
                   onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
-                  placeholder="e.g. Kaveri Cold Brew Technologies"
+                  placeholder="Enter proposed company name..."
                   className="w-full glass-input"
                 />
               </div>
@@ -275,7 +346,7 @@ export const QuestionnaireWizardPage: React.FC = () => {
                   type="text"
                   value={formData.alternative_names}
                   onChange={(e) => setFormData({ ...formData, alternative_names: e.target.value })}
-                  placeholder="e.g. Kaveri Brews, Kaveri Beverage Labs"
+                  placeholder="Enter alternative name choices (optional)..."
                   className="w-full glass-input"
                 />
               </div>
@@ -377,7 +448,7 @@ export const QuestionnaireWizardPage: React.FC = () => {
                 <div className="space-y-3">
                   {formData.founders_list.map((f, idx) => (
                     <div key={idx} className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-                      <div className="sm:col-span-5">
+                      <div className="sm:col-span-4">
                         <label className="block text-[10px] text-slate-900 dark:text-white font-bold mb-1">Full Legal Name</label>
                         <input
                           type="text"
@@ -388,22 +459,40 @@ export const QuestionnaireWizardPage: React.FC = () => {
                             setFormData({ ...formData, founders_list: updated });
                           }}
                           className="w-full glass-input text-xs py-1.5"
+                          placeholder="Founder Name"
                         />
                       </div>
                       <div className="sm:col-span-3">
+                        <label className="block text-[10px] text-slate-900 dark:text-white font-bold mb-1">Mobile / Phone Number</label>
+                        <input
+                          type="tel"
+                          value={f.phone || ""}
+                          onChange={(e) => {
+                            const updated = [...formData.founders_list];
+                            updated[idx].phone = e.target.value;
+                            setFormData({ ...formData, founders_list: updated });
+                          }}
+                          className="w-full glass-input text-xs py-1.5"
+                          placeholder="+91 98765 43210"
+                        />
+                      </div>
+                      <div className="sm:col-span-2">
                         <label className="block text-[10px] text-slate-900 dark:text-white font-bold mb-1">Equity Stake (%)</label>
                         <input
                           type="number"
+                          min={0}
+                          max={100}
                           value={f.proposed_shareholding_percentage}
                           onChange={(e) => {
+                            const val = e.target.value;
                             const updated = [...formData.founders_list];
-                            updated[idx].proposed_shareholding_percentage = parseFloat(e.target.value) || 0;
+                            updated[idx].proposed_shareholding_percentage = val === "" ? ("" as any) : Number(val);
                             setFormData({ ...formData, founders_list: updated });
                           }}
                           className="w-full glass-input text-xs py-1.5"
                         />
                       </div>
-                      <div className="sm:col-span-3">
+                      <div className="sm:col-span-2">
                         <label className="block text-[10px] text-slate-900 dark:text-white font-bold mb-1">Resident of India?</label>
                         <select
                           value={f.is_resident_of_india ? "yes" : "no"}
@@ -510,17 +599,68 @@ export const QuestionnaireWizardPage: React.FC = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Multi-State Operations?</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">State Operation *</label>
                   <select
                     value={formData.multi_state_operations ? "yes" : "no"}
                     onChange={(e) => setFormData({ ...formData, multi_state_operations: e.target.value === "yes" })}
                     className="w-full glass-input text-xs"
                   >
-                    <option value="no" className="bg-slate-900">Single State Initially</option>
-                    <option value="yes" className="bg-slate-900">Multi-State Presence</option>
+                    <option value="no" className="bg-slate-900">Single State (Primary registered office address specified above)</option>
+                    <option value="yes" className="bg-slate-900">Multi-State Presence (Additional branch or establishment)</option>
                   </select>
                 </div>
               </div>
+
+              {/* Conditional Multi-State Presence Branch Details */}
+              {formData.multi_state_operations && (
+                <div className="p-4 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-800 space-y-3 transition-all">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">Additional State / Branch Establishment Details *</h4>
+                  </div>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium leading-relaxed">
+                    Operating in multiple states triggers separate State GSTIN registrations under the Central Goods and Services Tax Act (CGST Act §§ 22/24) and state-specific professional tax compliances.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Additional Operating State *</label>
+                      <select
+                        required
+                        value={formData.secondary_state}
+                        onChange={(e) => setFormData({ ...formData, secondary_state: e.target.value })}
+                        className="w-full glass-input text-xs"
+                      >
+                        <option value="" className="bg-slate-900">-- Select State in India --</option>
+                        {indianStates.map((st) => (
+                          <option key={st} value={st} className="bg-slate-900">{st}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Additional Operating City / District *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.secondary_city}
+                        onChange={(e) => setFormData({ ...formData, secondary_city: e.target.value })}
+                        placeholder="e.g. Hyderabad, Mumbai, Pune"
+                        className="w-full glass-input text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Detailed Address of Additional Establishment / Branch *</label>
+                    <textarea
+                      rows={2}
+                      required
+                      value={formData.secondary_office_address}
+                      onChange={(e) => setFormData({ ...formData, secondary_office_address: e.target.value })}
+                      placeholder="Detailed branch/office address, building, street, landmark, PIN code..."
+                      className="w-full glass-input resize-none text-xs"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -534,6 +674,40 @@ export const QuestionnaireWizardPage: React.FC = () => {
               <p className="text-xs text-slate-700 dark:text-slate-300">Establish corporate share capital and initial startup budgeting.</p>
             </div>
 
+            {/* Informational Plain-Language Guide Box */}
+            <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 space-y-3">
+              <div className="flex items-center gap-2 text-blue-900 dark:text-blue-300 font-bold text-xs">
+                <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                <span>Plain-Language Guide: Understanding Corporate Share Capital</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                <div className="p-3.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-blue-100 dark:border-blue-900/60 shadow-xs">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-1">
+                    <span>🏛️</span>
+                    <span>What is Proposed Authorized Share Capital?</span>
+                  </div>
+                  <p>
+                    This is the <b>maximum statutory ceiling</b> of share capital your company is legally authorized to issue to shareholders under its Memorandum of Association (MOA).
+                  </p>
+                  <p className="mt-1.5 text-[11px] text-slate-600 dark:text-slate-400">
+                    💡 <b>MCA Zero-Fee Rule:</b> Under MCA SPICe+ norms, Government incorporation filing fees are <b>₹0 (100% free)</b> for authorized capital up to <b>₹15,00,000 (15 Lakhs)</b>. Setting ₹1,00,000 to ₹15,00,000 incurs no government fee.
+                  </p>
+                </div>
+                <div className="p-3.5 rounded-xl bg-white/80 dark:bg-slate-900/70 border border-blue-100 dark:border-blue-900/60 shadow-xs">
+                  <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-1">
+                    <span>💳</span>
+                    <span>What is Proposed Paid-Up Capital?</span>
+                  </div>
+                  <p>
+                    This is the <b>actual cash amount</b> that the founders and subscribers physically deposit into the newly opened company bank account in exchange for their allotted equity shares.
+                  </p>
+                  <p className="mt-1.5 text-[11px] text-slate-600 dark:text-slate-400">
+                    💡 <b>Statutory Rule:</b> Paid-up capital can never exceed authorized capital. Under current Companies Act rules, there is no mandatory minimum paid-up capital requirement (typically ₹1,00,000 for startup ventures).
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -541,21 +715,46 @@ export const QuestionnaireWizardPage: React.FC = () => {
                   <input
                     type="number"
                     required
+                    min={0}
                     value={formData.proposed_authorized_capital}
-                    onChange={(e) => setFormData({ ...formData, proposed_authorized_capital: parseFloat(e.target.value) || 100000 })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData({ ...formData, proposed_authorized_capital: val === "" ? ("" as any) : Number(val) });
+                    }}
+                    placeholder="100000"
                     className="w-full glass-input"
                   />
-                  <span className="text-[11px] text-slate-700 dark:text-slate-300 mt-1 block font-medium">Standard MCA zero-fee ceiling up to ₹15 Lakhs capital.</span>
+                  {(formData.proposed_authorized_capital === "" || Number(formData.proposed_authorized_capital) < 100000) ? (
+                    <div className="mt-1.5 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 text-[11px] font-semibold flex items-center gap-1.5">
+                      <span>⚠️</span>
+                      <span>enter the amount more than 100000</span>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-slate-700 dark:text-slate-300 mt-1 block font-medium">Standard MCA zero-fee ceiling up to ₹15 Lakhs capital.</span>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Proposed Paid-Up Capital (INR) *</label>
                   <input
                     type="number"
                     required
+                    min={0}
                     value={formData.proposed_paid_up_capital}
-                    onChange={(e) => setFormData({ ...formData, proposed_paid_up_capital: parseFloat(e.target.value) || 100000 })}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setFormData({ ...formData, proposed_paid_up_capital: val === "" ? ("" as any) : Number(val) });
+                    }}
+                    placeholder="100000"
                     className="w-full glass-input"
                   />
+                  {(formData.proposed_paid_up_capital === "" || Number(formData.proposed_paid_up_capital) < 100000) ? (
+                    <div className="mt-1.5 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 text-[11px] font-semibold flex items-center gap-1.5">
+                      <span>⚠️</span>
+                      <span>enter the amount more than 100000</span>
+                    </div>
+                  ) : (
+                    <span className="text-[11px] text-slate-700 dark:text-slate-300 mt-1 block font-medium">Actual capital deposited in company bank account after incorporation.</span>
+                  )}
                 </div>
               </div>
 
@@ -566,11 +765,11 @@ export const QuestionnaireWizardPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, initial_investment_range: e.target.value })}
                   className="w-full glass-input text-xs"
                 >
-                  <option value="Below ₹1 Lakh" className="bg-slate-900">Below ₹1 Lakh</option>
                   <option value="₹1L – ₹5L" className="bg-slate-900">₹1 Lakh – ₹5 Lakhs</option>
                   <option value="₹5L – ₹10L" className="bg-slate-900">₹5 Lakhs – ₹10 Lakhs</option>
                   <option value="₹10L – ₹25L" className="bg-slate-900">₹10 Lakhs – ₹25 Lakhs</option>
-                  <option value="Above ₹25 Lakhs" className="bg-slate-900">Above ₹25 Lakhs</option>
+                  <option value="₹25L – ₹50L" className="bg-slate-900">₹25 Lakhs – ₹50 Lakhs</option>
+                  <option value="Above ₹50 Lakhs" className="bg-slate-900">Above ₹50 Lakhs</option>
                 </select>
               </div>
             </div>
@@ -622,47 +821,106 @@ export const QuestionnaireWizardPage: React.FC = () => {
             <div>
               <span className="text-xs font-semibold text-emerald-400 uppercase tracking-widest">Section 6</span>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">Regulatory & Statutory Needs</h2>
-              <p className="text-xs text-slate-700 dark:text-slate-300">Assess privacy, cross-border commerce, and statutory auditing.</p>
+              <p className="text-xs text-slate-700 dark:text-slate-300">Mandatory statutory declarations governing privacy, cross-border commerce, and secretarial auditing.</p>
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Digital Personal Data Collection</h4>
-                  <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">Collects user phone numbers, emails, transactions, or profiles (DPDP Act 2023).</p>
+              {/* Mandatory: Digital Personal Data Collection */}
+              <div className={`p-5 rounded-2xl border transition-all ${
+                formData.collects_personal_data_confirmed
+                  ? "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800"
+                  : "bg-amber-50/50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800"
+              }`}>
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">Digital Personal Data Collection *</h4>
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                        Mandatory
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-1">
+                      Does your business collect, store, or process personal user information (e.g. phone numbers, email addresses, KYC proofs, or customer profiles) under the Digital Personal Data Protection Act, 2023 (DPDP Act)?
+                    </p>
+                  </div>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={formData.collects_personal_data}
-                  onChange={(e) => setFormData({ ...formData, collects_personal_data: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded"
-                />
+
+                <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/90 cursor-pointer hover:border-emerald-500 transition-all shadow-xs">
+                  <input
+                    type="checkbox"
+                    checked={formData.collects_personal_data_confirmed}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      collects_personal_data_confirmed: e.target.checked,
+                      collects_personal_data: e.target.checked 
+                    })}
+                    className="w-4 h-4 mt-0.5 accent-emerald-500 rounded cursor-pointer"
+                  />
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-900 dark:text-white block">
+                      I confirm and acknowledge mandatory compliance under the DPDP Act, 2023
+                    </span>
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">
+                      Our organization will maintain statutory consent notices, data fiduciary safeguards, and user grievance mechanisms for all digital personal data handled.
+                    </span>
+                  </div>
+                </label>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              {/* Cross-Border Trade / Import-Export */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">Cross-Border Trade / Import-Export</h4>
-                  <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">Exports software, digital services, or imports goods (Requires IEC code).</p>
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-0.5">Exports software, digital services, or imports foreign goods (Requires DGFT Import Export Code - IEC).</p>
                 </div>
                 <input
                   type="checkbox"
                   checked={formData.imports_or_exports}
                   onChange={(e) => setFormData({ ...formData, imports_or_exports: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded"
+                  className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">External CA/CS Retainer Assistance</h4>
-                  <p className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">Request recommendations for statutory auditor (ADT-1) and secretarial filings.</p>
+              {/* Mandatory: External CA/CS Retainer Assistance */}
+              <div className={`p-5 rounded-2xl border transition-all ${
+                formData.requires_ca_cs_support_confirmed
+                  ? "bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-800"
+                  : "bg-amber-50/50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-800"
+              }`}>
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white">External CA/CS Retainer Assistance *</h4>
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                        Mandatory
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 font-medium mt-1">
+                      Professional secretarial certification is mandatory for SPICe+ Part B incorporation filings, statutory auditor appointment (Form ADT-1 within 30 days under Section 139), and annual ROC returns (AOC-4, MGT-7).
+                    </p>
+                  </div>
                 </div>
-                <input
-                  type="checkbox"
-                  checked={formData.requires_ca_cs_support}
-                  onChange={(e) => setFormData({ ...formData, requires_ca_cs_support: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-500 rounded"
-                />
+
+                <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/90 cursor-pointer hover:border-emerald-500 transition-all shadow-xs">
+                  <input
+                    type="checkbox"
+                    checked={formData.requires_ca_cs_support_confirmed}
+                    onChange={(e) => setFormData({ 
+                      ...formData, 
+                      requires_ca_cs_support_confirmed: e.target.checked,
+                      requires_ca_cs_support: e.target.checked 
+                    })}
+                    className="w-4 h-4 mt-0.5 accent-emerald-500 rounded cursor-pointer"
+                  />
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-900 dark:text-white block">
+                      I confirm and acknowledge mandatory CA/CS retainer assistance
+                    </span>
+                    <span className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 block">
+                      Our company engages/will engage an external practicing Chartered Accountant (CA) or Company Secretary (CS) for required statutory attestations and filings.
+                    </span>
+                  </div>
+                </label>
               </div>
             </div>
           </div>
@@ -678,16 +936,37 @@ export const QuestionnaireWizardPage: React.FC = () => {
             </div>
 
             {/* Validation Findings */}
-            {validationData ? (
+            {validating ? (
+              <div className="p-12 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-4 shadow-sm">
+                <div className="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 mx-auto flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <Loader2 className="w-7 h-7 animate-spin" />
+                </div>
+                <div>
+                  <h4 className="text-base font-bold text-slate-900 dark:text-white">Running Statutory Compliance Validation...</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 max-w-md mx-auto leading-relaxed">
+                    Evaluating regulatory cross-checks against Companies Act 2013, MCA Rule 8, foreign investment caps, DPDP Act 2023, and state establishment provisions.
+                  </p>
+                </div>
+              </div>
+            ) : validationData ? (
               <div className="space-y-4">
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <div>
                     <h4 className="text-sm font-bold text-slate-900 dark:text-white">Validation Summary</h4>
                     <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">{validationData.total_checks} deterministic compliance checks executed.</p>
                   </div>
-                  <span className="glass-badge glass-badge-emerald text-xs">
-                    Recommended: {validationData.structure_recommendation?.recommended_structure}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="glass-badge glass-badge-emerald text-xs">
+                      Recommended: {validationData.structure_recommendation?.recommended_structure}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={runValidation}
+                      className="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:text-emerald-800 border border-emerald-300 dark:border-emerald-700 px-3 py-1.5 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-all flex items-center gap-1.5"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" /> Re-run Validation
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2.5">
@@ -719,11 +998,20 @@ export const QuestionnaireWizardPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="text-center py-12 px-6 rounded-2xl bg-white dark:bg-slate-900 border border-dashed border-slate-300 dark:border-slate-700 space-y-4">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 mx-auto flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Ready for Statutory Compliance Validation</h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1 max-w-md mx-auto">
+                    Click the button below to execute cross-field verification across your founders, foreign participation, multi-state presence, authorized capital, and regulatory declarations.
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={runValidation}
-                  className="glass-button-primary text-xs py-2 px-4"
+                  className="glass-button-primary text-xs py-2.5 px-6 inline-flex items-center gap-2 shadow-md hover:shadow-lg transition-all"
                 >
                   <Sparkles className="w-4 h-4" /> Run Compliance Validation
                 </button>

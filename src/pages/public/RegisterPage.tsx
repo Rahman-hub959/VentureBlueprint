@@ -62,14 +62,16 @@ export const RegisterPage: React.FC = () => {
           <div>
             <label className="block text-xs font-bold text-slate-900 dark:text-white mb-1.5">Full Name</label>
             <div className="relative">
-              <User className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-3.5" />
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                <User className="w-4 h-4" />
+              </div>
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Aarav Sharma"
-                className="w-full glass-input pl-10"
+                className="w-full glass-input !pl-11"
               />
             </div>
           </div>
@@ -77,14 +79,16 @@ export const RegisterPage: React.FC = () => {
           <div>
             <label className="block text-xs font-bold text-slate-900 dark:text-white mb-1.5">Email Address</label>
             <div className="relative">
-              <Mail className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-3.5" />
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                <Mail className="w-4 h-4" />
+              </div>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="aarav@ventureblueprint.in"
-                className="w-full glass-input pl-10"
+                className="w-full glass-input !pl-11"
               />
             </div>
           </div>
@@ -92,13 +96,15 @@ export const RegisterPage: React.FC = () => {
           <div>
             <label className="block text-xs font-bold text-slate-900 dark:text-white mb-1.5">Phone Number (Optional)</label>
             <div className="relative">
-              <Phone className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-3.5" />
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                <Phone className="w-4 h-4" />
+              </div>
               <input
                 type="tel"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="w-full glass-input pl-10"
+                className="w-full glass-input !pl-11"
               />
             </div>
           </div>
@@ -106,14 +112,16 @@ export const RegisterPage: React.FC = () => {
           <div>
             <label className="block text-xs font-bold text-slate-900 dark:text-white mb-1.5">Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-500 dark:text-slate-400 absolute left-3.5 top-3.5" />
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+                <Lock className="w-4 h-4" />
+              </div>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
-                className="w-full glass-input pl-10"
+                className="w-full glass-input !pl-11"
               />
             </div>
           </div>

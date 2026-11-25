@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { projectsApi } from '../api/client';
 import '../styles/SettingsPage.css';
 
 /* ---------- Types ---------- */
@@ -61,17 +64,15 @@ const PRIVACY_ROWS: { key: keyof PrivacyPrefs; title: string; note: string }[] =
 ];
 
 const DEFAULTS: SettingsData = {
-  profile: { fullName: 'Sample User', email: 'sample.user@example.com', phone: '+91 98765 43210', jobTitle: 'Founder & CEO', role: 'Founder', avatar: null },
-  business: { name: 'Kaveri Cold Brew Co.', domain: 'Food & Beverage', structure: 'Private limited company', location: 'Bengaluru, Karnataka, India', founders: '2', description: 'Small-batch cold brew coffee, steeped for eighteen hours and delivered fresh to coffee lovers who want café quality at home.', website: 'https://www.kavericoldbrew.example' },
+  profile: { fullName: 'Entrepreneur', email: '', phone: '', jobTitle: 'Founder & Director', role: 'Founder', avatar: null },
+  business: { name: 'My Venture', domain: 'Technology & SaaS', structure: 'Private limited company', location: 'India', founders: '2', description: 'Early-stage venture building innovative products and services.', website: '' },
   preferences: { language: 'English (India)', timeZone: TIME_ZONES[0], currency: CURRENCIES[0], dateFormat: DATE_FORMATS[3], theme: 'light' },
   notifications: { email: true, projectUpdates: true, complianceReminders: true, blueprintUpdates: true, marketing: false },
   privacy: { analytics: true, personalisation: true, research: false },
   security: {
-    twoFactor: false, passwordChanged: '12 Aug 2026', lastLogin: '31 Oct 2026, 9:42 PM · Hyderabad, India · Chrome on Windows',
+    twoFactor: false, passwordChanged: 'Recently', lastLogin: 'Active session · Chrome on Windows',
     sessions: [
-      { id: 's1', device: 'Chrome on Windows', location: 'Hyderabad, India', lastActive: 'Active now', current: true },
-      { id: 's2', device: 'Safari on iPhone', location: 'Hyderabad, India', lastActive: '2 hours ago', current: false },
-      { id: 's3', device: 'Edge on Windows', location: 'Bengaluru, India', lastActive: '3 days ago', current: false },
+      { id: 's1', device: 'Current Browser Session', location: 'India', lastActive: 'Active now', current: true },
     ],
   },
 };
@@ -81,21 +82,16 @@ const cx = (...p: (string | false | undefined)[]) => p.filter(Boolean).join(' ')
 const initialsOf = (name: string) => name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('') || 'U';
 
 function load(): SettingsData {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw) as Partial<SettingsData>;
-      return {
-        profile: { ...DEFAULTS.profile, ...p.profile }, business: { ...DEFAULTS.business, ...p.business },
-        preferences: { ...DEFAULTS.preferences, ...p.preferences }, notifications: { ...DEFAULTS.notifications, ...p.notifications },
-        privacy: { ...DEFAULTS.privacy, ...p.privacy }, security: { ...DEFAULTS.security, ...p.security },
-      };
-    }
-  } catch { /* fall back to defaults */ }
   return DEFAULTS;
 }
-function persist(data: SettingsData): boolean {
-  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); return true; } catch { return false; }
+function persist(data: SettingsData, userId?: string): boolean {
+  try {
+    const key = userId ? `venture-blueprint:settings:${userId}` : STORAGE_KEY;
+    window.localStorage.setItem(key, JSON.stringify(data));
+    return true;
+  } catch {
+    return false;
+  }
 }
 function validate(d: SettingsData): Errors {
   const e: Errors = {};
@@ -227,6 +223,8 @@ function PasswordDialog({ onClose, onDone }: { onClose: () => void; onDone: () =
 
 /* ---------- Page ---------- */
 export default function SettingsPage() {
+  const { user } = useAuth();
+  const { theme: currentAppTheme, setTheme: setAppTheme } = useTheme();
   const [saved, setSaved] = useState<SettingsData>(load);
   const [draft, setDraft] = useState<SettingsData>(load);
   const [section, setSection] = useState<SectionId>('profile');
@@ -238,37 +236,76 @@ export default function SettingsPage() {
   const timer = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
 
+  // Synchronize dynamic authenticated user credentials
+  useEffect(() => {
+    if (!user) return;
+    const userStorageKey = `venture-blueprint:settings:${user.id}`;
+    let base = DEFAULTS;
+    try {
+      const raw = window.localStorage.getItem(userStorageKey);
+      if (raw) {
+        const p = JSON.parse(raw);
+        base = {
+          profile: { ...DEFAULTS.profile, ...p.profile },
+          business: { ...DEFAULTS.business, ...p.business },
+          preferences: { ...DEFAULTS.preferences, ...p.preferences },
+          notifications: { ...DEFAULTS.notifications, ...p.notifications },
+          privacy: { ...DEFAULTS.privacy, ...p.privacy },
+          security: { ...DEFAULTS.security, ...p.security },
+        };
+      }
+    } catch { /* ignore */ }
+
+    const merged: SettingsData = {
+      ...base,
+      profile: {
+        ...base.profile,
+        fullName: user.full_name || base.profile.fullName,
+        email: user.email || base.profile.email,
+        phone: user.phone_number || base.profile.phone,
+        role: user.role || base.profile.role,
+        avatar: base.profile.avatar || null,
+      },
+      preferences: {
+        ...base.preferences,
+        theme: (currentAppTheme as Theme) || base.preferences.theme
+      }
+    };
+
+    setSaved(merged);
+    setDraft(merged);
+
+    // Populate business name from actual projects if not custom edited
+    projectsApi.list().then((list) => {
+      if (list && list.length > 0) {
+        const primary = list[0];
+        setDraft((prev) => ({
+          ...prev,
+          business: {
+            ...prev.business,
+            name: (prev.business.name === 'My Venture' || prev.business.name === 'Kaveri Cold Brew Co.') ? primary.name : prev.business.name,
+            domain: primary.domain || prev.business.domain,
+            structure: primary.preferred_structure || prev.business.structure,
+          }
+        }));
+        setSaved((prev) => ({
+          ...prev,
+          business: {
+            ...prev.business,
+            name: (prev.business.name === 'My Venture' || prev.business.name === 'Kaveri Cold Brew Co.') ? primary.name : prev.business.name,
+            domain: primary.domain || prev.business.domain,
+            structure: primary.preferred_structure || prev.business.structure,
+          }
+        }));
+      }
+    }).catch(() => {});
+  }, [user, currentAppTheme]);
+
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(saved), [draft, saved]);
   const sectionDirty = (id: SectionId) => JSON.stringify(draft[id]) !== JSON.stringify(saved[id]);
   const { profile, business, preferences, notifications, privacy, security } = draft;
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
-  useEffect(() => {
-    const media = window.matchMedia?.('(prefers-color-scheme: dark)');
-    const applyTheme = (value: Theme) => {
-      const resolved: 'light' | 'dark' = value === 'system'
-        ? (media?.matches ? 'dark' : 'light')
-        : value;
-
-      // Keep the document-level theme in sync across all application pages.
-      document.documentElement.dataset.vbTheme = resolved;
-      document.documentElement.dataset.theme = resolved;
-      document.body.dataset.vbTheme = resolved;
-      document.body.dataset.theme = resolved;
-    };
-
-    applyTheme(saved.preferences.theme);
-
-    const onSystem = () => {
-      if (saved.preferences.theme === 'system') {
-        applyTheme('system');
-        window.dispatchEvent(new Event('venture-blueprint:theme-change'));
-      }
-    };
-
-    media?.addEventListener?.('change', onSystem);
-    return () => media?.removeEventListener?.('change', onSystem);
-  }, [saved.preferences.theme]);
   useEffect(() => {
     if (!dirty) return;
     const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); };
@@ -294,9 +331,11 @@ export default function SettingsPage() {
     setErrors(found);
     const first = Object.keys(found)[0];
     if (first) { setSection(errorSection(first)); notify('Please fix the highlighted fields'); return false; }
-    const ok = persist(draft);
+    const ok = persist(draft, user?.id);
     setSaved(draft); setEditingProfile(false);
-    if (draft.preferences.theme) { window.dispatchEvent(new Event('venture-blueprint:theme-change')); }
+    if (draft.preferences.theme) {
+      setAppTheme(draft.preferences.theme as any);
+    }
     notify(ok ? 'Settings saved' : 'Saved for this session only: browser storage is full');
     return true;
   };
@@ -305,7 +344,7 @@ export default function SettingsPage() {
   /* Security actions apply immediately (after confirmation) */
   const commitSecurity = (patch: Partial<Security>) => {
     const next: SettingsData = { ...saved, security: { ...saved.security, ...patch } };
-    setSaved(next); setDraft((d) => ({ ...d, security: next.security })); persist(next);
+    setSaved(next); setDraft((d) => ({ ...d, security: next.security })); persist(next, user?.id);
   };
   const confirm = (d: Omit<Extract<DialogState, { kind: 'confirm' }>, 'kind'>) => setDialog({ kind: 'confirm', ...d });
   const askTwoFactor = (on: boolean) => confirm({
@@ -340,7 +379,12 @@ export default function SettingsPage() {
   const askDeleteAccount = () => confirm({
     title: 'Delete your account?', message: 'This permanently deletes your profile, settings and all saved business information. This cannot be undone.', confirmLabel: 'Delete my account', tone: 'danger', requireText: 'DELETE',
     onConfirm: () => {
-      try { Object.keys(window.localStorage).filter((k) => k.startsWith('venture-blueprint:')).forEach((k) => window.localStorage.removeItem(k)); } catch { /* ignore */ }
+      try {
+        if (user) {
+          window.localStorage.removeItem(`venture-blueprint:settings:${user.id}`);
+        }
+        Object.keys(window.localStorage).filter((k) => k.startsWith('venture-blueprint:')).forEach((k) => window.localStorage.removeItem(k));
+      } catch { /* ignore */ }
       setSaved(DEFAULTS); setDraft(DEFAULTS); setDataTick((n) => n + 1); setSection('profile'); closeDialog();
       notify('Account deletion requested. Your saved data has been erased.');
     },

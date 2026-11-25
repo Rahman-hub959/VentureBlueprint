@@ -1,9 +1,13 @@
 from datetime import datetime, timezone
+import logging
+import json
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User, Role, UserSession
 from app.models.audit import AuditLog
+from app.services.email_service import send_welcome_email
 from app.security import (
     get_password_hash,
     verify_password,
@@ -72,6 +76,21 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
     db.add(session)
     db.add(audit)
     db.commit()
+
+    # Dispatch Onboarding & Confirmation Email
+    try:
+        email_res = send_welcome_email(user.email, user.full_name, user.phone_number)
+        email_audit = AuditLog(
+            user_id=user.id,
+            action="WELCOME_EMAIL_DISPATCHED",
+            entity_type="email",
+            entity_id=user.id,
+            details=email_res
+        )
+        db.add(email_audit)
+        db.commit()
+    except Exception as email_err:
+        logging.getLogger("ventureblueprint.auth").error(f"Failed to dispatch welcome email: {email_err}")
 
     return {
         "access_token": access_token,
@@ -149,3 +168,13 @@ def reset_password(req: PasswordResetConfirm, db: Session = Depends(get_db)):
     user.hashed_password = get_password_hash(req.new_password)
     db.commit()
     return {"message": "Password successfully reset. You may now log in with your new password."}
+
+@router.get("/my-confirmation-email")
+def get_my_confirmation_email(current_user: User = Depends(get_current_user)):
+    """Returns the latest confirmation email dispatched to this user."""
+    storage_dir = Path(__file__).resolve().parent.parent.parent / "storage" / "sent_emails"
+    safe_email = current_user.email.replace("@", "_at_").replace(".", "_")
+    files = sorted(storage_dir.glob(f"*_{safe_email}.json"), reverse=True)
+    if not files:
+        return {"found": False, "message": "No confirmation email record found on file"}
+    return {"found": True, "data": json.loads(files[0].read_text(encoding="utf-8"))}

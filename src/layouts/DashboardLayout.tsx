@@ -112,7 +112,24 @@ export const DashboardLayout: React.FC = () => {
         <nav className="flex-1 flex flex-col gap-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+            const isActive = (() => {
+              if (item.path === "/projects") {
+                return location.pathname === "/projects";
+              }
+              if (item.path === "/projects/new") {
+                return location.pathname === "/projects/new";
+              }
+              if (item.path.endsWith("/compliance")) {
+                return location.pathname.endsWith("/compliance");
+              }
+              if (item.path.endsWith("/documents")) {
+                return location.pathname.endsWith("/documents");
+              }
+              if (item.path.endsWith("/roles")) {
+                return location.pathname.endsWith("/roles");
+              }
+              return location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+            })();
             return (
               <Link
                 key={item.label}
@@ -172,18 +189,12 @@ export const DashboardLayout: React.FC = () => {
               onClick={toggleTheme}
               aria-label="Toggle Day/Night mode"
               title={resolvedTheme === "dark" ? "Switch to Day Mode (Light)" : "Switch to Night Mode (Dark)"}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-bold transition-all hover:border-emerald-500"
+              className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-emerald-500 transition-all duration-300 active:scale-95 text-slate-800 dark:text-slate-100 group shadow-xs cursor-pointer"
             >
               {resolvedTheme === "dark" ? (
-                <>
-                  <Sun className="w-4 h-4 text-amber-400" />
-                  <span className="text-xs font-semibold">Day Mode</span>
-                </>
+                <Sun className="w-4 h-4 text-amber-400 transform transition-transform duration-300 rotate-0 group-hover:rotate-90 group-hover:scale-110" />
               ) : (
-                <>
-                  <Moon className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs font-semibold">Night Mode</span>
-                </>
+                <Moon className="w-4 h-4 text-blue-600 transform transition-transform duration-300 -rotate-12 group-hover:rotate-0 group-hover:scale-110" />
               )}
             </button>
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 text-xs font-bold">
