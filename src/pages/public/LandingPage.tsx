@@ -818,7 +818,7 @@ export const LandingPage: React.FC = () => {
                     </span>
                   </div>
                   <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                    In a short period of time our team will contact you via phone &amp; email with meeting coordinates.
+                    In a short period of time our team will contact you via phone &amp; email to discuss your requirements.
                   </p>
                 </div>
 

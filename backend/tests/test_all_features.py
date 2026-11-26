@@ -197,7 +197,8 @@ def test_consultations_lifecycle():
     assert data["id"].startswith("CONS-2026-")
     assert data["status"] == "Requested"
     assert "Aniket Kulkarni" in data["assigned_expert"]
-    assert "meet.google.com" in data["meeting_link"]
+    assert data["phone_number"] == "+91 9876543210"
+    assert data["pillar"] == "CA"
     cons_id = data["id"]
 
     # 2. Get consultation by ID

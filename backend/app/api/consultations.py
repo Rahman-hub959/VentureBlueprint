@@ -85,15 +85,10 @@ def create_consultation(
         assigned_expert=expert_info["name"],
         expert_role=expert_info["role"],
         notes=payload.notes,
-        meeting_platform="Google Meet / Encrypted Video",
+        meeting_platform="Direct Phone & Verified Advisory",
     )
 
     db.add(consultation)
-    db.commit()
-    db.refresh(consultation)
-
-    # Attach meeting link using the assigned ID
-    consultation.meeting_link = f"https://meet.google.com/setu-{consultation.id.lower().replace('_', '-')}"
     db.commit()
     db.refresh(consultation)
 
@@ -108,9 +103,9 @@ def create_consultation(
             assigned_expert=consultation.assigned_expert,
             expert_role=consultation.expert_role,
             topic=consultation.topic,
+            phone_number=consultation.phone_number,
             preferred_date=consultation.preferred_date,
             preferred_time_slot=consultation.preferred_time_slot,
-            meeting_link=consultation.meeting_link,
             company_name=consultation.company_name
         )
     except Exception:

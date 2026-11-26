@@ -295,9 +295,9 @@ def send_consultation_confirmation_email(
     assigned_expert: str,
     expert_role: str,
     topic: str,
+    phone_number: Optional[str] = None,
     preferred_date: Optional[str] = None,
     preferred_time_slot: Optional[str] = None,
-    meeting_link: Optional[str] = None,
     company_name: Optional[str] = None
 ) -> Dict[str, Any]:
     """
@@ -309,7 +309,7 @@ def send_consultation_confirmation_email(
 
     date_str = preferred_date or "To be scheduled within 24 hours"
     time_str = preferred_time_slot or "Morning Slot (10:00 AM - 1:00 PM)"
-    meet_url = meeting_link or "https://meet.google.com/corpsetu-advisory"
+    phone_str = phone_number or "your contact phone"
     comp_str = f" for {company_name}" if company_name else ""
 
     body_text = f"""Dear {name},
@@ -323,9 +323,9 @@ We have assigned your session{comp_str} to our empanelled expert:
 - Topic: {topic}
 - Scheduled Date: {date_str}
 - Preferred Time: {time_str}
-- Video Meeting Room: {meet_url}
+- Consultation Mode: Direct Phone Callback ({phone_str}) & Email Advisory
 
-Our expert has received your dossier and will connect with you via phone and the video meeting link above.
+Our expert has received your dossier and will connect directly with you via phone callback and email.
 
 You can track your consultation live anytime on your CorpSetu Dashboard:
 {settings.PORTAL_URL}/consultations
@@ -351,7 +351,7 @@ Law · CS · CA — One Bridge
       </div>
       <h2 style="font-size: 20px; font-weight: 800; color: #0B2559; margin-top: 0;">Hello, {name}!</h2>
       <p style="font-size: 14px; line-height: 1.6; color: #334155;">
-        Your consultation request has been assigned to our verified professional desk{comp_str}. Below are your official tracking reference and session details:
+        Your consultation request has been assigned to our verified professional desk{comp_str}. Below are your official tracking reference and consultation details:
       </p>
 
       <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; margin: 20px 0;">
@@ -373,6 +373,10 @@ Law · CS · CA — One Bridge
             <td style="padding: 6px 0; color: #1E293B;">{topic}</td>
           </tr>
           <tr>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Phone Callback:</td>
+            <td style="padding: 6px 0; color: #1E293B; font-weight: 700;">{phone_str}</td>
+          </tr>
+          <tr>
             <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Preferred Slot:</td>
             <td style="padding: 6px 0; color: #1E293B;">{date_str} ({time_str})</td>
           </tr>
@@ -380,12 +384,12 @@ Law · CS · CA — One Bridge
       </div>
 
       <div style="background-color: #EFF6FF; border-left: 4px solid #1E40AF; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
-        <h4 style="margin: 0 0 6px; font-size: 13px; color: #1E40AF; font-weight: 700;">Video Meeting Room:</h4>
+        <h4 style="margin: 0 0 6px; font-size: 13px; color: #1E40AF; font-weight: 700;">Direct Phone &amp; Email Advisory:</h4>
         <p style="margin: 0; font-size: 13px; color: #1E3A8A;">
-          <a href="{meet_url}" style="color: #1E40AF; font-weight: 700; text-decoration: underline;">{meet_url}</a>
+          Our expert will connect with you directly via phone callback at <b>{phone_str}</b> during your preferred slot.
         </p>
         <p style="margin: 6px 0 0; font-size: 12px; color: #475569;">
-          Our expert will contact you by phone prior to the call. Please keep any financial/ROC documents ready.
+          Please keep any relevant company documents, contracts, or tax queries handy.
         </p>
       </div>
 
