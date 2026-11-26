@@ -167,11 +167,11 @@ export const QuestionnaireWizardPage: React.FC = () => {
 
     // Step 4 (index 3: Financials & Capital) Validation
     if (activeStep === 3) {
-      if (formData.proposed_authorized_capital === "" || Number(formData.proposed_authorized_capital) < 100000) {
+      if (!formData.proposed_authorized_capital || Number(formData.proposed_authorized_capital) < 100000) {
         showToast("Enter the amount more than 100000 for Proposed Authorized Share Capital.", "warning");
         return;
       }
-      if (formData.proposed_paid_up_capital === "" || Number(formData.proposed_paid_up_capital) < 100000) {
+      if (!formData.proposed_paid_up_capital || Number(formData.proposed_paid_up_capital) < 100000) {
         showToast("Enter the amount more than 100000 for Proposed Paid-Up Capital.", "warning");
         return;
       }
@@ -214,7 +214,7 @@ export const QuestionnaireWizardPage: React.FC = () => {
       showToast("Statutory compliance validation completed successfully.", "success");
     } catch (err) {
       console.error("Validation error:", err);
-      showToast("Compliance validation failed. Please check network/server.", "error");
+      showToast("Compliance validation failed. Please check network/server.", "warning");
     } finally {
       setValidating(false);
     }
@@ -724,7 +724,7 @@ export const QuestionnaireWizardPage: React.FC = () => {
                     placeholder="100000"
                     className="w-full glass-input"
                   />
-                  {(formData.proposed_authorized_capital === "" || Number(formData.proposed_authorized_capital) < 100000) ? (
+                  {(Boolean(!formData.proposed_authorized_capital || Number(formData.proposed_authorized_capital) < 100000)) ? (
                     <div className="mt-1.5 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 text-[11px] font-semibold flex items-center gap-1.5">
                       <span>⚠️</span>
                       <span>enter the amount more than 100000</span>
@@ -747,7 +747,7 @@ export const QuestionnaireWizardPage: React.FC = () => {
                     placeholder="100000"
                     className="w-full glass-input"
                   />
-                  {(formData.proposed_paid_up_capital === "" || Number(formData.proposed_paid_up_capital) < 100000) ? (
+                  {(Boolean(!formData.proposed_paid_up_capital || Number(formData.proposed_paid_up_capital) < 100000)) ? (
                     <div className="mt-1.5 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 text-[11px] font-semibold flex items-center gap-1.5">
                       <span>⚠️</span>
                       <span>enter the amount more than 100000</span>

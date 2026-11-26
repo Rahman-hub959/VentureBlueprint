@@ -38,6 +38,7 @@ export const LandingPage: React.FC = () => {
     id: string;
     expert: string;
     topic: string;
+    email?: string;
   } | null>(null);
 
   // Consultation Form state

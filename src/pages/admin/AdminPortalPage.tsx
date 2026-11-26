@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { ShieldAlert, Users, Database, FileText, CheckCircle2, Activity, RefreshCw } from "lucide-react";
-import { adminApi } from "../../api/client";
+import { adminApi, regulationsApi } from "../../api/client";
 
 export const AdminPortalPage: React.FC = () => {
   const [stats, setStats] = useState<any | null>(null);
@@ -17,9 +17,9 @@ export const AdminPortalPage: React.FC = () => {
       const [statsData, usersData, rulesData, auditData, healthData] = await Promise.all([
         adminApi.getStats().catch(() => null),
         adminApi.getUsers().catch(() => []),
-        adminApi.getRegulatoryRules().catch(() => []),
+        regulationsApi.getRules().catch(() => []),
         adminApi.getAuditLogs().catch(() => []),
-        adminApi.getSystemHealth().catch(() => null)
+        adminApi.getHealth().catch(() => null)
       ]);
       setStats(statsData);
       setUsers(usersData);
