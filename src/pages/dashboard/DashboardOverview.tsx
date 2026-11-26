@@ -35,11 +35,13 @@ import {
   Award
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { ComplianceScoreRing } from "../../components/ComplianceScoreRing";
 import { projectsApi, documentsApi, complianceApi, consultationsApi } from "../../api/client";
 
 export const DashboardOverview: React.FC = () => {
   const { user } = useAuth();
+  const { showToast } = useToast();
   const navigate = useNavigate();
 
   // Active Pillar: "CS" (Secretarial & Setup), "CA" (Tax & Accounting), "LAW" (Contracts & Advisory)
@@ -348,14 +350,14 @@ export const DashboardOverview: React.FC = () => {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* 3-PILLAR SERVICE SELECTOR (CS, CA, LAW) - SPATIAL UI          */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="spatial-surface p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-2 pb-2.5 mb-2.5 border-b border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            <span className="w-2 h-2 rounded-full bg-corpset-gold animate-ping" />
-            <span>Select Active Professional Domain</span>
+      <div className="spatial-surface p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-2 pb-2.5 mb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            <span className="w-2 h-2 rounded-full bg-[#C59B27] animate-ping" />
+            <span>Active Corporate Advisory Desk</span>
           </div>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">
-            Switch anytime — all corporate filings stay synced under one company record
+          <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-[#C59B27] border border-amber-500/20">
+            Unified Multi-Disciplinary Suite · One Company Record
           </span>
         </div>
 
@@ -364,31 +366,43 @@ export const DashboardOverview: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSelectPillar("CS")}
-            className={`p-4 rounded-xl text-left transition-all duration-200 flex items-start justify-between cursor-pointer ${
+            className={`p-4 rounded-2xl text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
               activePillar === "CS"
-                ? "spatial-card-gold ring-2 ring-emerald-500/20"
-                : "spatial-card hover:border-emerald-300"
+                ? "spatial-card-gold ring-2 ring-emerald-500/30 shadow-md"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-emerald-400/60"
             }`}
           >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${activePillar === "CS" ? "bg-emerald-600 text-white" : "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300"}`}>
-                  <Building2 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">CS Services</h4>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Company Secretarial &amp; Setup</span>
-                    <span className="text-[10px] text-[#C59B27] font-semibold">· Starting from ₹1,499</span>
-                  </div>
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform ${
+                  activePillar === "CS"
+                    ? "bg-emerald-600 text-white shadow-sm scale-105"
+                    : "bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
+                }`}
+              >
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
+                  CS Services
+                </h4>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                    Company Secretarial &amp; Setup
+                  </span>
+                  <span className="text-[10px] text-[#C59B27] font-bold">· Starting ₹1,499</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
-                MCA SPICe+, ROC annual filings, board resolutions, DIN/DSC, and statutory registers.
-              </p>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${activePillar === "CS" ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}`}>
-              {activePillar === "CS" ? "Active" : "Select"}
+            <span
+              className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition-all ${
+                activePillar === "CS"
+                  ? "bg-emerald-600 text-white shadow-sm flex items-center gap-1.5"
+                  : "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-emerald-500 hover:text-emerald-600"
+              }`}
+            >
+              {activePillar === "CS" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+              {activePillar === "CS" ? "Active Desk" : "Select Desk"}
             </span>
           </button>
 
@@ -396,31 +410,43 @@ export const DashboardOverview: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSelectPillar("CA")}
-            className={`p-4 rounded-xl text-left transition-all duration-200 flex items-start justify-between cursor-pointer ${
+            className={`p-4 rounded-2xl text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
               activePillar === "CA"
-                ? "spatial-card-gold ring-2 ring-amber-500/20"
-                : "spatial-card hover:border-amber-300"
+                ? "spatial-card-gold ring-2 ring-amber-500/30 shadow-md"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-amber-400/60"
             }`}
           >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${activePillar === "CA" ? "bg-amber-600 text-white" : "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"}`}>
-                  <Landmark className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">CA Services</h4>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">Chartered Accountant &amp; Tax</span>
-                    <span className="text-[10px] text-[#C59B27] font-semibold">· Starting from ₹499/mo</span>
-                  </div>
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform ${
+                  activePillar === "CA"
+                    ? "bg-amber-600 text-white shadow-sm scale-105"
+                    : "bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
+                }`}
+              >
+                <Landmark className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
+                  CA Services
+                </h4>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400">
+                    Chartered Accountant &amp; Tax
+                  </span>
+                  <span className="text-[10px] text-[#C59B27] font-bold">· Starting ₹499/mo</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
-                GST (GSTR-1, 3B), Advance Tax, TDS, monthly bookkeeping, and Statutory Audit.
-              </p>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${activePillar === "CA" ? "bg-amber-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}`}>
-              {activePillar === "CA" ? "Active" : "Select"}
+            <span
+              className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition-all ${
+                activePillar === "CA"
+                  ? "bg-amber-600 text-white shadow-sm flex items-center gap-1.5"
+                  : "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-amber-500 hover:text-amber-600"
+              }`}
+            >
+              {activePillar === "CA" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+              {activePillar === "CA" ? "Active Desk" : "Select Desk"}
             </span>
           </button>
 
@@ -428,31 +454,43 @@ export const DashboardOverview: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSelectPillar("LAW")}
-            className={`p-4 rounded-xl text-left transition-all duration-200 flex items-start justify-between cursor-pointer ${
+            className={`p-4 rounded-2xl text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
               activePillar === "LAW"
-                ? "spatial-card-navy ring-2 ring-blue-500/20"
-                : "spatial-card hover:border-blue-300"
+                ? "spatial-card-navy ring-2 ring-blue-500/30 shadow-md"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-blue-400/60"
             }`}
           >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${activePillar === "LAW" ? "bg-blue-600 text-white" : "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"}`}>
-                  <Scale className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">Corporate Law</h4>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400">Contracts, IP &amp; Legal Advisory</span>
-                    <span className="text-[10px] text-[#C59B27] font-semibold">· Starting from ₹999</span>
-                  </div>
+            <div className="flex items-center gap-3">
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform ${
+                  activePillar === "LAW"
+                    ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-sm scale-105"
+                    : "bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400"
+                }`}
+              >
+                <Scale className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
+                  Corporate Law
+                </h4>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400">
+                    Contracts, IP &amp; Legal Advisory
+                  </span>
+                  <span className="text-[10px] text-[#C59B27] font-bold">· Starting ₹999</span>
                 </div>
               </div>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
-                Founder vesting agreements, NDAs, Trademark registration, contracts, and legal risk audit.
-              </p>
             </div>
-            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${activePillar === "LAW" ? "bg-blue-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}`}>
-              {activePillar === "LAW" ? "Active" : "Select"}
+            <span
+              className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition-all ${
+                activePillar === "LAW"
+                  ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-sm flex items-center gap-1.5"
+                  : "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-blue-500 hover:text-blue-600"
+              }`}
+            >
+              {activePillar === "LAW" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+              {activePillar === "LAW" ? "Active Desk" : "Select Desk"}
             </span>
           </button>
         </div>
@@ -1393,7 +1431,7 @@ export const DashboardOverview: React.FC = () => {
                       email: res.email || user?.email || "your email",
                     });
                   } catch (err: any) {
-                    alert(err?.message || "Failed to book CA consultation");
+                    showToast(err?.message || "Failed to book CA consultation", "warning");
                   }
                 }}
                 className="corpsetu-btn-gold px-4 py-2 text-xs font-bold"
@@ -1469,7 +1507,7 @@ export const DashboardOverview: React.FC = () => {
                       email: res.email || user?.email || "your email",
                     });
                   } catch (err: any) {
-                    alert(err?.message || "Failed to book Legal consultation");
+                    showToast(err?.message || "Failed to book Legal consultation", "warning");
                   }
                 }}
                 className="corpsetu-btn-navy px-4 py-2 text-xs font-bold"
