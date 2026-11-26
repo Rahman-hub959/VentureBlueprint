@@ -14,11 +14,14 @@ import {
   Sun,
   Moon,
   Menu,
-  X
+  X,
+  MessageSquareWarning,
+  Scale
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { projectsApi } from "../api/client";
+import { CorpSetuLogo } from "../components/CorpSetuLogo";
 
 export const DashboardLayout: React.FC = () => {
   const { user, logout, isAdmin } = useAuth();
@@ -54,6 +57,7 @@ export const DashboardLayout: React.FC = () => {
     { label: "Compliance Checklist", path: `/projects/${activeProjectId}/compliance`, icon: CheckSquare },
     { label: "Generated Documents", path: `/projects/${activeProjectId}/documents`, icon: FileText },
     { label: "Role Recommendations", path: `/projects/${activeProjectId}/roles`, icon: Users },
+    { label: "Grievances & Support", path: "/complaints", icon: MessageSquareWarning },
     { label: "Settings", path: "/settings", icon: Settings },
   ];
 
@@ -74,14 +78,8 @@ export const DashboardLayout: React.FC = () => {
       {/* Sidebar Navigation */}
       <aside className="hidden md:flex flex-col w-64 glass-panel m-3 mr-0 rounded-2xl z-20 sticky top-3 h-[calc(100vh-24px)] p-4 shadow-sm">
         {/* Brand */}
-        <Link to="/dashboard" className="flex items-center gap-3 px-2 py-3 mb-6 border-b border-slate-200 dark:border-slate-800">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white border border-emerald-400 shadow-sm">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <div className="font-extrabold text-sm tracking-tight text-slate-900 dark:text-white">VentureBlueprint</div>
-            <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold tracking-wider uppercase">Workspace</div>
-          </div>
+        <Link to="/dashboard" className="flex items-center px-2 py-3 mb-5 border-b border-slate-200 dark:border-slate-800">
+          <CorpSetuLogo size="sm" />
         </Link>
 
         {/* Project Selector Box */}

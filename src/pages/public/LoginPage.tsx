@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Shield, Lock, Mail, AlertCircle } from "lucide-react";
+import { Lock, Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { CorpSetuLogo } from "../../components/CorpSetuLogo";
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -40,12 +41,14 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="max-w-md mx-auto px-6 py-12">
       <div className="bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6 transition-colors">
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white mx-auto border border-emerald-400 shadow-md">
-            <Shield className="w-6 h-6 text-white" />
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <CorpSetuLogo size="lg" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Welcome Back</h1>
-          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">Sign in to your VentureBlueprint workspace</p>
+          <h1 className="text-2xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">Welcome Back</h1>
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
+            Sign in to your CorpSetu Law, CS & CA compliance platform
+          </p>
         </div>
 
         {error && (
@@ -68,7 +71,7 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="founder@ventureblueprint.in"
-                className="w-full glass-input !pl-11"
+                className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
           </div>
@@ -76,7 +79,7 @@ export const LoginPage: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-bold text-slate-900 dark:text-white">Password</label>
-              <Link to="/forgot-password" className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline font-semibold">
+              <Link to="/forgot-password" className="text-[11px] text-[#C59B27] dark:text-[#E5B842] hover:underline font-semibold">
                 Forgot password?
               </Link>
             </div>
@@ -90,7 +93,7 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full glass-input !pl-11"
+                className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
           </div>
@@ -98,9 +101,9 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full glass-button-primary justify-center text-xs py-3 mt-2 shadow-md font-bold"
+            className="w-full corpsetu-btn-navy justify-center text-xs py-3 mt-2 shadow-md font-bold"
           >
-            {loading ? "Authenticating..." : "Sign In to Workspace"}
+            {loading ? "Authenticating..." : "Sign In to CorpSetu"}
           </button>
         </form>
 
@@ -113,14 +116,14 @@ export const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={fillDemoFounder}
-              className="px-2.5 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-200 dark:border-emerald-700 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-[11px] font-bold text-emerald-800 dark:text-emerald-300 transition-colors"
+              className="px-2.5 py-2 rounded-lg bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900 text-[11px] font-bold text-amber-900 dark:text-amber-200 transition-colors"
             >
               Demo Founder
             </button>
             <button
               type="button"
               onClick={fillDemoAdmin}
-              className="px-2.5 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900 text-[11px] font-bold text-blue-800 dark:text-blue-300 transition-colors"
+              className="px-2.5 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/80 border border-blue-200 dark:border-blue-700 hover:bg-blue-100 dark:hover:bg-blue-900 text-[11px] font-bold text-[#0B2559] dark:text-blue-300 transition-colors"
             >
               Demo Admin
             </button>
@@ -129,7 +132,7 @@ export const LoginPage: React.FC = () => {
 
         <div className="text-center pt-2 text-xs text-slate-700 dark:text-slate-300 font-medium">
           Don't have an account?{" "}
-          <Link to="/register" className="text-emerald-700 dark:text-emerald-400 font-bold hover:underline">
+          <Link to="/register" className="text-[#C59B27] dark:text-[#E5B842] font-bold hover:underline">
             Register here
           </Link>
         </div>

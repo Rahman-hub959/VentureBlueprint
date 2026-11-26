@@ -15,8 +15,17 @@ html:not(.dark) {
 
   /* Border & Rim Light Tokens - Crisp Light Slate */
   --border-glass: #e2e8f0;
-  --border-glass-highlight: #3b82f6;
-  --border-glass-focus: #10b981;
+  --border-glass-highlight: #c59b27;
+  --border-glass-focus: #0b2559;
+
+  /* CorpSetu Core Colors: NAVY, GOLD, WHITE */
+  --color-corpset-navy: #0b2559;
+  --color-corpset-navy-dark: #061838;
+  --color-corpset-navy-light: #eef2f9;
+  --color-corpset-gold: #c59b27;
+  --color-corpset-gold-hover: #b38a1e;
+  --color-corpset-gold-light: #fef9e7;
+  --color-corpset-gold-border: #ead69e;
 
   /* The 3 Core Colors: GREEN, BLUE, WHITE */
   --color-green-primary: #059669;
@@ -76,8 +85,17 @@ html.dark {
 
   /* Borders in dark mode */
   --border-glass: #1f293d;
-  --border-glass-highlight: #3b82f6;
-  --border-glass-focus: #10b981;
+  --border-glass-highlight: #c59b27;
+  --border-glass-focus: #3b82f6;
+
+  /* CorpSetu in Dark Mode */
+  --color-corpset-navy: #1e3a8a;
+  --color-corpset-navy-dark: #0f172a;
+  --color-corpset-navy-light: rgba(30, 58, 138, 0.2);
+  --color-corpset-gold: #e5b842;
+  --color-corpset-gold-hover: #d4a017;
+  --color-corpset-gold-light: rgba(229, 184, 66, 0.15);
+  --color-corpset-gold-border: rgba(229, 184, 66, 0.4);
 
   /* The 3 Core Colors in Dark: Vibrant Green, Electric Blue, Clean White */
   --color-green-primary: #10b981;
@@ -206,6 +224,51 @@ html.dark select option {
 .glass-input:focus {
   border-color: var(--color-green-accent);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
+/* CorpSetu Brand Buttons: Gold & Navy */
+.corpsetu-btn-gold {
+  background: linear-gradient(135deg, #c59b27 0%, #b38a1e 100%);
+  color: #ffffff !important;
+  border: 1px solid rgba(197, 155, 39, 0.4);
+  box-shadow: 0 4px 14px 0 rgba(197, 155, 39, 0.35);
+  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.corpsetu-btn-gold:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(197, 155, 39, 0.45);
+}
+
+.corpsetu-btn-navy {
+  background: linear-gradient(135deg, #0b2559 0%, #061838 100%);
+  color: #ffffff !important;
+  border: 1px solid rgba(11, 37, 89, 0.5);
+  box-shadow: 0 4px 14px 0 rgba(11, 37, 89, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 20px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.corpsetu-btn-navy:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(11, 37, 89, 0.45);
 }
 
 /* Primary Button: GREEN (Action & Momentum) */

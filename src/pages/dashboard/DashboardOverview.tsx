@@ -22,7 +22,17 @@ import {
   AlertCircle,
   ChevronDown,
   Landmark,
-  Building2
+  Building2,
+  Calculator,
+  Receipt,
+  FileSpreadsheet,
+  Download,
+  Search,
+  BookOpen,
+  HelpCircle,
+  PhoneCall,
+  Lock,
+  Award
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { projectsApi, documentsApi, complianceApi } from "../../api/client";
@@ -30,6 +40,16 @@ import { projectsApi, documentsApi, complianceApi } from "../../api/client";
 export const DashboardOverview: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Active Pillar: "CS" (Secretarial & Setup), "CA" (Tax & Accounting), "LAW" (Contracts & Advisory)
+  const [activePillar, setActivePillar] = useState<"CS" | "CA" | "LAW">(() => {
+    return (localStorage.getItem("corpsetu_active_pillar") as "CS" | "CA" | "LAW") || "CS";
+  });
+
+  const handleSelectPillar = (pillar: "CS" | "CA" | "LAW") => {
+    setActivePillar(pillar);
+    localStorage.setItem("corpsetu_active_pillar", pillar);
+  };
 
   const [projects, setProjects] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
@@ -44,6 +64,22 @@ export const DashboardOverview: React.FC = () => {
       return {};
     }
   });
+
+  // CA Tools State
+  const [estimatedProfit, setEstimatedProfit] = useState<number>(1500000);
+  const [taxTurnover, setTaxTurnover] = useState<number>(4500000);
+  const [gstQuarter, setGstQuarter] = useState<string>("Q3 (Oct - Dec)");
+  const [caBookedModal, setCaBookedModal] = useState<boolean>(false);
+  const [caConsultTopic, setCaConsultTopic] = useState<string>("GST & Advance Tax Planning");
+
+  // LAW Tools State
+  const [contractType, setContractType] = useState<string>("founder_agreement");
+  const [founderCount, setFounderCount] = useState<number>(2);
+  const [vestingYears, setVestingYears] = useState<number>(4);
+  const [cliffMonths, setCliffMonths] = useState<number>(12);
+  const [tmSearchQuery, setTmSearchQuery] = useState<string>("");
+  const [tmSearchResult, setTmSearchResult] = useState<any>(null);
+  const [lawBookedModal, setLawBookedModal] = useState<boolean>(false);
 
   const toggleDeadline = (id: string) => {
     setCompletedDeadlines((prev) => {
@@ -84,6 +120,7 @@ export const DashboardOverview: React.FC = () => {
   const pendingTasks = tasks.filter(t => t.status !== "Completed").length;
   const activeProject = projects[0];
 
+  // CS Roadmap Stages
   const roadmapStages = [
     {
       stage: 1,
@@ -157,6 +194,7 @@ export const DashboardOverview: React.FC = () => {
     }
   ];
 
+  // CS Statutory Deadlines
   const statutoryDeadlines = [
     {
       id: "adt_1",
@@ -204,462 +242,1191 @@ export const DashboardOverview: React.FC = () => {
     }
   ];
 
+  // CA Compliance Schedule & Tax Calculations
+  const calculatedTax = Math.round(estimatedProfit * 0.22 * 1.10); // 22% Corporate Tax + 10% Surcharge/Cess
+  const advanceTaxQ1 = Math.round(calculatedTax * 0.15);
+  const advanceTaxQ2 = Math.round(calculatedTax * 0.45);
+  const advanceTaxQ3 = Math.round(calculatedTax * 0.75);
+  const advanceTaxQ4 = calculatedTax;
+
+  const caDeadlines = [
+    {
+      id: "gstr_1",
+      title: "GSTR-1 (Outward Supplies)",
+      period: "Monthly by 11th",
+      due_date: "11th of each Month",
+      status: "Up to Date",
+      law: "Section 37, CGST Act, 2017",
+      description: "Report all B2B and B2C sales invoices and generate automated invoice matches for recipients."
+    },
+    {
+      id: "gstr_3b",
+      title: "GSTR-3B (Summary Return & Tax Payment)",
+      period: "Monthly by 20th",
+      due_date: "20th of each Month",
+      status: "Filing Ready",
+      law: "Section 39, CGST Act, 2017",
+      description: "Self-assessed summary of input tax credit (ITC) claimed and net tax liability settled in cash."
+    },
+    {
+      id: "advance_tax_q3",
+      title: "Advance Tax Q3 Installment (75%)",
+      period: "15th December",
+      due_date: "15-Dec-2026",
+      status: "Upcoming",
+      law: "Section 208 & 211, Income Tax Act, 1961",
+      description: "Mandatory corporate tax installment for entities with estimated tax liability exceeding ₹10,000."
+    },
+    {
+      id: "tds_challan_281",
+      title: "TDS Payment (Challan 281)",
+      period: "7th of each Month",
+      due_date: "07th of each Month",
+      status: "Verified",
+      law: "Section 200(1), Income Tax Act",
+      description: "Deposit of tax withheld on salaries, contractor payments (194C), professional fees (194J), and rent."
+    }
+  ];
+
+  // Law Trademark Search Handler
+  const handleTmSearch = () => {
+    if (!tmSearchQuery.trim()) return;
+    const query = tmSearchQuery.toLowerCase();
+    const isConflict = ["tata", "apple", "google", "reliance", "corpset"].some(k => query.includes(k));
+    setTmSearchResult({
+      query: tmSearchQuery,
+      isAvailable: !isConflict,
+      recommendedClass: "Class 42 (Software & SaaS) & Class 35 (Business Consultancy)",
+      riskLevel: isConflict ? "High (Phonetic / Direct Conflict Detected)" : "Low (Distinctive Corporate Mark)",
+      registryStatus: isConflict ? "Likely Objection under §11(1) of TM Act" : "Clear for TM-A expedited filing"
+    });
+  };
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto py-2">
       {/* Welcome Banner */}
       <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden transition-colors">
         <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-            <span>Welcome Back, {user?.full_name}</span>
+          <div className="inline-flex items-center gap-2 text-xs font-bold text-corpset-navy dark:text-corpset-gold bg-amber-50 dark:bg-slate-800 px-3 py-1 rounded-full border border-corpset-gold/30">
+            <Sparkles className="w-3.5 h-3.5 text-corpset-gold" />
+            <span>CorpSetu Platform · Welcome Back, {user?.full_name}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Entrepreneur Command Center
+            Corporate Operations &amp; Compliance Hub
           </h1>
-          <p className="text-xs sm:text-sm text-slate-800 dark:text-slate-200 max-w-xl font-medium leading-relaxed">
-            Track company formation progress, evaluate MCA Rule 8 compliance, and compile professional documentation dossiers.
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-xl font-medium leading-relaxed">
+            One unified bridge for Law, Company Secretarial (CS), and Chartered Accountancy (CA). Select your active service pillar below.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 z-10 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 z-10 w-full md:w-auto">
           <Link
             to="/projects/new"
-            className="glass-button-primary text-xs py-3 px-5 shadow-sm w-full sm:w-auto justify-center font-bold"
+            className="corpsetu-btn-navy text-xs py-3 px-5 shadow-sm justify-center font-bold inline-flex items-center gap-2"
           >
-            <Plus className="w-4 h-4 text-white" />
+            <Plus className="w-4 h-4" />
             <span>New Company Project</span>
           </Link>
-        </div>
-      </div>
-
-      {/* Metric Cards Grid with Enhanced Badges & Readiness Micro-bars */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 group">
-          <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Projects</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <FolderKanban className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            </div>
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{totalProjects}</div>
-          <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1 font-semibold">Active venture workspaces</p>
-          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(totalProjects * 10, 100)}%` }} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 group">
-          <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider">Completed Assessments</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-            </div>
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{completedAssessments}</div>
-          <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mt-1">Ready for document compilation</p>
-          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${totalProjects > 0 ? (completedAssessments / totalProjects) * 100 : 100}%` }} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 group">
-          <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider">Generated Documents</span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            </div>
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{documents.length}</div>
-          <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1 font-semibold">PDF & DOCX corporate files</p>
-          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(documents.length * 20, 100)}%` }} />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 transition-all duration-200 group">
-          <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider">Pending Requirements</span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-            </div>
-          </div>
-          <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{pendingTasks}</div>
-          <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold mt-1">Statutory actions requiring review</p>
-          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
-            <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(pendingTasks * 15, 100)}%` }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Action Hub */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
-        <h3 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <Link
-            to="/projects/new"
-            className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-600 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+            to="/complaints"
+            className="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 inline-flex items-center justify-center gap-1.5"
+            title="File Grievance / Ticket"
           >
-            <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
-            <span className="text-xs font-bold text-slate-900 dark:text-white">Create Project</span>
-          </Link>
-
-          {activeProject ? (
-            <>
-              <Link
-                to={`/projects/${activeProject.id}/questionnaire`}
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
-              >
-                <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-slate-900 dark:text-white">Continue Intake</span>
-              </Link>
-              <Link
-                to={`/projects/${activeProject.id}/compliance`}
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-600 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
-              >
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-slate-900 dark:text-white">MCA Checklist</span>
-              </Link>
-              <Link
-                to={`/projects/${activeProject.id}/documents`}
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
-              >
-                <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-slate-900 dark:text-white">Generate Dossier</span>
-              </Link>
-              <Link
-                to={`/projects/${activeProject.id}/roles`}
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
-              >
-                <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
-                <span className="text-xs font-bold text-slate-900 dark:text-white">Role Matrix</span>
-              </Link>
-            </>
-          ) : (
-            <Link
-              to="/projects"
-              className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-600 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
-            >
-              <FolderKanban className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-bold text-slate-900 dark:text-white">My Projects</span>
-            </Link>
-          )}
-
-          <Link
-            to="/projects"
-            className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-all flex flex-col items-center text-center gap-2 group"
-          >
-            <FolderKanban className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:scale-110 transition-transform" />
-            <span className="text-xs font-bold text-slate-900 dark:text-white">All Projects</span>
+            <HelpCircle className="w-4 h-4 text-corpset-gold" />
+            <span>Support Desk</span>
           </Link>
         </div>
       </div>
 
-      {/* Item 7: Visual SPICe+ MCA Incorporation Roadmap */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-              <Landmark className="w-4 h-4" />
-              <span>Official Regulatory Incorporation Workflow</span>
-            </div>
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mt-1">
-              MCA SPICe+ Incorporation Roadmap
-            </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              5-Stage statutory sequence under the Ministry of Corporate Affairs (MCA21) & Companies Act, 2013.
-            </p>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 3-PILLAR SERVICE SELECTOR (CS, CA, LAW)                       */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-2 pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+            <span className="w-2 h-2 rounded-full bg-corpset-gold animate-ping" />
+            <span>Select Active Professional Domain</span>
           </div>
-          {activeProject && (
-            <span className="self-start sm:self-auto glass-badge glass-badge-emerald text-xs">
-              Active Project: {activeProject.name}
-            </span>
-          )}
-        </div>
-
-        {/* 5-Step Horizontal / Responsive Stepper */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {roadmapStages.map((stg, idx) => {
-            const isSelected = activeStage === idx;
-            const isCompleted = stg.status === "Completed";
-            const isInProgress = stg.status === "In Progress";
-
-            return (
-              <button
-                key={stg.stage}
-                type="button"
-                onClick={() => setActiveStage(idx)}
-                className={`p-4 rounded-2xl border text-left transition-all duration-200 relative flex flex-col justify-between cursor-pointer ${
-                  isSelected
-                    ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/40 shadow-xs ring-2 ring-emerald-500/20"
-                    : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-emerald-300 dark:hover:border-emerald-700"
-                }`}
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200">
-                      {isCompleted ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : stg.stage}
-                    </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      isCompleted
-                        ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300"
-                        : isInProgress
-                        ? "bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 animate-pulse"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                    }`}>
-                      {stg.status}
-                    </span>
-                  </div>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2">
-                    {stg.title}
-                  </h4>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
-                    {stg.mca_form}
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-medium">
-                  <span>{stg.timeline}</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">Details &rarr;</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Selected Stage Detail Panel */}
-        {roadmapStages[activeStage] && (
-          <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                  Stage {roadmapStages[activeStage].stage} Detailed Dossier · {roadmapStages[activeStage].mca_form}
-                </span>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
-                  {roadmapStages[activeStage].title}
-                </h3>
-              </div>
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-700 self-start sm:self-auto">
-                Statute: {roadmapStages[activeStage].statutory_rule}
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
-              {roadmapStages[activeStage].description}
-            </p>
-
-            <div className="pt-2">
-              <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider block mb-2">
-                Mandatory Deliverables &amp; Filing Action Items:
-              </span>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                {roadmapStages[activeStage].action_items.map((action, aIdx) => (
-                  <div
-                    key={aIdx}
-                    className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2 shadow-2xs"
-                  >
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
-                    <span>{action}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Item 8: Statutory Deadlines Countdown Cards */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-4">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
-              <Clock className="w-4 h-4" />
-              <span>Critical Statutory Clock</span>
-            </div>
-            <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mt-1">
-              Post-Incorporation Statutory Deadlines
-            </h2>
-            <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-              Live countdown and compliance requirements following Certificate of Incorporation (COI) issuance.
-            </p>
-          </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Click card to toggle completed status
+          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+            Switch anytime — all corporate filings stay synced under one company record
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {statutoryDeadlines.map((item) => {
-            const isDone = completedDeadlines[item.id] || false;
-
-            return (
-              <div
-                key={item.id}
-                onClick={() => toggleDeadline(item.id)}
-                className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 hover:shadow-md ${
-                  isDone
-                    ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800 opacity-80"
-                    : item.severity === "critical"
-                    ? "bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-900/60 hover:border-rose-400"
-                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300"
-                }`}
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                      {item.form_name}
-                    </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      isDone
-                        ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300"
-                        : "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300"
-                    }`}>
-                      {isDone ? "✓ Completed" : item.deadline_window}
-                    </span>
-                  </div>
-
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {item.title}
-                  </h4>
-
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                    {item.description}
-                  </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* CS Services Button */}
+          <button
+            type="button"
+            onClick={() => handleSelectPillar("CS")}
+            className={`p-4 rounded-xl text-left border transition-all duration-200 flex items-start justify-between cursor-pointer ${
+              activePillar === "CS"
+                ? "bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/20 shadow-sm"
+                : "bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700"
+            }`}
+          >
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${activePillar === "CS" ? "bg-emerald-600 text-white" : "bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300"}`}>
+                  <Building2 className="w-4 h-4" />
                 </div>
-
-                <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <Scale className="w-3.5 h-3.5 text-slate-400" />
-                      <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate max-w-[150px]">
-                        {item.statutory_provision}
-                      </span>
-                    </div>
-                    {!isDone ? (
-                      <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                        {item.remaining_days}d left
-                      </span>
-                    ) : (
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                        Recorded
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg font-medium">
-                    <span className="font-bold text-slate-700 dark:text-slate-300">Default Risk: </span>
-                    <span>{item.consequence}</span>
-                  </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">CS Services</h4>
+                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Company Secretarial &amp; Setup</span>
                 </div>
               </div>
-            );
-          })}
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
+                MCA SPICe+, ROC annual filings, board resolutions, DIN/DSC, and statutory registers.
+              </p>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${activePillar === "CS" ? "bg-emerald-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}`}>
+              {activePillar === "CS" ? "Active" : "Select"}
+            </span>
+          </button>
+
+          {/* CA Services Button */}
+          <button
+            type="button"
+            onClick={() => handleSelectPillar("CA")}
+            className={`p-4 rounded-xl text-left border transition-all duration-200 flex items-start justify-between cursor-pointer ${
+              activePillar === "CA"
+                ? "bg-amber-50/70 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-500/20 shadow-sm"
+                : "bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700"
+            }`}
+          >
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${activePillar === "CA" ? "bg-amber-600 text-white" : "bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"}`}>
+                  <Landmark className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">CA Services</h4>
+                  <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">Chartered Accountant &amp; Tax</span>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
+                GST (GSTR-1, 3B), Advance Tax, TDS, monthly bookkeeping, and Statutory Audit.
+              </p>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${activePillar === "CA" ? "bg-amber-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}`}>
+              {activePillar === "CA" ? "Active" : "Select"}
+            </span>
+          </button>
+
+          {/* Corporate Law Button */}
+          <button
+            type="button"
+            onClick={() => handleSelectPillar("LAW")}
+            className={`p-4 rounded-xl text-left border transition-all duration-200 flex items-start justify-between cursor-pointer ${
+              activePillar === "LAW"
+                ? "bg-blue-50/70 dark:bg-blue-950/40 border-blue-500 ring-2 ring-blue-500/20 shadow-sm"
+                : "bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700"
+            }`}
+          >
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${activePillar === "LAW" ? "bg-blue-600 text-white" : "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"}`}>
+                  <Scale className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">Corporate Law</h4>
+                  <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400">Contracts, IP &amp; Legal Advisory</span>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
+                Founder vesting agreements, NDAs, Trademark registration, contracts, and legal risk audit.
+              </p>
+            </div>
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${activePillar === "LAW" ? "bg-blue-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"}`}>
+              {activePillar === "LAW" ? "Active" : "Select"}
+            </span>
+          </button>
         </div>
       </div>
 
-      {/* Main Grid: Recent Projects & Statutory Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Recent Projects List (7 cols) */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Recent Projects</h3>
-              <Link to="/projects" className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                View All ({projects.length}) <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PILLAR 1: CS SERVICES (SECRETARIAL, INCORPORATION & MCA)      */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {activePillar === "CS" && (
+        <div className="space-y-6">
+          {/* CS Metric Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider">Total Projects</span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <FolderKanban className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              </div>
+              <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{totalProjects}</div>
+              <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1 font-semibold">Active venture workspaces</p>
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(totalProjects * 10, 100)}%` }} />
+              </div>
             </div>
 
-            {projects.length === 0 ? (
-              <div className="text-center py-12 text-slate-500 space-y-3">
-                <FolderKanban className="w-10 h-10 text-slate-400 mx-auto" />
-                <p className="text-sm font-medium">No company projects created yet.</p>
-                <Link to="/projects/new" className="glass-button-primary text-xs py-2 px-4 inline-flex font-bold">
-                  Create First Project
-                </Link>
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider">Completed Assessments</span>
+                <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {projects.slice(0, 4).map((proj) => (
-                  <div
-                    key={proj.id}
-                    className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-all flex items-center justify-between gap-4"
-                  >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{proj.name}</h4>
-                        <span className="glass-badge glass-badge-emerald text-[10px]">
-                          {proj.preferred_structure || "Private Limited"}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">Domain: {proj.domain}</p>
-                    </div>
+              <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{completedAssessments}</div>
+              <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mt-1">Ready for document compilation</p>
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
+                <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${totalProjects > 0 ? (completedAssessments / totalProjects) * 100 : 100}%` }} />
+              </div>
+            </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <span className="text-xs font-bold text-slate-900 dark:text-white">{proj.completion_percentage}%</span>
-                        <div className="w-16 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden mt-1">
-                          <div
-                            className="h-full bg-emerald-500 rounded-full"
-                            style={{ width: `${proj.completion_percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                      <Link
-                        to={`/projects/${proj.id}/questionnaire`}
-                        className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 hover:text-blue-700 shadow-xs transition-colors"
-                      >
-                        <ArrowRight className="w-4 h-4" />
-                      </Link>
-                    </div>
-                  </div>
-                ))}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider">Generated Documents</span>
+                <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
               </div>
-            )}
+              <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{documents.length}</div>
+              <p className="text-[11px] text-slate-700 dark:text-slate-300 mt-1 font-semibold">PDF &amp; DOCX corporate dossiers</p>
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
+                <div className="h-full bg-blue-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(documents.length * 20, 100)}%` }} />
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+              <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
+                <span className="text-xs font-bold uppercase tracking-wider">Pending Requirements</span>
+                <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                </div>
+              </div>
+              <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{pendingTasks}</div>
+              <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold mt-1">Statutory actions requiring review</p>
+              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mt-3">
+                <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${Math.min(pendingTasks * 15, 100)}%` }} />
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Pending Statutory Checklist (5 cols) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Statutory Checklist</h3>
-              {activeProject && (
-                <Link to={`/projects/${activeProject.id}/compliance`} className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline">
-                  Full Checklist
+          {/* CS Quick Action Hub */}
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <h3 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-4">CS Quick Actions</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <Link
+                to="/projects/new"
+                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+              >
+                <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs font-bold text-slate-900 dark:text-white">Create Project</span>
+              </Link>
+
+              {activeProject ? (
+                <>
+                  <Link
+                    to={`/projects/${activeProject.id}/questionnaire`}
+                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                  >
+                    <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Continue Intake</span>
+                  </Link>
+                  <Link
+                    to={`/projects/${activeProject.id}/compliance`}
+                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                  >
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">MCA Checklist</span>
+                  </Link>
+                  <Link
+                    to={`/projects/${activeProject.id}/documents`}
+                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                  >
+                    <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Generate Dossier</span>
+                  </Link>
+                  <Link
+                    to={`/projects/${activeProject.id}/roles`}
+                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                  >
+                    <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">Role Matrix</span>
+                  </Link>
+                </>
+              ) : (
+                <Link
+                  to="/projects"
+                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-all flex flex-col items-center text-center gap-2 group"
+                >
+                  <FolderKanban className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">My Projects</span>
                 </Link>
+              )}
+
+              <Link
+                to="/projects"
+                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-all flex flex-col items-center text-center gap-2 group"
+              >
+                <FolderKanban className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs font-bold text-slate-900 dark:text-white">All Projects</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Visual SPICe+ MCA Incorporation Roadmap */}
+          <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                  <Landmark className="w-4 h-4" />
+                  <span>Official Regulatory Incorporation Workflow</span>
+                </div>
+                <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mt-1">
+                  MCA SPICe+ Incorporation Roadmap
+                </h2>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                  5-Stage statutory sequence under the Ministry of Corporate Affairs (MCA21) &amp; Companies Act, 2013.
+                </p>
+              </div>
+              {activeProject && (
+                <span className="self-start sm:self-auto glass-badge glass-badge-emerald text-xs">
+                  Active Project: {activeProject.name}
+                </span>
               )}
             </div>
 
-            {tasks.length === 0 ? (
-              <div className="text-center py-12 text-slate-500">
-                <CheckCircle2 className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                <p className="text-xs font-medium">No active statutory tasks for current project.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {tasks.slice(0, 5).map((t) => (
-                  <div key={t.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
-                    <span className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${
-                      t.status === "Completed" ? "bg-emerald-500" : "bg-blue-500"
-                    }`} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">{t.title}</h5>
-                        <span className="text-[10px] text-slate-500 dark:text-slate-400 capitalize font-medium">{t.status}</span>
+            {/* 5-Step Stepper */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {roadmapStages.map((stg, idx) => {
+                const isSelected = activeStage === idx;
+                const isCompleted = stg.status === "Completed";
+                const isInProgress = stg.status === "In Progress";
+
+                return (
+                  <button
+                    key={stg.stage}
+                    type="button"
+                    onClick={() => setActiveStage(idx)}
+                    className={`p-4 rounded-2xl border text-left transition-all duration-200 relative flex flex-col justify-between cursor-pointer ${
+                      isSelected
+                        ? "border-emerald-500 bg-emerald-50/60 dark:bg-emerald-950/40 shadow-xs ring-2 ring-emerald-500/20"
+                        : "border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:border-emerald-300 dark:hover:border-emerald-700"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200">
+                          {isCompleted ? <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> : stg.stage}
+                        </span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                          isCompleted
+                            ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300"
+                            : isInProgress
+                            ? "bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 animate-pulse"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                        }`}>
+                          {stg.status}
+                        </span>
                       </div>
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate mt-0.5 font-medium">{t.description}</p>
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2">
+                        {stg.title}
+                      </h4>
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono">
+                        {stg.mca_form}
+                      </div>
                     </div>
+
+                    <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-medium">
+                      <span>{stg.timeline}</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">Details &rarr;</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Stage Detail Panel */}
+            {roadmapStages[activeStage] && (
+              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                      Stage {roadmapStages[activeStage].stage} Detailed Dossier · {roadmapStages[activeStage].mca_form}
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white mt-0.5">
+                      {roadmapStages[activeStage].title}
+                    </h3>
                   </div>
-                ))}
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 px-3 py-1 rounded-xl border border-slate-200 dark:border-slate-700 self-start sm:self-auto">
+                    Statute: {roadmapStages[activeStage].statutory_rule}
+                  </span>
+                </div>
+
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                  {roadmapStages[activeStage].description}
+                </p>
+
+                <div className="pt-2">
+                  <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider block mb-2">
+                    Mandatory Deliverables &amp; Filing Action Items:
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
+                    {roadmapStages[activeStage].action_items.map((action, aIdx) => (
+                      <div
+                        key={aIdx}
+                        className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 flex items-start gap-2 shadow-2xs"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <span>{action}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
-          <div className="pt-4 mt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
-            <span>Verified Rules Engine</span>
-            <span className="text-emerald-700 dark:text-emerald-400 font-bold">100% Deterministic</span>
+          {/* Statutory Deadlines Countdown Cards */}
+          <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-4">
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                  <Clock className="w-4 h-4" />
+                  <span>Critical Statutory Clock</span>
+                </div>
+                <h2 className="text-xl font-extrabold text-slate-900 dark:text-white mt-1">
+                  Post-Incorporation Statutory Deadlines
+                </h2>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                  Live countdown and compliance requirements following Certificate of Incorporation (COI) issuance.
+                </p>
+              </div>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                Click card to toggle completed status
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {statutoryDeadlines.map((item) => {
+                const isDone = completedDeadlines[item.id] || false;
+
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => toggleDeadline(item.id)}
+                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 hover:shadow-md ${
+                      isDone
+                        ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800 opacity-80"
+                        : item.severity === "critical"
+                        ? "bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-900/60 hover:border-rose-400"
+                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                          {item.form_name}
+                        </span>
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                          isDone
+                            ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300"
+                            : "bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300"
+                        }`}>
+                          {isDone ? "✓ Completed" : item.deadline_window}
+                        </span>
+                      </div>
+
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                        {item.title}
+                      </h4>
+
+                      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Scale className="w-3.5 h-3.5 text-slate-400" />
+                          <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate max-w-[150px]">
+                            {item.statutory_provision}
+                          </span>
+                        </div>
+                        {!isDone ? (
+                          <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
+                            {item.remaining_days}d left
+                          </span>
+                        ) : (
+                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                            Recorded
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 p-2 rounded-lg font-medium">
+                        <span className="font-bold text-slate-700 dark:text-slate-300">Default Risk: </span>
+                        <span>{item.consequence}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Main Grid: Recent Projects & Statutory Tasks */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Recent Projects</h3>
+                  <Link to="/projects" className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline flex items-center gap-1">
+                    View All ({projects.length}) <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+
+                {projects.length === 0 ? (
+                  <div className="text-center py-12 text-slate-500 space-y-3">
+                    <FolderKanban className="w-10 h-10 text-slate-400 mx-auto" />
+                    <p className="text-sm font-medium">No company projects created yet.</p>
+                    <Link to="/projects/new" className="corpsetu-btn-navy text-xs py-2 px-4 inline-flex font-bold">
+                      Create First Project
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {projects.slice(0, 4).map((proj) => (
+                      <div
+                        key={proj.id}
+                        className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-all flex items-center justify-between gap-4"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-slate-900 dark:text-white">{proj.name}</h4>
+                            <span className="glass-badge glass-badge-emerald text-[10px]">
+                              {proj.preferred_structure || "Private Limited"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-700 dark:text-slate-300 font-medium">Domain: {proj.domain}</p>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <span className="text-xs font-bold text-slate-900 dark:text-white">{proj.completion_percentage}%</span>
+                            <div className="w-16 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden mt-1">
+                              <div
+                                className="h-full bg-emerald-500 rounded-full"
+                                style={{ width: `${proj.completion_percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                          <Link
+                            to={`/projects/${proj.id}/questionnaire`}
+                            className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 hover:text-blue-700 shadow-xs transition-colors"
+                          >
+                            <ArrowRight className="w-4 h-4" />
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Statutory Checklist</h3>
+                  {activeProject && (
+                    <Link to={`/projects/${activeProject.id}/compliance`} className="text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline">
+                      Full Checklist
+                    </Link>
+                  )}
+                </div>
+
+                {tasks.length === 0 ? (
+                  <div className="text-center py-12 text-slate-500">
+                    <CheckCircle2 className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                    <p className="text-xs font-medium">No active statutory tasks for current project.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {tasks.slice(0, 5).map((t) => (
+                      <div key={t.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+                        <span className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${
+                          t.status === "Completed" ? "bg-emerald-500" : "bg-blue-500"
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <h5 className="text-xs font-bold text-slate-900 dark:text-white truncate">{t.title}</h5>
+                            <span className="text-[10px] text-slate-500 dark:text-slate-400 capitalize font-medium">{t.status}</span>
+                          </div>
+                          <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate mt-0.5 font-medium">{t.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 mt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
+                <span>Verified Rules Engine</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">100% Deterministic</span>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PILLAR 2: CA SERVICES (CHARTERED ACCOUNTANT, TAX & AUDIT)     */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {activePillar === "CA" && (
+        <div className="space-y-6">
+          {/* CA Command Banner */}
+          <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-6 sm:p-7 rounded-3xl border border-amber-500/30 dark:border-amber-500/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
+                <Landmark className="w-4 h-4" />
+                <span>Chartered Accountant Financial Desk</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+                Tax, GST &amp; Statutory Bookkeeping Engine
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
+                Maintain accurate books of accounts, automate GST returns (GSTR-1, 3B), estimate advance taxes, and prepare statutory audit schedules.
+              </p>
+            </div>
+            <button
+              onClick={() => { setCaConsultTopic("General CA Tax Strategy"); setCaBookedModal(true); }}
+              className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
+            >
+              Consult Empanelled CA
+            </button>
+          </div>
+
+          {/* CA 4 Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">GST Status</span>
+                <Receipt className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">Active · GSTR-3B</div>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Due: 20th Nov · ₹0 Penalty</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Advance Tax Q3</span>
+                <Calculator className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">₹{advanceTaxQ3.toLocaleString("en-IN")}</div>
+              <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold mt-1">75% threshold · Due 15 Dec</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Ledger Reconciliation</span>
+                <FileSpreadsheet className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">98% Synced</div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold mt-1">Bank statements up to date</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Statutory Audit</span>
+                <Award className="w-4 h-4 text-amber-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">Sec 139 Compliant</div>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Auditor Form ADT-1 Filed</p>
+            </div>
+          </div>
+
+          {/* CA Interactive Tools & Calculators */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Advance Tax Estimator (7 cols) */}
+            <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Advance Tax &amp; TDS Estimator (FY 2026-27)</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Compute mandatory statutory corporate advance tax installments under Section 208</p>
+                </div>
+                <span className="text-xs font-bold px-2.5 py-1 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 rounded-lg">
+                  Base 22% + Surcharge
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Annual Business Turnover (₹)</label>
+                  <input
+                    type="number"
+                    value={taxTurnover}
+                    onChange={(e) => setTaxTurnover(Number(e.target.value))}
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Estimated Net Profit Before Tax (₹)</label>
+                  <input
+                    type="number"
+                    value={estimatedProfit}
+                    onChange={(e) => setEstimatedProfit(Number(e.target.value))}
+                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/60 space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700 dark:text-slate-300">Estimated Annual Tax Liability:</span>
+                  <span className="text-base font-extrabold text-amber-700 dark:text-amber-400">₹{calculatedTax.toLocaleString("en-IN")}</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-amber-200/60 dark:border-amber-800/40">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+                    <span className="text-[10px] text-slate-500 block font-bold">15% by 15-Jun</span>
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white">₹{advanceTaxQ1.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+                    <span className="text-[10px] text-slate-500 block font-bold">45% by 15-Sep</span>
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white">₹{advanceTaxQ2.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-amber-400 dark:border-amber-600 text-center ring-1 ring-amber-400">
+                    <span className="text-[10px] text-amber-700 dark:text-amber-400 block font-bold">75% by 15-Dec ★</span>
+                    <span className="text-xs font-extrabold text-amber-700 dark:text-amber-400">₹{advanceTaxQ3.toLocaleString("en-IN")}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-center">
+                    <span className="text-[10px] text-slate-500 block font-bold">100% by 15-Mar</span>
+                    <span className="text-xs font-extrabold text-slate-900 dark:text-white">₹{advanceTaxQ4.toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Section 234B &amp; 234C interest penalty applies on delay</span>
+                <button
+                  onClick={() => alert(`Advance Tax Calculation of ₹${calculatedTax} for FY 2026-27 downloaded as schedule.`)}
+                  className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 inline-flex items-center gap-1.5"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export Tax Computation</span>
+                </button>
+              </div>
+            </div>
+
+            {/* GST & Statutory Filing Calendar (5 cols) */}
+            <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">GST &amp; Tax Compliance Calendar</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">Live</span>
+                </div>
+
+                <div className="space-y-3">
+                  {caDeadlines.map((dl) => (
+                    <div key={dl.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-900 dark:text-white">{dl.title}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
+                          {dl.due_date}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-snug">{dl.description}</p>
+                      <span className="text-[10px] font-mono text-slate-500">{dl.law}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-500 font-medium">Need full financial audit?</span>
+                <button
+                  onClick={() => { setCaConsultTopic("Statutory Audit under Section 139"); setCaBookedModal(true); }}
+                  className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
+                >
+                  Book CA Review &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* PILLAR 3: CORPORATE LAW (CONTRACTS, IP & LEGAL ADVISORY)     */}
+      {/* ═════════════════════════════════════════════════════════════ */}
+      {activePillar === "LAW" && (
+        <div className="space-y-6">
+          {/* LAW Command Banner */}
+          <div className="bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent p-6 sm:p-7 rounded-3xl border border-blue-500/30 dark:border-blue-500/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider">
+                <Scale className="w-4 h-4" />
+                <span>Corporate Legal &amp; Contracts Vault</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
+                Contracts, Intellectual Property &amp; Legal Advisory
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
+                Generate airtight founder vesting agreements, bilateral NDAs, conduct trademark searches, and safeguard corporate intellectual property.
+              </p>
+            </div>
+            <button
+              onClick={() => setLawBookedModal(true)}
+              className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
+            >
+              Consult High Court Advocate
+            </button>
+          </div>
+
+          {/* LAW 4 Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Active Contracts</span>
+                <FileCheck className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">4 Drafted</div>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Founders Agreement &amp; NDA Ready</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Trademark Status</span>
+                <Shield className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">Class 42 &amp; 35</div>
+              <p className="text-[11px] text-blue-600 dark:text-blue-400 font-bold mt-1">Phonetic Clearance Completed</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Board Resolutions</span>
+                <BookOpen className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">3 Executed</div>
+              <p className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold mt-1">Bank Mandate &amp; Shares Allotted</p>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Legal Risk Score</span>
+                <Scale className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">96 / 100</div>
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Low Dispute Exposure</p>
+            </div>
+          </div>
+
+          {/* Interactive Contract Drafting Studio & Trademark Search */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Legal Agreement Generator (7 cols) */}
+            <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Interactive Legal Contract Drafter</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Generate tailored commercial agreements with enforceable statutory clauses</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setContractType("founder_agreement")}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg ${contractType === "founder_agreement" ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"}`}
+                  >
+                    Founder Agreement
+                  </button>
+                  <button
+                    onClick={() => setContractType("nda")}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg ${contractType === "nda" ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"}`}
+                  >
+                    NDA
+                  </button>
+                </div>
+              </div>
+
+              {contractType === "founder_agreement" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Number of Co-Founders</label>
+                      <select
+                        value={founderCount}
+                        onChange={(e) => setFounderCount(Number(e.target.value))}
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                      >
+                        <option value={1}>1 Founder (Single)</option>
+                        <option value={2}>2 Co-Founders (Equal/Custom)</option>
+                        <option value={3}>3 Co-Founders</option>
+                        <option value={4}>4+ Co-Founders</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Equity Vesting Duration</label>
+                      <select
+                        value={vestingYears}
+                        onChange={(e) => setVestingYears(Number(e.target.value))}
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                      >
+                        <option value={3}>3 Years (36 Months)</option>
+                        <option value={4}>4 Years (Standard Tech)</option>
+                        <option value={5}>5 Years</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Cliff Period</label>
+                      <select
+                        value={cliffMonths}
+                        onChange={(e) => setCliffMonths(Number(e.target.value))}
+                        className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
+                      >
+                        <option value={6}>6 Months Cliff</option>
+                        <option value={12}>12 Months Cliff (Standard)</option>
+                        <option value={0}>No Cliff (Immediate)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 space-y-2 text-xs text-slate-700 dark:text-slate-300">
+                    <span className="font-extrabold text-blue-900 dark:text-blue-300 block">Pre-Configured Enforceable Covenants Included:</span>
+                    <ul className="list-disc pl-4 space-y-1 text-[11px]">
+                      <li><strong>IP Assignment Clause:</strong> 100% intellectual property, code, and trade secrets assigned irrevocably to the company.</li>
+                      <li><strong>Non-Compete &amp; Non-Solicit:</strong> 24-month post-exit restriction under Indian Contract Act §27 safe harbor.</li>
+                      <li><strong>Good Leaver vs. Bad Leaver:</strong> Unvested shares subject to company clawback at nominal face value.</li>
+                      <li><strong>Deadlock Resolution:</strong> Russian Roulette / Texas Shootout clause for equal 50:50 shareholdings.</li>
+                    </ul>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-xs text-slate-500">Stamp Duty: Applicable state e-stamp required</span>
+                    <button
+                      onClick={() => alert("Founder Vesting Agreement draft successfully compiled into your project documents vault.")}
+                      className="corpsetu-btn-navy px-4 py-2 text-xs font-bold inline-flex items-center gap-1.5"
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      <span>Generate Agreement</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {contractType === "nda" && (
+                <div className="space-y-4">
+                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Non-Disclosure Agreement (Mutual Bilateral)</h4>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">
+                      Standard 3-year mutual confidentiality agreement protecting business discussions, financial projections, software architecture, and client lists.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                        <span className="text-[10px] text-slate-500 block font-bold">Jurisdiction</span>
+                        <span className="font-bold text-slate-900 dark:text-white">Bengaluru / High Court of Karnataka</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                        <span className="text-[10px] text-slate-500 block font-bold">Dispute Resolution</span>
+                        <span className="font-bold text-slate-900 dark:text-white">Arbitration &amp; Conciliation Act, 1996</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2">
+                    <span className="text-xs text-slate-500">Ready for digital sign via e-Sign / Aadhaar OTP</span>
+                    <button
+                      onClick={() => alert("Bilateral NDA successfully compiled into your project documents vault.")}
+                      className="corpsetu-btn-navy px-4 py-2 text-xs font-bold inline-flex items-center gap-1.5"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download NDA Template</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Trademark Protection & Clearance Desk (5 cols) */}
+            <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Trademark Conflict Checker</h3>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300">TM-A Desk</span>
+                </div>
+
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-600 dark:text-slate-300">
+                    Verify brand name distinctiveness across IP India Registry Class 9, 35, 42, and 45 before filing.
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter brand or company name..."
+                      value={tmSearchQuery}
+                      onChange={(e) => setTmSearchQuery(e.target.value)}
+                      className="flex-1 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={handleTmSearch}
+                      className="px-3.5 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 flex items-center gap-1"
+                    >
+                      <Search className="w-3.5 h-3.5" />
+                      <span>Search</span>
+                    </button>
+                  </div>
+
+                  {tmSearchResult && (
+                    <div className={`p-3.5 rounded-2xl border text-xs space-y-1.5 ${tmSearchResult.isAvailable ? "bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300" : "bg-rose-50/70 dark:bg-rose-950/40 border-rose-300"}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-900 dark:text-white">Search: {tmSearchResult.query}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${tmSearchResult.isAvailable ? "bg-emerald-200 text-emerald-800" : "bg-rose-200 text-rose-800"}`}>
+                          {tmSearchResult.riskLevel}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300"><strong>Classification:</strong> {tmSearchResult.recommendedClass}</p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300"><strong>Registry Evaluation:</strong> {tmSearchResult.registryStatus}</p>
+                    </div>
+                  )}
+
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
+                    <span className="font-bold text-slate-800 dark:text-slate-200 block">Common Startup Trademark Classes:</span>
+                    <div>• <strong>Class 9:</strong> Downloadable software, mobile apps, SaaS tokens</div>
+                    <div>• <strong>Class 35:</strong> Advertising, retail business, marketplace</div>
+                    <div>• <strong>Class 42:</strong> Software development, cloud hosting, AI services</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-500 font-medium">Need expedited TM-A filing?</span>
+                <button
+                  onClick={() => setLawBookedModal(true)}
+                  className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline"
+                >
+                  File with IP Attorney &rarr;
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* CA CONSULTATION MODAL                                         */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {caBookedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
+                  <Landmark className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Empanelled CA Session</h3>
+                  <span className="text-xs text-slate-500">Chartered Accountant Consultation</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setCaBookedModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 flex items-center justify-center text-sm font-bold"
+              >
+                &times;
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              You are requesting a 1-on-1 strategy call with our Senior Chartered Accountant regarding <strong>{caConsultTopic}</strong>.
+            </p>
+
+            <div className="space-y-2 text-xs">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="text-slate-500 font-bold block">Assigned CA Specialist:</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">CA Neha Kulkarni, FCA (ICAI Reg #418290)</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold block text-[11px]">Online · Available within ~20 mins</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setCaBookedModal(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  alert("Your CA consultation request has been confirmed! CA Neha Kulkarni will connect with you via Google Meet link sent to your registered email.");
+                  setCaBookedModal(false);
+                }}
+                className="corpsetu-btn-gold px-4 py-2 text-xs font-bold"
+              >
+                Confirm CA Appointment
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* LAW CONSULTATION MODAL                                        */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {lawBookedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
+                  <Scale className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Corporate Counsel Session</h3>
+                  <span className="text-xs text-slate-500">High Court Advocate Consultation</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setLawBookedModal(false)}
+                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 flex items-center justify-center text-sm font-bold"
+              >
+                &times;
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300">
+              Schedule an executive consultation regarding contract drafting, founder vesting dispute prevention, or trademark objection filings.
+            </p>
+
+            <div className="space-y-2 text-xs">
+              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                <span className="text-slate-500 font-bold block">Assigned Legal Counsel:</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">Adv. Rajesh Sharma, LL.M (Bar Council KAR/2012)</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-semibold block text-[11px]">Online · Available within ~15 mins</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setLawBookedModal(false)}
+                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  alert("Your legal counsel appointment is confirmed! Adv. Rajesh Sharma will connect via encrypted video bridge.");
+                  setLawBookedModal(false);
+                }}
+                className="corpsetu-btn-navy px-4 py-2 text-xs font-bold"
+              >
+                Confirm Legal Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

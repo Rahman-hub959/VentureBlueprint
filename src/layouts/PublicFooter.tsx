@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Shield, ExternalLink } from "lucide-react";
+import { ExternalLink, Scale, FileSpreadsheet, Building2 } from "lucide-react";
+import { CorpSetuLogo } from "../components/CorpSetuLogo";
 
 export const PublicFooter: React.FC = () => {
   return (
@@ -8,62 +9,65 @@ export const PublicFooter: React.FC = () => {
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10 mb-12">
         {/* Brand Col */}
         <div className="md:col-span-2 flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white border border-emerald-400 shadow-sm">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-extrabold text-lg text-slate-900 dark:text-white">VentureBlueprint</span>
-          </div>
-          <p className="text-slate-700 dark:text-slate-300 leading-relaxed max-w-sm text-xs sm:text-sm font-medium">
-            AI-independent, deterministic company formation planning, statutory MCA validation, and professional document generation platform for Indian enterprises.
+          <CorpSetuLogo size="lg" />
+          <p className="text-slate-600 dark:text-slate-300 leading-relaxed max-w-sm text-xs sm:text-sm font-medium">
+            One unified platform bridging Corporate Law, Company Secretarial (CS), and Chartered Accountancy (CA) services for startups, SMEs, and growing enterprises in India.
           </p>
-          <div className="inline-flex items-center gap-2 text-xs text-emerald-800 dark:text-emerald-300 font-semibold bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1.5 rounded-full border border-emerald-200 dark:border-emerald-800 w-fit">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            100% Deterministic Local Processing • Zero External AI Dependencies
+          <div className="inline-flex items-center gap-2 text-xs text-[#0B2559] dark:text-[#E5B842] font-semibold bg-amber-50/80 dark:bg-amber-950/40 px-3 py-1.5 rounded-full border border-amber-200 dark:border-amber-800/60 w-fit">
+            <span className="w-2 h-2 rounded-full bg-[#C59B27] animate-pulse" />
+            Law. CS, CA. One Bridge · 100% Statutory Assurance
           </div>
         </div>
 
-        {/* Product Links */}
+        {/* Three Pillars */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Platform</span>
-          <Link to="/how-it-works" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">How It Works</Link>
-          <Link to="/features" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Core Features</Link>
-          <Link to="/domains" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Supported Domains</Link>
-          <Link to="/register" className="hover:text-emerald-700 dark:hover:text-emerald-400 font-semibold transition-colors">Start Questionnaire</Link>
+          <span className="text-xs font-bold text-[#0B2559] dark:text-[#E5B842] uppercase tracking-wider">Three Pillars</span>
+          <a href="/#pillars" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors flex items-center gap-1.5">
+            <Scale className="w-3.5 h-3.5 text-[#C59B27]" /> Corporate Law
+          </a>
+          <a href="/#pillars" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors flex items-center gap-1.5">
+            <Building2 className="w-3.5 h-3.5 text-[#C59B27]" /> CS Secretarial
+          </a>
+          <a href="/#pillars" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors flex items-center gap-1.5">
+            <FileSpreadsheet className="w-3.5 h-3.5 text-[#C59B27]" /> CA & Taxation
+          </a>
+          <a href="/#compliance-calendar" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">
+            Compliance Calendar
+          </a>
         </div>
 
-        {/* Regulatory Links */}
+        {/* Official Portals */}
         <div className="flex flex-col gap-3">
           <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Official Portals</span>
-          <a href="https://www.mca.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
-            MCA Portal <ExternalLink className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+          <a href="https://www.mca.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">
+            MCA V3 Portal <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
-          <a href="https://www.gst.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
-            GST Network <ExternalLink className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+          <a href="https://www.gst.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">
+            GST Portal <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
-          <a href="https://udyamregistration.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
-            MSME Udyam <ExternalLink className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+          <a href="https://eportal.incometax.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">
+            Income Tax e-Filing <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
-          <a href="https://www.startupindia.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">
-            Startup India (DPIIT) <ExternalLink className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+          <a href="https://ipindia.gov.in" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">
+            IP India Trademark <ExternalLink className="w-3 h-3 text-slate-400" />
           </a>
         </div>
 
         {/* Legal & Governance */}
         <div className="flex flex-col gap-3">
-          <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Governance</span>
-          <Link to="/about" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">About Us</Link>
-          <Link to="/faq" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">FAQ</Link>
-          <Link to="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Privacy Policy</Link>
-          <Link to="/terms" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Terms of Service</Link>
-          <Link to="/contact" className="hover:text-blue-600 dark:hover:text-blue-400 font-medium transition-colors">Support & Contact</Link>
+          <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Help & Legal</span>
+          <a href="/#faq" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">FAQ</a>
+          <Link to="/complaints" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">Register Grievance</Link>
+          <Link to="/privacy" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">Terms of Service</Link>
+          <a href="/#book-consultation" className="hover:text-[#C59B27] dark:hover:text-[#E5B842] font-medium transition-colors">Book Consultation</a>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-600 dark:text-slate-400 font-medium">
-        <p>© {new Date().getFullYear()} VentureBlueprint. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} <strong className="text-slate-900 dark:text-white">CorpSetu</strong>. All rights reserved. www.corpsetu.com</p>
         <p className="max-w-xl text-center md:text-right text-slate-600 dark:text-slate-400">
-          <b className="text-slate-900 dark:text-white">Disclaimer:</b> VentureBlueprint provides automated regulatory guidance and business planning tools. We do not provide licensed legal, tax, or financial advice or guaranteed MCA registration.
+          <b className="text-slate-900 dark:text-white">Law. CS, CA. One Bridge:</b> Integrated regulatory compliance, corporate law, secretarial governance, and accounting platform for Indian businesses.
         </p>
       </div>
     </footer>

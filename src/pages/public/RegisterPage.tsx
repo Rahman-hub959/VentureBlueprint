@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Shield, ArrowRight, Lock, Mail, User, AlertCircle, Phone } from "lucide-react";
+import { ArrowRight, Lock, Mail, User, AlertCircle, Phone } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { CorpSetuLogo } from "../../components/CorpSetuLogo";
 
 export const RegisterPage: React.FC = () => {
   const [fullName, setFullName] = useState("");
@@ -43,12 +44,14 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="max-w-md mx-auto px-6 py-12">
       <div className="bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6 transition-colors">
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 flex items-center justify-center text-white mx-auto border border-emerald-400 shadow-md">
-            <Shield className="w-6 h-6 text-white" />
+        <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <CorpSetuLogo size="lg" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Create Your Account</h1>
-          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">Start planning your company formation dossier</p>
+          <h1 className="text-2xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">Create Your Account</h1>
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
+            Join CorpSetu — Law, CS & CA compliance platform
+          </p>
         </div>
 
         {error && (
@@ -71,7 +74,7 @@ export const RegisterPage: React.FC = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Aarav Sharma"
-                className="w-full glass-input !pl-11"
+                className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
           </div>
@@ -88,7 +91,7 @@ export const RegisterPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="aarav@ventureblueprint.in"
-                className="w-full glass-input !pl-11"
+                className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
           </div>
@@ -104,7 +107,7 @@ export const RegisterPage: React.FC = () => {
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="w-full glass-input !pl-11"
+                className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
           </div>
@@ -121,7 +124,7 @@ export const RegisterPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 8 characters"
-                className="w-full glass-input !pl-11"
+                className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
           </div>
@@ -129,15 +132,15 @@ export const RegisterPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full glass-button-primary justify-center text-xs py-3 mt-2 shadow-md font-bold"
+            className="w-full corpsetu-btn-navy justify-center text-xs py-3 mt-2 shadow-md font-bold"
           >
-            {loading ? "Creating Account..." : "Create Entrepreneur Account"}
+            {loading ? "Creating Account..." : "Create CorpSetu Account"}
           </button>
         </form>
 
         <div className="text-center pt-2 text-xs text-slate-700 dark:text-slate-300 font-medium">
           Already have an account?{" "}
-          <Link to="/login" className="text-emerald-700 dark:text-emerald-400 font-bold hover:underline">
+          <Link to="/login" className="text-[#C59B27] dark:text-[#E5B842] font-bold hover:underline">
             Sign In
           </Link>
         </div>

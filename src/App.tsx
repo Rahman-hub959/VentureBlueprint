@@ -32,6 +32,11 @@ import { DocumentsPage } from "./pages/documents/DocumentsPage";
 import { RolesPage } from "./pages/roles/RolesPage";
 import { AdminPortalPage } from "./pages/admin/AdminPortalPage";
 import SettingsPage from "./pages/SettingsPage";
+import { ComplaintsPage } from "./pages/complaints/ComplaintsPage";
+
+// Global Widgets
+import { CursorHighlight } from "./components/CursorHighlight";
+import { LiveChatWidget } from "./components/LiveChatWidget";
 
 // Application Error Boundary
 interface ErrorBoundaryProps {
@@ -123,6 +128,8 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <ToastProvider>
+            <CursorHighlight />
+            <LiveChatWidget />
             <BrowserRouter>
             <Routes>
               {/* Public Layout & Pages */}
@@ -134,6 +141,7 @@ export default function App() {
                 <Route path="/domains" element={<DomainsPage />} />
                 <Route path="/faq" element={<FaqPage />} />
                 <Route path="/contact" element={<ContactPage />} />
+                <Route path="/complaints" element={<ComplaintsPage />} />
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/login" element={<LoginPage />} />
@@ -157,6 +165,7 @@ export default function App() {
                 <Route path="/projects/:id/compliance" element={<CompliancePage />} />
                 <Route path="/projects/:id/documents" element={<DocumentsPage />} />
                 <Route path="/projects/:id/roles" element={<RolesPage />} />
+                <Route path="/complaints" element={<ComplaintsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
 
                 {/* Admin Portal */}

@@ -43,12 +43,30 @@ def build_docx_document(output_path: Path, doc_data: Dict[str, Any]) -> str:
     """
     doc = Document()
 
-    # Page Margins (0.65 inch)
+    # Page Margins (0.65 inch) & CorpSetu Header/Footer Watermark
     for section in doc.sections:
         section.top_margin = Inches(0.65)
         section.bottom_margin = Inches(0.65)
         section.left_margin = Inches(0.65)
         section.right_margin = Inches(0.65)
+
+        # Running Header
+        header = section.header
+        p_head = header.paragraphs[0]
+        p_head.text = "CORPSETU | LAW • CS • CA ONE BRIDGE  —  OFFICIAL STATUTORY BLUEPRINT"
+        p_head.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p_head.runs[0].font.name = "Arial"
+        p_head.runs[0].font.size = Pt(7.5)
+        p_head.runs[0].font.color.rgb = MUTED_RGB
+
+        # Running Footer
+        footer = section.footer
+        p_foot = footer.paragraphs[0]
+        p_foot.text = "CORPSETU · CONFIDENTIAL & PROPRIETARY  —  STATUTORY DOSSIER"
+        p_foot.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p_foot.runs[0].font.name = "Arial"
+        p_foot.runs[0].font.size = Pt(7.5)
+        p_foot.runs[0].font.color.rgb = MUTED_RGB
 
     title = doc_data.get("title", "COMPANY SETUP BLUEPRINT")
     company_name = doc_data.get("company_name", "Lumora Labs")
@@ -58,6 +76,15 @@ def build_docx_document(output_path: Path, doc_data: Dict[str, Any]) -> str:
     status_labels_table = doc_data.get("status_labels_table", [])
     contents_list = doc_data.get("contents_list", [])
     sections = doc_data.get("sections", [])
+
+    # Subtle Watermark Micro-Banner
+    p_wm = doc.add_paragraph()
+    r_wm = p_wm.add_run("••• CORPSETU · VERIFIED STATUTORY COMPLIANCE BLUEPRINT · ONE BRIDGE •••")
+    r_wm.font.name = "Arial"
+    r_wm.font.size = Pt(7.5)
+    r_wm.font.bold = True
+    r_wm.font.color.rgb = RGBColor(197, 155, 39)
+    p_wm.paragraph_format.space_after = Pt(4)
 
     # Title
     p_title = doc.add_paragraph()

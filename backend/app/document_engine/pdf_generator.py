@@ -10,12 +10,14 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether, HRFlowable, Flowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak, KeepTogether, HRFlowable, Flowable, Image as RLImage
 )
 from reportlab.pdfgen import canvas
 
-# Corporate Color Palette: Green, Blue, White Foundation
-NAVY_PRIMARY = colors.HexColor("#0F172A")
+# CorpSetu Corporate Color Palette
+CORPSETU_NAVY = colors.HexColor("#0B2559")
+CORPSETU_GOLD = colors.HexColor("#C59B27")
+NAVY_PRIMARY = colors.HexColor("#0B2559")
 NAVY_SECONDARY = colors.HexColor("#1E293B")
 BLUE_ACCENT = colors.HexColor("#1E40AF")
 BLUE_LIGHT = colors.HexColor("#EFF6FF")
@@ -24,7 +26,7 @@ EMERALD_ACCENT = colors.HexColor("#10B981")
 EMERALD_DARK = colors.HexColor("#059669")
 EMERALD_LIGHT = colors.HexColor("#ECFDF5")
 EMERALD_BORDER = colors.HexColor("#A7F3D0")
-GOLD_ACCENT = colors.HexColor("#D97706")
+GOLD_ACCENT = colors.HexColor("#C59B27")
 GOLD_LIGHT = colors.HexColor("#FEF3C7")
 GOLD_BORDER = colors.HexColor("#FDE68A")
 TEXT_DARK = colors.HexColor("#0F172A")
@@ -51,7 +53,8 @@ class SectionMarker(Flowable):
 
 class NumberedCanvas(canvas.Canvas):
     """
-    Two-pass canvas to dynamically compute total pages and render corporate headers/footers.
+    Two-pass canvas to dynamically compute total pages and render corporate headers/footers,
+    including CorpSetu branding and a subtle, low-opacity document watermark.
     """
     def __init__(self, *args, **kwargs):
         super(NumberedCanvas, self).__init__(*args, **kwargs)
@@ -65,9 +68,42 @@ class NumberedCanvas(canvas.Canvas):
         num_pages = len(self._saved_page_states)
         for state in self._saved_page_states:
             self.__dict__.update(state)
+            self.draw_watermark()
             self.draw_header_footer(num_pages)
             super(NumberedCanvas, self).showPage()
         super(NumberedCanvas, self).save()
+
+    def draw_watermark(self):
+        """
+        Draws a subtle, low-opacity watermark across the document.
+        Calibrated with alpha=0.038 to be visually elegant while strictly
+        ensuring 100% legibility of all body text, tables, and codes.
+        """
+        self.saveState()
+        try:
+            # Diagonal center watermark with subtle CorpSetu Navy tint
+            self.setFont("Helvetica-Bold", 38)
+            # Low opacity (0.038) ensures zero disturbance to content
+            self.setFillColor(colors.Color(0.043, 0.145, 0.349, alpha=0.038))
+            self.translate(4.25 * inch, 5.5 * inch)
+            self.rotate(45)
+            self.drawCentredString(0, 30, "CORPSETU")
+            self.setFont("Helvetica", 13)
+            self.drawCentredString(0, -2, "LAW • CS • CA  —  ONE BRIDGE")
+            self.setFont("Helvetica-Bold", 9.5)
+            self.drawCentredString(0, -24, "STATUTORY PLANNING DOSSIER  •  VERIFIED RECORD")
+        finally:
+            self.restoreState()
+
+        # Subtle top and bottom security micro-watermark
+        self.saveState()
+        try:
+            self.setFont("Helvetica", 6.5)
+            self.setFillColor(colors.Color(0.25, 0.3, 0.45, alpha=0.22))
+            self.drawCentredString(4.25 * inch, 11 * inch - 18, "••• CORPSETU VERIFIED STATUTORY DOCUMENT • OFFICIAL COMPLIANCE BLUEPRINT •••")
+            self.drawCentredString(4.25 * inch, 14, "••• LAW • CS • CA ONE BRIDGE • ALL RIGHTS RESERVED • STRICTLY CONFIDENTIAL •••")
+        finally:
+            self.restoreState()
 
     def draw_header_footer(self, page_count):
         if self._pageNumber == 1:
@@ -78,9 +114,9 @@ class NumberedCanvas(canvas.Canvas):
         self.setFillColor(TEXT_MUTED)
 
         # Running Header
-        self.drawString(48, 11 * inch - 32, "VENTUREBLUEPRINT | COMPANY SETUP BLUEPRINT")
+        self.drawString(48, 11 * inch - 32, "CORPSETU | LAW • CS • CA ONE BRIDGE")
         self.setFont("Helvetica", 7.5)
-        self.drawRightString(8.5 * inch - 48, 11 * inch - 32, "SRS v0.1 • STATUTORY PLANNING DOSSIER")
+        self.drawRightString(8.5 * inch - 48, 11 * inch - 32, "STATUTORY PLANNING DOSSIER")
         self.setStrokeColor(BORDER_COLOR)
         self.setLineWidth(0.6)
         self.line(48, 11 * inch - 36, 8.5 * inch - 48, 11 * inch - 36)
@@ -89,7 +125,7 @@ class NumberedCanvas(canvas.Canvas):
         self.line(48, 40, 8.5 * inch - 48, 40)
         self.setFont("Helvetica", 7.5)
         self.setFillColor(TEXT_MUTED)
-        self.drawString(48, 28, "CONFIDENTIAL & PROPRIETARY — STATUTORY PLANNING ASSISTANCE ONLY")
+        self.drawString(48, 28, "CORPSETU · CONFIDENTIAL & PROPRIETARY — STATUTORY PLANNING ASSISTANCE ONLY")
         page_str = f"Page {self._pageNumber} of {page_count}"
         self.setFont("Helvetica-Bold", 8)
         self.setFillColor(NAVY_PRIMARY)
@@ -258,6 +294,15 @@ def _create_styles():
         alignment=2
     )
 
+    corpsetu_brand_style = ParagraphStyle(
+        "CorpSetuBrand",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=12,
+        leading=14,
+        textColor=CORPSETU_NAVY
+    )
+
     return {
         "title": title_style,
         "entity": entity_style,
@@ -276,7 +321,8 @@ def _create_styles():
         "toc_th_left": toc_th_left,
         "toc_th_right": toc_th_right,
         "toc_td_left": toc_td_left,
-        "toc_td_right": toc_td_right
+        "toc_td_right": toc_td_right,
+        "corpsetu_brand": corpsetu_brand_style
     }
 
 def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draft: bool = False) -> List[Any]:
@@ -299,12 +345,31 @@ def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draf
     # ─────────────────────────────────────────────────────────────────
     top_bar = Table([["", "", ""]], colWidths=[2.5 * inch, 2.5 * inch, 2.15 * inch], rowHeights=[4])
     top_bar.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, 0), NAVY_PRIMARY),
-        ('BACKGROUND', (1, 0), (1, 0), EMERALD_DARK),
+        ('BACKGROUND', (0, 0), (0, 0), CORPSETU_NAVY),
+        ('BACKGROUND', (1, 0), (1, 0), CORPSETU_GOLD),
         ('BACKGROUND', (2, 0), (2, 0), BLUE_ACCENT),
     ]))
     story.append(top_bar)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 8))
+
+    # CorpSetu Brand Header
+    logo_path = Path(__file__).resolve().parent.parent / "static" / "corpsetu-logo.png"
+    if logo_path.exists():
+        try:
+            logo_img = RLImage(str(logo_path), width=1.1 * inch, height=0.35 * inch)
+            brand_text = Paragraph("<font color='#0B2559'><b>CorpSetu</b></font> <font color='#C59B27'>|</font> <font size=7 color='#475569'><b>Law. CS, CA. One Bridge.</b></font>", st["corpsetu_brand"])
+            header_table = Table([[logo_img, brand_text]], colWidths=[1.2 * inch, 5.95 * inch])
+            header_table.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 0),
+                ('TOPPADDING', (0, 0), (-1, -1), 0),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            story.append(header_table)
+            story.append(Spacer(1, 4))
+        except Exception:
+            pass
 
     story.append(Paragraph(title, st["title"]))
     story.append(Paragraph(company_name, st["entity"]))
