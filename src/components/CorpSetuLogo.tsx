@@ -13,11 +13,13 @@ export const CorpSetuLogo: React.FC<CorpSetuLogoProps> = ({
   showTagline = true,
   variant = "full",
 }) => {
+  // Tightly cropped logo dimensions (aspect ratio 830:293 ~ 2.83:1)
+  // Scaled up so the emblem and typography are crisp, bold, and clearly readable
   const sizeMap = {
-    sm: { imgH: "h-7", text: "text-base", sub: "text-[9px]" },
-    md: { imgH: "h-9", text: "text-lg", sub: "text-[10px]" },
-    lg: { imgH: "h-12", text: "text-2xl", sub: "text-xs" },
-    xl: { imgH: "h-16", text: "text-3xl", sub: "text-sm" },
+    sm: { imgH: "h-9 sm:h-10", iconH: "h-9 w-9" },
+    md: { imgH: "h-11 sm:h-12", iconH: "h-11 w-11" },
+    lg: { imgH: "h-14 sm:h-16", iconH: "h-14 w-14" },
+    xl: { imgH: "h-20 sm:h-24", iconH: "h-20 w-20" },
   };
 
   const currentSize = sizeMap[size];
@@ -25,13 +27,22 @@ export const CorpSetuLogo: React.FC<CorpSetuLogoProps> = ({
   if (variant === "icon") {
     return (
       <div className={`relative inline-flex items-center justify-center ${className}`}>
+        {/* Light Mode Square Icon */}
         <img
-          src="/corpsetu-logo.png"
+          src="/corpsetu-icon.png"
           alt="CorpSetu"
-          className={`${currentSize.imgH} w-auto object-contain rounded-lg`}
+          className={`${currentSize.iconH} object-contain rounded-lg dark:hidden`}
           onError={(e) => {
-            // Fallback to jpg if png not found
-            (e.target as HTMLImageElement).src = "/corpsetu-logo.jpg";
+            (e.target as HTMLImageElement).src = "/corpsetu-logo.png";
+          }}
+        />
+        {/* Dark Mode Square Icon */}
+        <img
+          src="/corpsetu-icon-dark.png"
+          alt="CorpSetu"
+          className={`${currentSize.iconH} object-contain rounded-lg hidden dark:block`}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/corpsetu-logo.png";
           }}
         />
       </div>
@@ -39,27 +50,25 @@ export const CorpSetuLogo: React.FC<CorpSetuLogoProps> = ({
   }
 
   return (
-    <div className={`flex items-center gap-2.5 ${className}`}>
+    <div className={`relative inline-flex items-center ${className}`}>
+      {/* Light Mode Full Brand Lockup */}
       <img
         src="/corpsetu-logo.png"
-        alt="CorpSetu"
-        className={`${currentSize.imgH} w-auto object-contain rounded-md`}
+        alt="CorpSetu · Law, CS, CA. One Bridge."
+        className={`${currentSize.imgH} w-auto object-contain dark:hidden transition-all`}
         onError={(e) => {
           (e.target as HTMLImageElement).src = "/corpsetu-logo.jpg";
         }}
       />
-      <div className="flex flex-col">
-        <div className="flex items-center gap-1.5 leading-none">
-          <span className={`font-extrabold tracking-tight text-[#0B2559] dark:text-white ${currentSize.text}`}>
-            Corp<span className="text-[#C59B27]">Setu</span>
-          </span>
-        </div>
-        {showTagline && (
-          <span className={`font-semibold tracking-wider text-[#C59B27] dark:text-[#E5B842] mt-0.5 uppercase ${currentSize.sub}`}>
-            Law. CS, CA. One Bridge.
-          </span>
-        )}
-      </div>
+      {/* Dark Mode Full Brand Lockup with High-Contrast Typography */}
+      <img
+        src="/corpsetu-logo-dark.png"
+        alt="CorpSetu · Law, CS, CA. One Bridge."
+        className={`${currentSize.imgH} w-auto object-contain hidden dark:block transition-all`}
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = "/corpsetu-logo.png";
+        }}
+      />
     </div>
   );
 };

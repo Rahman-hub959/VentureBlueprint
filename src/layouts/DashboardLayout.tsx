@@ -79,7 +79,7 @@ export const DashboardLayout: React.FC = () => {
       <aside className="hidden md:flex flex-col w-64 glass-panel m-3 mr-0 rounded-2xl z-20 sticky top-3 h-[calc(100vh-24px)] p-4 shadow-sm">
         {/* Brand */}
         <Link to="/dashboard" className="flex items-center px-2 py-3 mb-5 border-b border-slate-200 dark:border-slate-800">
-          <CorpSetuLogo size="sm" />
+          <CorpSetuLogo size="md" />
         </Link>
 
         {/* Project Selector Box */}

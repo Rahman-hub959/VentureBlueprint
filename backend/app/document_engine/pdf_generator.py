@@ -356,9 +356,9 @@ def _build_story(doc_data: Dict[str, Any], page_tracker: Dict[str, int], is_draf
     logo_path = Path(__file__).resolve().parent.parent / "static" / "corpsetu-logo.png"
     if logo_path.exists():
         try:
-            logo_img = RLImage(str(logo_path), width=1.1 * inch, height=0.35 * inch)
-            brand_text = Paragraph("<font color='#0B2559'><b>CorpSetu</b></font> <font color='#C59B27'>|</font> <font size=7 color='#475569'><b>Law. CS, CA. One Bridge.</b></font>", st["corpsetu_brand"])
-            header_table = Table([[logo_img, brand_text]], colWidths=[1.2 * inch, 5.95 * inch])
+            # Full brand lockup (830x293 aspect ratio)
+            logo_img = RLImage(str(logo_path), width=1.85 * inch, height=0.65 * inch)
+            header_table = Table([[logo_img]], colWidths=[7.15 * inch])
             header_table.setStyle(TableStyle([
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
                 ('LEFTPADDING', (0, 0), (-1, -1), 0),
