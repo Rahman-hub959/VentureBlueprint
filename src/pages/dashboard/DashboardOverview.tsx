@@ -348,10 +348,11 @@ export const DashboardOverview: React.FC = () => {
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 3-PILLAR SERVICE SELECTOR (CS, CA, LAW) - SPATIAL UI          */}
+      {/* 3-PILLAR SERVICE SELECTOR (CS, CA, LAW) - PERFECT SQUARE CARDS */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="spatial-surface p-3.5 sm:p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-2 pb-2.5 mb-3 border-b border-slate-100 dark:border-slate-800">
+      <div className="spatial-surface p-4 sm:p-6 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm space-y-4">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-800 dark:text-slate-200">
             <span className="w-2 h-2 rounded-full bg-[#C59B27] animate-ping" />
             <span>Active Corporate Advisory Desk</span>
@@ -361,137 +362,243 @@ export const DashboardOverview: React.FC = () => {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* CS Services Button */}
+        {/* 3 Perfect Square Category Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
+          {/* Card 1: CS Services */}
           <button
             type="button"
             onClick={() => handleSelectPillar("CS")}
-            className={`p-4 rounded-2xl text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
+            className={`w-full aspect-square p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${
               activePillar === "CS"
-                ? "spatial-card-gold ring-2 ring-emerald-500/30 shadow-md"
-                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-emerald-400/60"
+                ? "spatial-card-gold ring-2 ring-emerald-500/40 shadow-xl"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-emerald-400 hover:shadow-md"
             }`}
           >
-            <div className="flex items-center gap-3">
+            {/* Top Row: Icon & Status Indicator */}
+            <div className="flex items-center justify-between w-full">
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform ${
+                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
                   activePillar === "CS"
-                    ? "bg-emerald-600 text-white shadow-sm scale-105"
-                    : "bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400"
+                    ? "bg-emerald-600 text-white shadow-md scale-105"
+                    : "bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 group-hover:scale-105"
                 }`}
               >
-                <Building2 className="w-5 h-5" />
+                <Building2 className="w-6 h-6" />
               </div>
+              <span
+                className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                  activePillar === "CS"
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                }`}
+              >
+                {activePillar === "CS" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+                {activePillar === "CS" ? "Active Desk" : "Available"}
+              </span>
+            </div>
+
+            {/* Middle: Domain Details & Scope */}
+            <div className="space-y-2.5 my-auto py-2">
               <div>
-                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
+                <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
                   CS Services
                 </h4>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
-                    Company Secretarial &amp; Setup
-                  </span>
-                  <span className="text-[10px] text-[#C59B27] font-bold">· Starting ₹1,499</span>
-                </div>
+                <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 mt-0.5">
+                  Company Secretarial &amp; MCA Setup
+                </p>
+              </div>
+
+              <div className="text-xs font-extrabold text-[#C59B27]">
+                Starting from ₹1,499
+              </div>
+
+              <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pt-1">
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                  <span>MCA SPICe+ &amp; ROC Annual Filings</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                  <span>Board Resolutions &amp; Statutory Registers</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                  <span>Director DIN, DSC &amp; e-KYC Compliance</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Bottom: Action Trigger Button */}
+            <div className="w-full pt-2">
+              <div
+                className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all ${
+                  activePillar === "CS"
+                    ? "bg-emerald-600 text-white shadow-md flex items-center justify-center gap-2"
+                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600"
+                }`}
+              >
+                <span>{activePillar === "CS" ? "Active Workspace Selected" : "Switch to CS Desk"}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
-            <span
-              className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition-all ${
-                activePillar === "CS"
-                  ? "bg-emerald-600 text-white shadow-sm flex items-center gap-1.5"
-                  : "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-emerald-500 hover:text-emerald-600"
-              }`}
-            >
-              {activePillar === "CS" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-              {activePillar === "CS" ? "Active Desk" : "Select Desk"}
-            </span>
           </button>
 
-          {/* CA Services Button */}
+          {/* Card 2: CA Services */}
           <button
             type="button"
             onClick={() => handleSelectPillar("CA")}
-            className={`p-4 rounded-2xl text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
+            className={`w-full aspect-square p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${
               activePillar === "CA"
-                ? "spatial-card-gold ring-2 ring-amber-500/30 shadow-md"
-                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-amber-400/60"
+                ? "spatial-card-gold ring-2 ring-amber-500/40 shadow-xl"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-amber-400 hover:shadow-md"
             }`}
           >
-            <div className="flex items-center gap-3">
+            {/* Top Row: Icon & Status Indicator */}
+            <div className="flex items-center justify-between w-full">
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform ${
+                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
                   activePillar === "CA"
-                    ? "bg-amber-600 text-white shadow-sm scale-105"
-                    : "bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400"
+                    ? "bg-amber-600 text-white shadow-md scale-105"
+                    : "bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 group-hover:scale-105"
                 }`}
               >
-                <Landmark className="w-5 h-5" />
+                <Landmark className="w-6 h-6" />
               </div>
+              <span
+                className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                  activePillar === "CA"
+                    ? "bg-amber-600 text-white shadow-sm"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                }`}
+              >
+                {activePillar === "CA" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+                {activePillar === "CA" ? "Active Desk" : "Available"}
+              </span>
+            </div>
+
+            {/* Middle: Domain Details & Scope */}
+            <div className="space-y-2.5 my-auto py-2">
               <div>
-                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
+                <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
                   CA Services
                 </h4>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400">
-                    Chartered Accountant &amp; Tax
-                  </span>
-                  <span className="text-[10px] text-[#C59B27] font-bold">· Starting ₹499/mo</span>
-                </div>
+                <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mt-0.5">
+                  Chartered Accountant &amp; Tax Compliance
+                </p>
+              </div>
+
+              <div className="text-xs font-extrabold text-[#C59B27]">
+                Starting from ₹499/mo
+              </div>
+
+              <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pt-1">
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                  <span>GST Returns (GSTR-1, 3B) &amp; ITC Match</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                  <span>Advance Tax, TDS &amp; Corporate ITR</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
+                  <span>Monthly Bookkeeping &amp; Audit Schedules</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Bottom: Action Trigger Button */}
+            <div className="w-full pt-2">
+              <div
+                className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all ${
+                  activePillar === "CA"
+                    ? "bg-amber-600 text-white shadow-md flex items-center justify-center gap-2"
+                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600"
+                }`}
+              >
+                <span>{activePillar === "CA" ? "Active Workspace Selected" : "Switch to CA Desk"}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
-            <span
-              className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition-all ${
-                activePillar === "CA"
-                  ? "bg-amber-600 text-white shadow-sm flex items-center gap-1.5"
-                  : "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-amber-500 hover:text-amber-600"
-              }`}
-            >
-              {activePillar === "CA" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-              {activePillar === "CA" ? "Active Desk" : "Select Desk"}
-            </span>
           </button>
 
-          {/* Corporate Law Button */}
+          {/* Card 3: Corporate Law */}
           <button
             type="button"
             onClick={() => handleSelectPillar("LAW")}
-            className={`p-4 rounded-2xl text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
+            className={`w-full aspect-square p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${
               activePillar === "LAW"
-                ? "spatial-card-navy ring-2 ring-blue-500/30 shadow-md"
-                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-blue-400/60"
+                ? "spatial-card-navy ring-2 ring-blue-500/40 shadow-xl"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-blue-400 hover:shadow-md"
             }`}
           >
-            <div className="flex items-center gap-3">
+            {/* Top Row: Icon & Status Indicator */}
+            <div className="flex items-center justify-between w-full">
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform ${
+                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
                   activePillar === "LAW"
-                    ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-sm scale-105"
-                    : "bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400"
+                    ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-md scale-105"
+                    : "bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 group-hover:scale-105"
                 }`}
               >
-                <Scale className="w-5 h-5" />
+                <Scale className="w-6 h-6" />
               </div>
+              <span
+                className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all flex items-center gap-1.5 ${
+                  activePillar === "LAW"
+                    ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-sm"
+                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
+                }`}
+              >
+                {activePillar === "LAW" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
+                {activePillar === "LAW" ? "Active Desk" : "Available"}
+              </span>
+            </div>
+
+            {/* Middle: Domain Details & Scope */}
+            <div className="space-y-2.5 my-auto py-2">
               <div>
-                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-tight">
+                <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
                   Corporate Law
                 </h4>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[11px] font-bold text-blue-700 dark:text-blue-400">
-                    Contracts, IP &amp; Legal Advisory
-                  </span>
-                  <span className="text-[10px] text-[#C59B27] font-bold">· Starting ₹999</span>
-                </div>
+                <p className="text-xs font-bold text-blue-700 dark:text-blue-400 mt-0.5">
+                  Contracts, IP &amp; Legal Advisory
+                </p>
+              </div>
+
+              <div className="text-xs font-extrabold text-[#C59B27]">
+                Starting from ₹999
+              </div>
+
+              <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pt-1">
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                  <span>Founder Vesting &amp; Bilateral NDAs</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                  <span>Trademark Class Search &amp; IP Protection</span>
+                </li>
+                <li className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                  <span>Commercial Contracts &amp; Dispute Shield</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Bottom: Action Trigger Button */}
+            <div className="w-full pt-2">
+              <div
+                className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all ${
+                  activePillar === "LAW"
+                    ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-md flex items-center justify-center gap-2"
+                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 group-hover:bg-[#0B2559] group-hover:text-white group-hover:border-[#0B2559]"
+                }`}
+              >
+                <span>{activePillar === "LAW" ? "Active Workspace Selected" : "Switch to Law Desk"}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
-            <span
-              className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider transition-all ${
-                activePillar === "LAW"
-                  ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-sm flex items-center gap-1.5"
-                  : "bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-blue-500 hover:text-blue-600"
-              }`}
-            >
-              {activePillar === "LAW" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-              {activePillar === "LAW" ? "Active Desk" : "Select Desk"}
-            </span>
           </button>
         </div>
       </div>
