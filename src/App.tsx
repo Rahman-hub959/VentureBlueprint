@@ -35,7 +35,6 @@ import SettingsPage from "./pages/SettingsPage";
 import { ComplaintsPage } from "./pages/complaints/ComplaintsPage";
 
 // Global Widgets
-import { CursorHighlight } from "./components/CursorHighlight";
 import { LiveChatWidget } from "./components/LiveChatWidget";
 
 // Application Error Boundary
@@ -128,7 +127,6 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <ToastProvider>
-            <CursorHighlight />
             <LiveChatWidget />
             <BrowserRouter>
             <Routes>

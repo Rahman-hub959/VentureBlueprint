@@ -214,6 +214,18 @@ html.dark select option {
   outline: none;
 }
 
+.glass-input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.55 !important;
+  font-weight: 400 !important;
+}
+
+.dark .glass-input::placeholder {
+  color: #64748b !important;
+  opacity: 0.55 !important;
+  font-weight: 400 !important;
+}
+
 .glass-input.has-icon,
 .glass-input.pl-10,
 .glass-input.pl-11,

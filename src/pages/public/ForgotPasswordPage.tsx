@@ -43,7 +43,7 @@ export const ForgotPasswordPage: React.FC = () => {
             <Link to="/login" className="text-[#0B2559] dark:text-white font-bold underline block pt-2">Return to Login</Link>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             <div>
               <label className="block text-xs font-bold text-slate-900 dark:text-white mb-1.5">Email Address</label>
               <div className="relative">
@@ -53,9 +53,10 @@ export const ForgotPasswordPage: React.FC = () => {
                 <input
                   type="email"
                   required
+                  autoComplete="off"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="founder@ventureblueprint.in"
+                  placeholder="Enter your registered email"
                   className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
                 />
               </div>

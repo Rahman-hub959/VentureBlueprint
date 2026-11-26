@@ -61,7 +61,7 @@ export const RegisterPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleRegister} className="space-y-4" autoComplete="off">
           <div>
             <label className="block text-xs font-bold text-slate-900 dark:text-white mb-1.5">Full Name</label>
             <div className="relative">
@@ -71,9 +71,10 @@ export const RegisterPage: React.FC = () => {
               <input
                 type="text"
                 required
+                autoComplete="off"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Aarav Sharma"
+                placeholder="Enter your full name"
                 className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
@@ -88,9 +89,10 @@ export const RegisterPage: React.FC = () => {
               <input
                 type="email"
                 required
+                autoComplete="off"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="aarav@ventureblueprint.in"
+                placeholder="Enter your email address"
                 className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
@@ -104,9 +106,10 @@ export const RegisterPage: React.FC = () => {
               </div>
               <input
                 type="tel"
+                autoComplete="off"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="+91 98765 43210"
+                placeholder="Enter 10-digit mobile number"
                 className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
@@ -121,9 +124,10 @@ export const RegisterPage: React.FC = () => {
               <input
                 type="password"
                 required
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder="Create a password (min. 8 characters)"
                 className="w-full glass-input !pl-11 focus:!border-[#C59B27]"
               />
             </div>
