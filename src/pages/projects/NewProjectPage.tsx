@@ -78,7 +78,7 @@ export const NewProjectPage: React.FC = () => {
         <span>Back to Projects</span>
       </Link>
 
-      <div className="glass-modal p-6 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl space-y-6">
+      <div className="spatial-surface p-6 sm:p-10 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl space-y-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
             <Sparkles className="w-4 h-4" />

@@ -91,9 +91,9 @@ export const LandingPage: React.FC = () => {
             {/* Left Content */}
             <div className="lg:col-span-7 space-y-6 text-left">
               {/* Trust Badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-xs font-bold text-amber-900 dark:text-amber-200 shadow-xs">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full spatial-glass-pill text-xs font-bold text-amber-900 dark:text-amber-200 shadow-xs">
                 <BadgeCheck className="w-4 h-4 text-[#C59B27]" />
-                <span>Trusted by 2000+ Startups & MSMEs Across India</span>
+                <span>Integrated Law, CS & CA Digital Statutory Platform</span>
               </div>
 
               {/* Main Headline */}
@@ -111,8 +111,8 @@ export const LandingPage: React.FC = () => {
                 From new company registration to ongoing compliance, corporate advisory, and legal support, we help startups, SMEs, and established companies handle their business responsibilities with clarity and confidence.
               </p>
 
-              {/* Search / Service Discovery Box (As seen in Reference UI) */}
-              <div className="bg-white dark:bg-slate-900 p-2 sm:p-2.5 rounded-2xl border-2 border-slate-200 dark:border-slate-800 shadow-md flex flex-col sm:flex-row items-center gap-2 max-w-xl">
+              {/* Search / Service Discovery Box (Spatial UI Surface) */}
+              <div className="spatial-surface p-2 sm:p-2.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-lg flex flex-col sm:flex-row items-center gap-2 max-w-xl">
                 <div className="flex items-center gap-2.5 px-3 w-full text-slate-400">
                   <Search className="w-5 h-5 text-[#C59B27]" />
                   <input
@@ -131,20 +131,20 @@ export const LandingPage: React.FC = () => {
                 </button>
               </div>
 
-              {/* Popular tags */}
+              {/* Popular tags: Starting from Format */}
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-1">
                 <span className="font-bold text-slate-900 dark:text-white">Popular:</span>
-                <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  Pvt Ltd ₹6,999
+                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  Pvt Ltd Starting from ₹6,999
                 </span>
-                <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  GST ₹499/mo
+                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  GST Starting from ₹499/mo
                 </span>
-                <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  Trademark ₹4,999
+                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  Trademark Starting from ₹4,999
                 </span>
-                <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  ROC Annual ₹1,499
+                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                  ROC Annual Starting from ₹1,499
                 </span>
               </div>
 
@@ -167,9 +167,9 @@ export const LandingPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Right Mockup: Live Dashboard & Expert Preview (Matches Reference 2 & 3) */}
+            {/* Right Mockup: Live Dashboard & Expert Preview (Spatial UI) */}
             <div className="lg:col-span-5 relative">
-              <div className="bg-white dark:bg-slate-900 rounded-3xl border-2 border-slate-200 dark:border-slate-800 shadow-2xl p-6 relative z-10 space-y-5">
+              <div className="spatial-surface rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl p-6 relative z-10 space-y-5">
                 {/* Header of Preview Box */}
                 <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                   <div className="flex items-center gap-2">
@@ -184,7 +184,7 @@ export const LandingPage: React.FC = () => {
                 </div>
 
                 {/* Score Widget */}
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 dark:from-slate-800/60 dark:to-slate-800/30 border border-slate-200 dark:border-slate-700">
+                <div className="flex items-center gap-4 p-4 rounded-2xl spatial-card border border-slate-200 dark:border-slate-700">
                   <div className="w-14 h-14 rounded-2xl bg-[#0B2559] text-white flex flex-col items-center justify-center font-extrabold shadow-sm">
                     <span className="text-lg leading-none">96</span>
                     <span className="text-[9px] text-[#C59B27]">/100</span>
@@ -192,7 +192,7 @@ export const LandingPage: React.FC = () => {
                   <div>
                     <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">Compliance Health Score</h2>
                     <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
-                      Excellent — All major MCA & GST filings up to date
+                      Verified — All major MCA & GST statutory filings on schedule
                     </p>
                   </div>
                 </div>
@@ -203,7 +203,7 @@ export const LandingPage: React.FC = () => {
                     Upcoming Statutory Deadlines
                   </span>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between p-3 rounded-xl spatial-glass-pill border border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950 flex items-center justify-center text-[#C59B27]">
                         <Clock className="w-4 h-4" />
@@ -218,7 +218,7 @@ export const LandingPage: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between p-3 rounded-xl spatial-glass-pill border border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600">
                         <CheckCircle2 className="w-4 h-4" />
@@ -234,18 +234,18 @@ export const LandingPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 3 Experts Online Section (From reference image) */}
-                <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/40 space-y-3">
+                {/* 3 Experts Online Section */}
+                <div className="p-4 rounded-2xl spatial-card-gold space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-[#0B2559] dark:text-[#E5B842] flex items-center gap-1.5">
                       <Users className="w-3.5 h-3.5 text-[#C59B27]" />
-                      3 Professional Experts Online
+                      3 Certified Practitioners Online
                     </span>
                     <span className="text-[10px] text-slate-500">Avg response: ~2 min</span>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div className="p-2 rounded-xl spatial-glass-pill border border-slate-200 dark:border-slate-700">
                       <div className="w-7 h-7 mx-auto rounded-full bg-blue-100 dark:bg-blue-900 text-[#0B2559] dark:text-blue-300 font-bold text-xs flex items-center justify-center mb-1">
                         ADV
                       </div>
@@ -253,7 +253,7 @@ export const LandingPage: React.FC = () => {
                       <div className="text-[9px] text-emerald-600 font-semibold">Online</div>
                     </div>
 
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div className="p-2 rounded-xl spatial-glass-pill border border-slate-200 dark:border-slate-700">
                       <div className="w-7 h-7 mx-auto rounded-full bg-amber-100 dark:bg-amber-900 text-[#C59B27] font-bold text-xs flex items-center justify-center mb-1">
                         CS
                       </div>
@@ -261,7 +261,7 @@ export const LandingPage: React.FC = () => {
                       <div className="text-[9px] text-emerald-600 font-semibold">Online</div>
                     </div>
 
-                    <div className="p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div className="p-2 rounded-xl spatial-glass-pill border border-slate-200 dark:border-slate-700">
                       <div className="w-7 h-7 mx-auto rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 font-bold text-xs flex items-center justify-center mb-1">
                         CA
                       </div>
@@ -285,31 +285,42 @@ export const LandingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Social Proof Stats Banner */}
+          {/* Authentic Statutory Standards & Integration Frameworks */}
           <div className="mt-14 pt-8 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <div className="space-y-1">
-              <div className="flex items-center justify-center gap-1 text-[#C59B27]">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 fill-[#C59B27]" />
-                ))}
+              <div className="flex items-center justify-center gap-1.5 text-[#C59B27] font-bold text-xs uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Statutory Practitioners</span>
               </div>
-              <div className="text-xl font-extrabold text-[#0B2559] dark:text-white">4.9 Star Rating</div>
-              <div className="text-xs text-slate-500 font-medium">From 1,200+ Founder Reviews</div>
+              <div className="text-lg font-extrabold text-[#0B2559] dark:text-white">ICAI · ICSI · Bar Council</div>
+              <div className="text-xs text-slate-500 font-medium">Empanelled Fellow Professionals</div>
             </div>
 
             <div className="space-y-1">
-              <div className="text-xl font-extrabold text-[#0B2559] dark:text-white">2000+ Clients</div>
-              <div className="text-xs text-slate-500 font-medium">Startups & MSMEs Trust Us</div>
+              <div className="flex items-center justify-center gap-1.5 text-[#C59B27] font-bold text-xs uppercase tracking-wider">
+                <Building2 className="w-4 h-4" />
+                <span>Direct Authority Integration</span>
+              </div>
+              <div className="text-lg font-extrabold text-[#0B2559] dark:text-white">MCA21 & GST Portal</div>
+              <div className="text-xs text-slate-500 font-medium">Direct CRC & GSTN Filing Workflows</div>
             </div>
 
             <div className="space-y-1">
-              <div className="text-xl font-extrabold text-[#0B2559] dark:text-white">100% On-Time</div>
-              <div className="text-xs text-slate-500 font-medium">No MCA or GST Penalties Guarantee</div>
+              <div className="flex items-center justify-center gap-1.5 text-[#C59B27] font-bold text-xs uppercase tracking-wider">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <span>SLA Commitment</span>
+              </div>
+              <div className="text-lg font-extrabold text-[#0B2559] dark:text-white">Zero-Penalty Guarantee</div>
+              <div className="text-xs text-slate-500 font-medium">Automated Calendar & Clock Tracking</div>
             </div>
 
             <div className="space-y-1">
-              <div className="text-xl font-extrabold text-[#0B2559] dark:text-white">Pan India Coverage</div>
-              <div className="text-xs text-slate-500 font-medium">Active in 28+ States & UTs</div>
+              <div className="flex items-center justify-center gap-1.5 text-[#C59B27] font-bold text-xs uppercase tracking-wider">
+                <Scale className="w-4 h-4 text-blue-500" />
+                <span>Regulatory Jurisdiction</span>
+              </div>
+              <div className="text-lg font-extrabold text-[#0B2559] dark:text-white">Pan-India Coverage</div>
+              <div className="text-xs text-slate-500 font-medium">ROC & GST Jurisdiction in 28+ States</div>
             </div>
           </div>
         </div>
@@ -333,12 +344,12 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Three Cards */}
+          {/* Three Cards with Spatial Elevation and "Starting from ₹..." Format */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
             {/* Card 1: Corporate Law */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:border-[#C59B27] transition-all hover:-translate-y-1 space-y-6 flex flex-col justify-between">
+            <div className="spatial-card p-8 space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-[#C59B27]">
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center text-[#C59B27] shadow-xs">
                   <Scale className="w-7 h-7" />
                 </div>
                 <div>
@@ -381,13 +392,13 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Card 2: CS Services */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border-2 border-[#C59B27] dark:border-[#C59B27] shadow-xl relative space-y-6 flex flex-col justify-between">
+            <div className="spatial-card-gold p-8 relative space-y-6 flex flex-col justify-between">
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#C59B27] text-white px-3.5 py-1 rounded-full text-[10px] font-extrabold tracking-wider uppercase shadow-xs">
                 Built-in Blueprint Engine
               </div>
 
               <div className="space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-[#0B2559] dark:text-blue-300">
+                <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center text-[#0B2559] dark:text-blue-300 shadow-xs">
                   <Building2 className="w-7 h-7" />
                 </div>
                 <div>
@@ -428,9 +439,9 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Card 3: CA Services */}
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 border-2 border-slate-200 dark:border-slate-800 shadow-lg hover:border-[#C59B27] transition-all hover:-translate-y-1 space-y-6 flex flex-col justify-between">
+            <div className="spatial-card p-8 space-y-6 flex flex-col justify-between">
               <div className="space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-700 dark:text-emerald-300">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center text-emerald-700 dark:text-emerald-300 shadow-xs">
                   <FileSpreadsheet className="w-7 h-7" />
                 </div>
                 <div>
@@ -439,7 +450,7 @@ export const LandingPage: React.FC = () => {
                     GST filing, taxation, financial reporting, bookkeeping and audit assistance.
                   </p>
                 </div>
-                <div className="text-sm font-bold text-[#C59B27]">Starting from ₹499</div>
+                <div className="text-sm font-bold text-[#C59B27]">Starting from ₹499/mo</div>
 
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <li className="flex items-center gap-2">
@@ -479,8 +490,8 @@ export const LandingPage: React.FC = () => {
               How It Works
             </h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-[#C59B27] text-white font-extrabold flex items-center justify-center mx-auto text-sm">
+              <div className="spatial-card p-6 text-center space-y-2">
+                <div className="w-10 h-10 rounded-full bg-[#C59B27] text-white font-extrabold flex items-center justify-center mx-auto text-sm shadow-xs">
                   1
                 </div>
                 <h5 className="font-extrabold text-sm text-[#0B2559] dark:text-white">Tell Your Need</h5>
@@ -489,8 +500,8 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-[#0B2559] text-white font-extrabold flex items-center justify-center mx-auto text-sm">
+              <div className="spatial-card p-6 text-center space-y-2">
+                <div className="w-10 h-10 rounded-full bg-[#0B2559] text-white font-extrabold flex items-center justify-center mx-auto text-sm shadow-xs">
                   2
                 </div>
                 <h5 className="font-extrabold text-sm text-[#0B2559] dark:text-white">Get Expert Assigned</h5>
@@ -499,8 +510,8 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center space-y-2">
-                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-extrabold flex items-center justify-center mx-auto text-sm">
+              <div className="spatial-card p-6 text-center space-y-2">
+                <div className="w-10 h-10 rounded-full bg-emerald-600 text-white font-extrabold flex items-center justify-center mx-auto text-sm shadow-xs">
                   3
                 </div>
                 <h5 className="font-extrabold text-sm text-[#0B2559] dark:text-white">Track & Stay Compliant</h5>
@@ -535,7 +546,7 @@ export const LandingPage: React.FC = () => {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="p-6 rounded-2xl spatial-card space-y-3">
               <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
                 <Building className="w-5 h-5 text-[#C59B27]" />
                 Company Registration and Business Setup
@@ -552,7 +563,7 @@ export const LandingPage: React.FC = () => {
               </ul>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="p-6 rounded-2xl spatial-card space-y-3">
               <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#0B2559] dark:text-blue-300" />
                 Corporate Secretarial Services
@@ -570,7 +581,7 @@ export const LandingPage: React.FC = () => {
               </ul>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="p-6 rounded-2xl spatial-card space-y-3">
               <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
                 <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
                 Accounting and Financial Support
@@ -587,7 +598,7 @@ export const LandingPage: React.FC = () => {
               </ul>
             </div>
 
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3">
+            <div className="p-6 rounded-2xl spatial-card space-y-3">
               <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
                 <Scale className="w-5 h-5 text-[#C59B27]" />
                 Legal and Business Advisory
@@ -626,8 +637,8 @@ export const LandingPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-[#C59B27] flex items-center justify-center font-bold">
+            <div className="spatial-card p-6 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-[#C59B27] flex items-center justify-center font-bold shadow-2xs">
                 01
               </div>
               <h4 className="font-extrabold text-base text-[#0B2559] dark:text-white">Clear Advice Without Unnecessary Complexity</h4>
@@ -636,8 +647,8 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#0B2559] dark:text-blue-300 flex items-center justify-center font-bold">
+            <div className="spatial-card p-6 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#0B2559] dark:text-blue-300 flex items-center justify-center font-bold shadow-2xs">
                 02
               </div>
               <h4 className="font-extrabold text-base text-[#0B2559] dark:text-white">Support for Both New and Established Companies</h4>
@@ -646,8 +657,8 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center font-bold">
+            <div className="spatial-card p-6 space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center font-bold shadow-2xs">
                 03
               </div>
               <h4 className="font-extrabold text-base text-[#0B2559] dark:text-white">Practical, Business-Focused Solutions</h4>
@@ -801,7 +812,7 @@ export const LandingPage: React.FC = () => {
           ========================================================================= */}
       {consultationModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 relative">
+          <div className="spatial-surface rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 relative">
             <button
               onClick={() => setConsultationModalOpen(false)}
               className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700"
@@ -828,7 +839,7 @@ export const LandingPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleConsultSubmit} className="space-y-3.5 text-left">
+              <form onSubmit={handleConsultSubmit} className="space-y-3.5 text-left" autoComplete="off">
                 {/* Service Selection Tabs */}
                 <div>
                   <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
@@ -863,9 +874,10 @@ export const LandingPage: React.FC = () => {
                     <input
                       type="text"
                       required
+                      autoComplete="off"
                       value={consultData.name}
                       onChange={(e) => setConsultData({ ...consultData, name: e.target.value })}
-                      placeholder="e.g. Aarav Sharma"
+                      placeholder="Enter your full name"
                       className="w-full glass-input text-xs"
                     />
                   </div>
@@ -874,9 +886,10 @@ export const LandingPage: React.FC = () => {
                     <input
                       type="tel"
                       required
+                      autoComplete="off"
                       value={consultData.phone}
                       onChange={(e) => setConsultData({ ...consultData, phone: e.target.value })}
-                      placeholder="+91 98765 43210"
+                      placeholder="Enter 10-digit mobile number"
                       className="w-full glass-input text-xs"
                     />
                   </div>
@@ -888,19 +901,21 @@ export const LandingPage: React.FC = () => {
                     <input
                       type="email"
                       required
+                      autoComplete="off"
                       value={consultData.email}
                       onChange={(e) => setConsultData({ ...consultData, email: e.target.value })}
-                      placeholder="founder@company.in"
+                      placeholder="Enter your email address"
                       className="w-full glass-input text-xs"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">Company / Idea Name</label>
+                    <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">Company / Entity Name</label>
                     <input
                       type="text"
+                      autoComplete="off"
                       value={consultData.companyName}
                       onChange={(e) => setConsultData({ ...consultData, companyName: e.target.value })}
-                      placeholder="e.g. Lumora Technologies"
+                      placeholder="Enter company or venture name (optional)"
                       className="w-full glass-input text-xs"
                     />
                   </div>

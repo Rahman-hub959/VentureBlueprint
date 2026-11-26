@@ -81,14 +81,14 @@ export const ProjectsListPage: React.FC = () => {
           <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Company Projects</h1>
           <p className="text-xs text-slate-800 dark:text-slate-300 font-medium">Manage all startup blueprints, assessments, and regulatory dossiers</p>
         </div>
-        <Link to="/projects/new" className="glass-button-primary text-xs py-2.5 px-4 font-bold shadow-sm">
+        <Link to="/projects/new" className="corpsetu-btn-navy text-xs py-2.5 px-4 font-bold shadow-sm inline-flex items-center gap-2">
           <Plus className="w-4 h-4 text-white" />
           <span>New Company Project</span>
         </Link>
       </div>
 
       {/* Filters and Search Bar */}
-      <div className="glass-panel p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+      <div className="spatial-surface p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div className="relative w-full sm:w-72">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
             <Search className="w-4 h-4" />
@@ -128,20 +128,20 @@ export const ProjectsListPage: React.FC = () => {
       {loading ? (
         <div className="text-center py-20 text-slate-500 text-sm">Loading projects...</div>
       ) : projects.length === 0 ? (
-        <div className="glass-panel p-16 rounded-3xl text-center space-y-4 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/80">
+        <div className="spatial-card p-16 rounded-3xl text-center space-y-4">
           <FolderKanban className="w-12 h-12 text-slate-400 mx-auto" />
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">No projects found</h3>
           <p className="text-xs text-slate-600 dark:text-slate-400 max-w-sm mx-auto">
             Get started by creating your first company formation project.
           </p>
-          <Link to="/projects/new" className="glass-button-primary text-xs py-2.5 px-5 inline-flex font-bold">
+          <Link to="/projects/new" className="corpsetu-btn-navy text-xs py-2.5 px-5 inline-flex font-bold">
             Create Project
           </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((proj) => (
-            <div key={proj.id} className="glass-card p-6 flex flex-col justify-between relative group border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-sm rounded-2xl">
+            <div key={proj.id} className="spatial-card p-6 flex flex-col justify-between relative group rounded-2xl">
               <div>
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div>

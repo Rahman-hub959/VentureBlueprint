@@ -131,7 +131,7 @@ export const ComplaintsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-[#0B2559] to-[#061838] rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="spatial-card-navy rounded-3xl p-6 sm:p-8 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-[#C59B27] text-xs font-bold">
             <ShieldAlert className="w-4 h-4" />
@@ -155,7 +155,7 @@ export const ComplaintsPage: React.FC = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 spatial-surface p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-1.5 w-full sm:w-auto">
           {[
             { key: "ALL", label: `All Tickets (${tickets.length})` },
@@ -197,7 +197,7 @@ export const ComplaintsPage: React.FC = () => {
           return (
             <div
               key={ticket.id}
-              className="bg-white dark:bg-slate-900 rounded-3xl p-6 border-2 border-slate-200 dark:border-slate-800 shadow-md space-y-4 hover:border-[#C59B27] transition-all"
+              className="spatial-card rounded-3xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-md space-y-4 hover:border-[#C59B27] transition-all"
             >
               {/* Card Header */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -292,7 +292,7 @@ export const ComplaintsPage: React.FC = () => {
       {/* Register Complaint Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 relative">
+          <div className="spatial-surface rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 sm:p-8 space-y-5 relative">
             <button
               onClick={() => setModalOpen(false)}
               className="absolute top-5 right-5 p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700"

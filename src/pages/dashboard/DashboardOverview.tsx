@@ -304,10 +304,10 @@ export const DashboardOverview: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto py-2">
-      {/* Welcome Banner */}
-      <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden transition-colors">
+      {/* Welcome Banner with Spatial Surface */}
+      <div className="spatial-surface p-6 sm:p-8 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden transition-colors">
         <div className="space-y-2 z-10">
-          <div className="inline-flex items-center gap-2 text-xs font-bold text-corpset-navy dark:text-corpset-gold bg-amber-50 dark:bg-slate-800 px-3 py-1 rounded-full border border-corpset-gold/30">
+          <div className="inline-flex items-center gap-2 text-xs font-bold text-corpset-navy dark:text-corpset-gold spatial-glass-pill px-3 py-1 rounded-full border border-corpset-gold/30">
             <Sparkles className="w-3.5 h-3.5 text-corpset-gold" />
             <span>CorpSetu Platform · Welcome Back, {user?.full_name}</span>
           </div>
@@ -329,7 +329,7 @@ export const DashboardOverview: React.FC = () => {
           </Link>
           <Link
             to="/complaints"
-            className="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 inline-flex items-center justify-center gap-1.5"
+            className="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 inline-flex items-center justify-center gap-1.5 spatial-glass-pill"
             title="File Grievance / Ticket"
           >
             <HelpCircle className="w-4 h-4 text-corpset-gold" />
@@ -339,10 +339,10 @@ export const DashboardOverview: React.FC = () => {
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* 3-PILLAR SERVICE SELECTOR (CS, CA, LAW)                       */}
+      {/* 3-PILLAR SERVICE SELECTOR (CS, CA, LAW) - SPATIAL UI          */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-2 pb-2 mb-2 border-b border-slate-100 dark:border-slate-800">
+      <div className="spatial-surface p-3.5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-2 pb-2.5 mb-2.5 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-300">
             <span className="w-2 h-2 rounded-full bg-corpset-gold animate-ping" />
             <span>Select Active Professional Domain</span>
@@ -357,10 +357,10 @@ export const DashboardOverview: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSelectPillar("CS")}
-            className={`p-4 rounded-xl text-left border transition-all duration-200 flex items-start justify-between cursor-pointer ${
+            className={`p-4 rounded-xl text-left transition-all duration-200 flex items-start justify-between cursor-pointer ${
               activePillar === "CS"
-                ? "bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-500 ring-2 ring-emerald-500/20 shadow-sm"
-                : "bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700"
+                ? "spatial-card-gold ring-2 ring-emerald-500/20"
+                : "spatial-card hover:border-emerald-300"
             }`}
           >
             <div className="space-y-1">
@@ -370,7 +370,10 @@ export const DashboardOverview: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">CS Services</h4>
-                  <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Company Secretarial &amp; Setup</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Company Secretarial &amp; Setup</span>
+                    <span className="text-[10px] text-[#C59B27] font-semibold">· Starting from ₹1,499</span>
+                  </div>
                 </div>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
@@ -386,10 +389,10 @@ export const DashboardOverview: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSelectPillar("CA")}
-            className={`p-4 rounded-xl text-left border transition-all duration-200 flex items-start justify-between cursor-pointer ${
+            className={`p-4 rounded-xl text-left transition-all duration-200 flex items-start justify-between cursor-pointer ${
               activePillar === "CA"
-                ? "bg-amber-50/70 dark:bg-amber-950/40 border-amber-500 ring-2 ring-amber-500/20 shadow-sm"
-                : "bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-amber-300 dark:hover:border-amber-700"
+                ? "spatial-card-gold ring-2 ring-amber-500/20"
+                : "spatial-card hover:border-amber-300"
             }`}
           >
             <div className="space-y-1">
@@ -399,7 +402,10 @@ export const DashboardOverview: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">CA Services</h4>
-                  <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">Chartered Accountant &amp; Tax</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">Chartered Accountant &amp; Tax</span>
+                    <span className="text-[10px] text-[#C59B27] font-semibold">· Starting from ₹499/mo</span>
+                  </div>
                 </div>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
@@ -415,10 +421,10 @@ export const DashboardOverview: React.FC = () => {
           <button
             type="button"
             onClick={() => handleSelectPillar("LAW")}
-            className={`p-4 rounded-xl text-left border transition-all duration-200 flex items-start justify-between cursor-pointer ${
+            className={`p-4 rounded-xl text-left transition-all duration-200 flex items-start justify-between cursor-pointer ${
               activePillar === "LAW"
-                ? "bg-blue-50/70 dark:bg-blue-950/40 border-blue-500 ring-2 ring-blue-500/20 shadow-sm"
-                : "bg-slate-50/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700"
+                ? "spatial-card-navy ring-2 ring-blue-500/20"
+                : "spatial-card hover:border-blue-300"
             }`}
           >
             <div className="space-y-1">
@@ -428,7 +434,10 @@ export const DashboardOverview: React.FC = () => {
                 </div>
                 <div>
                   <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">Corporate Law</h4>
-                  <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400">Contracts, IP &amp; Legal Advisory</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400">Contracts, IP &amp; Legal Advisory</span>
+                    <span className="text-[10px] text-[#C59B27] font-semibold">· Starting from ₹999</span>
+                  </div>
                 </div>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2">
@@ -447,9 +456,9 @@ export const DashboardOverview: React.FC = () => {
       {/* ═════════════════════════════════════════════════════════════ */}
       {activePillar === "CS" && (
         <div className="space-y-6">
-          {/* CS Metric Cards Grid */}
+          {/* CS Metric Cards Grid - Spatial UI */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+            <div className="spatial-card p-5 group">
               <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider">Total Projects</span>
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -463,7 +472,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+            <div className="spatial-card p-5 group">
               <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider">Completed Assessments</span>
                 <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -477,7 +486,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+            <div className="spatial-card p-5 group">
               <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider">Generated Documents</span>
                 <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -491,7 +500,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:-translate-y-1 hover:shadow-md transition-all duration-200 group">
+            <div className="spatial-card p-5 group">
               <div className="flex items-center justify-between text-slate-800 dark:text-slate-300 mb-3">
                 <span className="text-xs font-bold uppercase tracking-wider">Pending Requirements</span>
                 <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -507,12 +516,12 @@ export const DashboardOverview: React.FC = () => {
           </div>
 
           {/* CS Quick Action Hub */}
-          <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+          <div className="spatial-card p-6">
             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider mb-4">CS Quick Actions</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <Link
                 to="/projects/new"
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                className="p-3.5 rounded-xl spatial-glass-pill hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
               >
                 <Plus className="w-5 h-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
                 <span className="text-xs font-bold text-slate-900 dark:text-white">Create Project</span>
@@ -522,28 +531,28 @@ export const DashboardOverview: React.FC = () => {
                 <>
                   <Link
                     to={`/projects/${activeProject.id}/questionnaire`}
-                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                    className="p-3.5 rounded-xl spatial-glass-pill hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
                   >
                     <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white">Continue Intake</span>
                   </Link>
                   <Link
                     to={`/projects/${activeProject.id}/compliance`}
-                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                    className="p-3.5 rounded-xl spatial-glass-pill hover:bg-emerald-50 dark:hover:bg-emerald-950/40 hover:border-emerald-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
                   >
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white">MCA Checklist</span>
                   </Link>
                   <Link
                     to={`/projects/${activeProject.id}/documents`}
-                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                    className="p-3.5 rounded-xl spatial-glass-pill hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
                   >
                     <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white">Generate Dossier</span>
                   </Link>
                   <Link
                     to={`/projects/${activeProject.id}/roles`}
-                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
+                    className="p-3.5 rounded-xl spatial-glass-pill hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 hover:-translate-y-1 hover:shadow-md transition-all duration-200 flex flex-col items-center text-center gap-2 group"
                   >
                     <Users className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
                     <span className="text-xs font-bold text-slate-900 dark:text-white">Role Matrix</span>
@@ -552,7 +561,7 @@ export const DashboardOverview: React.FC = () => {
               ) : (
                 <Link
                   to="/projects"
-                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-all flex flex-col items-center text-center gap-2 group"
+                  className="p-3.5 rounded-xl spatial-glass-pill hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-all flex flex-col items-center text-center gap-2 group"
                 >
                   <FolderKanban className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-bold text-slate-900 dark:text-white">My Projects</span>
@@ -561,7 +570,7 @@ export const DashboardOverview: React.FC = () => {
 
               <Link
                 to="/projects"
-                className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-all flex flex-col items-center text-center gap-2 group"
+                className="p-3.5 rounded-xl spatial-glass-pill hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 transition-all flex flex-col items-center text-center gap-2 group"
               >
                 <FolderKanban className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:scale-110 transition-transform" />
                 <span className="text-xs font-bold text-slate-900 dark:text-white">All Projects</span>
@@ -570,7 +579,7 @@ export const DashboardOverview: React.FC = () => {
           </div>
 
           {/* Visual SPICe+ MCA Incorporation Roadmap */}
-          <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
+          <div className="spatial-card p-6 sm:p-7 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800/80 pb-4">
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
@@ -683,7 +692,7 @@ export const DashboardOverview: React.FC = () => {
           </div>
 
           {/* Statutory Deadlines Countdown Cards */}
-          <div className="bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+          <div className="spatial-card p-6 sm:p-7 space-y-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800/80 pb-4">
               <div>
                 <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
@@ -710,12 +719,12 @@ export const DashboardOverview: React.FC = () => {
                   <div
                     key={item.id}
                     onClick={() => toggleDeadline(item.id)}
-                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 hover:shadow-md ${
+                    className={`p-5 rounded-2xl transition-all duration-200 cursor-pointer flex flex-col justify-between space-y-4 hover:shadow-md ${
                       isDone
-                        ? "bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800 opacity-80"
+                        ? "spatial-card bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-800 opacity-80"
                         : item.severity === "critical"
-                        ? "bg-white dark:bg-slate-900 border-rose-300 dark:border-rose-900/60 hover:border-rose-400"
-                        : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300"
+                        ? "spatial-card border-rose-300 dark:border-rose-900/60 hover:border-rose-400"
+                        : "spatial-card"
                     }`}
                   >
                     <div className="space-y-2">
@@ -773,7 +782,7 @@ export const DashboardOverview: React.FC = () => {
 
           {/* Main Grid: Recent Projects & Statutory Tasks */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+            <div className="lg:col-span-7 spatial-card p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Recent Projects</h3>
@@ -795,7 +804,7 @@ export const DashboardOverview: React.FC = () => {
                     {projects.slice(0, 4).map((proj) => (
                       <div
                         key={proj.id}
-                        className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 hover:border-blue-300 transition-all flex items-center justify-between gap-4"
+                        className="p-4 rounded-xl spatial-glass-pill hover:border-blue-300 transition-all flex items-center justify-between gap-4"
                       >
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
@@ -831,7 +840,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+            <div className="lg:col-span-5 spatial-card p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-5">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Statutory Checklist</h3>
@@ -882,7 +891,7 @@ export const DashboardOverview: React.FC = () => {
       {activePillar === "CA" && (
         <div className="space-y-6">
           {/* CA Command Banner */}
-          <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-6 sm:p-7 rounded-3xl border border-amber-500/30 dark:border-amber-500/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="spatial-card-gold p-6 sm:p-7 rounded-3xl border border-amber-500/30 dark:border-amber-500/20 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider">
                 <Landmark className="w-4 h-4" />
@@ -891,7 +900,7 @@ export const DashboardOverview: React.FC = () => {
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
                 Tax, GST &amp; Statutory Bookkeeping Engine
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-2xl font-medium">
                 Maintain accurate books of accounts, automate GST returns (GSTR-1, 3B), estimate advance taxes, and prepare statutory audit schedules.
               </p>
             </div>
@@ -899,13 +908,13 @@ export const DashboardOverview: React.FC = () => {
               onClick={() => { setCaConsultTopic("General CA Tax Strategy"); setCaBookedModal(true); }}
               className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
             >
-              Consult Empanelled CA
+              Consult Empanelled CA · Starting from ₹499
             </button>
           </div>
 
           {/* CA 4 Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">GST Status</span>
                 <Receipt className="w-4 h-4 text-amber-600" />
@@ -914,7 +923,7 @@ export const DashboardOverview: React.FC = () => {
               <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Due: 20th Nov · ₹0 Penalty</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">Advance Tax Q3</span>
                 <Calculator className="w-4 h-4 text-amber-600" />
@@ -923,7 +932,7 @@ export const DashboardOverview: React.FC = () => {
               <p className="text-[11px] text-amber-700 dark:text-amber-400 font-bold mt-1">75% threshold · Due 15 Dec</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">Ledger Reconciliation</span>
                 <FileSpreadsheet className="w-4 h-4 text-amber-600" />
@@ -932,7 +941,7 @@ export const DashboardOverview: React.FC = () => {
               <p className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold mt-1">Bank statements up to date</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">Statutory Audit</span>
                 <Award className="w-4 h-4 text-amber-600" />
@@ -945,7 +954,7 @@ export const DashboardOverview: React.FC = () => {
           {/* CA Interactive Tools & Calculators */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Advance Tax Estimator (7 cols) */}
-            <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+            <div className="lg:col-span-7 spatial-card p-6 sm:p-7 rounded-3xl space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Advance Tax &amp; TDS Estimator (FY 2026-27)</h3>
@@ -1016,7 +1025,7 @@ export const DashboardOverview: React.FC = () => {
             </div>
 
             {/* GST & Statutory Filing Calendar (5 cols) */}
-            <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 flex flex-col justify-between">
+            <div className="lg:col-span-5 spatial-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">GST &amp; Tax Compliance Calendar</h3>
@@ -1025,7 +1034,7 @@ export const DashboardOverview: React.FC = () => {
 
                 <div className="space-y-3">
                   {caDeadlines.map((dl) => (
-                    <div key={dl.id} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col gap-1.5">
+                    <div key={dl.id} className="p-3.5 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-slate-900 dark:text-white">{dl.title}</span>
                         <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300">
@@ -1045,7 +1054,7 @@ export const DashboardOverview: React.FC = () => {
                   onClick={() => { setCaConsultTopic("Statutory Audit under Section 139"); setCaBookedModal(true); }}
                   className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
                 >
-                  Book CA Review &rarr;
+                  Book CA Review &rarr; Starting from ₹2,499
                 </button>
               </div>
             </div>
@@ -1059,7 +1068,7 @@ export const DashboardOverview: React.FC = () => {
       {activePillar === "LAW" && (
         <div className="space-y-6">
           {/* LAW Command Banner */}
-          <div className="bg-gradient-to-r from-blue-500/10 via-blue-500/5 to-transparent p-6 sm:p-7 rounded-3xl border border-blue-500/30 dark:border-blue-500/20 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div className="spatial-card-navy p-6 sm:p-7 rounded-3xl border border-blue-500/30 dark:border-blue-500/20 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider">
                 <Scale className="w-4 h-4" />
@@ -1068,7 +1077,7 @@ export const DashboardOverview: React.FC = () => {
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white">
                 Contracts, Intellectual Property &amp; Legal Advisory
               </h2>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-2xl">
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 max-w-2xl font-medium">
                 Generate airtight founder vesting agreements, bilateral NDAs, conduct trademark searches, and safeguard corporate intellectual property.
               </p>
             </div>
@@ -1076,13 +1085,13 @@ export const DashboardOverview: React.FC = () => {
               onClick={() => setLawBookedModal(true)}
               className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
             >
-              Consult High Court Advocate
+              Consult High Court Advocate · Starting from ₹999
             </button>
           </div>
 
           {/* LAW 4 Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">Active Contracts</span>
                 <FileCheck className="w-4 h-4 text-blue-600" />
@@ -1091,7 +1100,7 @@ export const DashboardOverview: React.FC = () => {
               <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Founders Agreement &amp; NDA Ready</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">Trademark Status</span>
                 <Shield className="w-4 h-4 text-blue-600" />
@@ -1100,7 +1109,7 @@ export const DashboardOverview: React.FC = () => {
               <p className="text-[11px] text-blue-600 dark:text-blue-400 font-bold mt-1">Phonetic Clearance Completed</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">Board Resolutions</span>
                 <BookOpen className="w-4 h-4 text-blue-600" />
@@ -1109,7 +1118,7 @@ export const DashboardOverview: React.FC = () => {
               <p className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold mt-1">Bank Mandate &amp; Shares Allotted</p>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
                 <span className="text-xs font-bold uppercase tracking-wider">Legal Risk Score</span>
                 <Scale className="w-4 h-4 text-blue-600" />
@@ -1122,7 +1131,7 @@ export const DashboardOverview: React.FC = () => {
           {/* Interactive Contract Drafting Studio & Trademark Search */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Legal Agreement Generator (7 cols) */}
-            <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-6 sm:p-7 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-5">
+            <div className="lg:col-span-7 spatial-card p-6 sm:p-7 rounded-3xl space-y-5">
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Interactive Legal Contract Drafter</h3>
@@ -1205,7 +1214,7 @@ export const DashboardOverview: React.FC = () => {
                       className="corpsetu-btn-navy px-4 py-2 text-xs font-bold inline-flex items-center gap-1.5"
                     >
                       <FileText className="w-3.5 h-3.5" />
-                      <span>Generate Agreement</span>
+                      <span>Generate Agreement · Starting from ₹999</span>
                     </button>
                   </div>
                 </div>
@@ -1213,7 +1222,7 @@ export const DashboardOverview: React.FC = () => {
 
               {contractType === "nda" && (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+                  <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
                     <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Non-Disclosure Agreement (Mutual Bilateral)</h4>
                     <p className="text-xs text-slate-600 dark:text-slate-300">
                       Standard 3-year mutual confidentiality agreement protecting business discussions, financial projections, software architecture, and client lists.
@@ -1245,7 +1254,7 @@ export const DashboardOverview: React.FC = () => {
             </div>
 
             {/* Trademark Protection & Clearance Desk (5 cols) */}
-            <div className="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs space-y-4 flex flex-col justify-between">
+            <div className="lg:col-span-5 spatial-card p-6 rounded-3xl space-y-4 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-3 border-b border-slate-100 dark:border-slate-800 pb-3">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Trademark Conflict Checker</h3>
@@ -1287,7 +1296,7 @@ export const DashboardOverview: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
+                  <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800 text-[11px] text-slate-600 dark:text-slate-400 space-y-1">
                     <span className="font-bold text-slate-800 dark:text-slate-200 block">Common Startup Trademark Classes:</span>
                     <div>• <strong>Class 9:</strong> Downloadable software, mobile apps, SaaS tokens</div>
                     <div>• <strong>Class 35:</strong> Advertising, retail business, marketplace</div>
@@ -1302,7 +1311,7 @@ export const DashboardOverview: React.FC = () => {
                   onClick={() => setLawBookedModal(true)}
                   className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline"
                 >
-                  File with IP Attorney &rarr;
+                  File with IP Attorney &rarr; Starting from ₹4,999
                 </button>
               </div>
             </div>
@@ -1315,7 +1324,7 @@ export const DashboardOverview: React.FC = () => {
       {/* ───────────────────────────────────────────────────────────── */}
       {caBookedModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+          <div className="spatial-surface rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200/90 dark:border-slate-800 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
@@ -1323,7 +1332,7 @@ export const DashboardOverview: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Empanelled CA Session</h3>
-                  <span className="text-xs text-slate-500">Chartered Accountant Consultation</span>
+                  <span className="text-xs text-slate-500">Chartered Accountant Consultation · Starting from ₹499</span>
                 </div>
               </div>
               <button
@@ -1339,9 +1348,9 @@ export const DashboardOverview: React.FC = () => {
             </p>
 
             <div className="space-y-2 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+              <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
                 <span className="text-slate-500 font-bold block">Assigned CA Specialist:</span>
-                <span className="font-extrabold text-slate-900 dark:text-white">CA Neha Kulkarni, FCA (ICAI Reg #418290)</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">CA Aniket Kulkarni, FCA (ICAI Reg #418290)</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold block text-[11px]">Online · Available within ~20 mins</span>
               </div>
             </div>
@@ -1357,7 +1366,7 @@ export const DashboardOverview: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  alert("Your CA consultation request has been confirmed! CA Neha Kulkarni will connect with you via Google Meet link sent to your registered email.");
+                  alert("Your CA consultation request has been confirmed! CA Aniket Kulkarni will connect with you via Google Meet link sent to your registered email.");
                   setCaBookedModal(false);
                 }}
                 className="corpsetu-btn-gold px-4 py-2 text-xs font-bold"
@@ -1374,7 +1383,7 @@ export const DashboardOverview: React.FC = () => {
       {/* ───────────────────────────────────────────────────────────── */}
       {lawBookedModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+          <div className="spatial-surface rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200/90 dark:border-slate-800 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
@@ -1382,7 +1391,7 @@ export const DashboardOverview: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Corporate Counsel Session</h3>
-                  <span className="text-xs text-slate-500">High Court Advocate Consultation</span>
+                  <span className="text-xs text-slate-500">High Court Advocate Consultation · Starting from ₹999</span>
                 </div>
               </div>
               <button
@@ -1398,9 +1407,9 @@ export const DashboardOverview: React.FC = () => {
             </p>
 
             <div className="space-y-2 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+              <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
                 <span className="text-slate-500 font-bold block">Assigned Legal Counsel:</span>
-                <span className="font-extrabold text-slate-900 dark:text-white">Adv. Rajesh Sharma, LL.M (Bar Council KAR/2012)</span>
+                <span className="font-extrabold text-slate-900 dark:text-white">Adv. Rajesh Varma, LL.M (Bar Council KAR/2012/842)</span>
                 <span className="text-emerald-600 dark:text-emerald-400 font-semibold block text-[11px]">Online · Available within ~15 mins</span>
               </div>
             </div>
@@ -1416,7 +1425,7 @@ export const DashboardOverview: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  alert("Your legal counsel appointment is confirmed! Adv. Rajesh Sharma will connect via encrypted video bridge.");
+                  alert("Your legal counsel appointment is confirmed! Adv. Rajesh Varma will connect via encrypted video bridge.");
                   setLawBookedModal(false);
                 }}
                 className="corpsetu-btn-navy px-4 py-2 text-xs font-bold"
