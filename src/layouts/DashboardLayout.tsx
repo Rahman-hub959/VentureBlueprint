@@ -55,7 +55,9 @@ export const DashboardLayout: React.FC = () => {
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { label: "My Projects", path: "/projects", icon: FolderKanban },
     { label: "Create Project", path: "/projects/new", icon: PlusCircle },
-    { label: "Your Consultations", path: "/consultations", icon: CalendarCheck },
+    ...(isAdmin
+      ? [{ label: "Consultation Requests", path: "/admin/consultations", icon: CalendarCheck }]
+      : [{ label: "Your Consultations", path: "/consultations", icon: CalendarCheck }]),
     { label: "Compliance Checklist", path: `/projects/${activeProjectId}/compliance`, icon: CheckSquare },
     { label: "Generated Documents", path: `/projects/${activeProjectId}/documents`, icon: FileText },
     { label: "Role Recommendations", path: `/projects/${activeProjectId}/roles`, icon: Users },

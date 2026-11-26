@@ -31,6 +31,7 @@ import { CompliancePage } from "./pages/compliance/CompliancePage";
 import { DocumentsPage } from "./pages/documents/DocumentsPage";
 import { RolesPage } from "./pages/roles/RolesPage";
 import { AdminPortalPage } from "./pages/admin/AdminPortalPage";
+import { AdminConsultationsPage } from "./pages/admin/AdminConsultationsPage";
 import SettingsPage from "./pages/SettingsPage";
 import { ComplaintsPage } from "./pages/complaints/ComplaintsPage";
 import { ConsultationsPage } from "./pages/consultations/ConsultationsPage";
@@ -175,6 +176,14 @@ export default function App() {
                   element={
                     <AdminRoute>
                       <AdminPortalPage />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/consultations"
+                  element={
+                    <AdminRoute>
+                      <AdminConsultationsPage />
                     </AdminRoute>
                   }
                 />

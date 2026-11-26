@@ -6,8 +6,8 @@ from datetime import datetime, timezone
 from app.database import get_db
 from app.models.consultation import Consultation
 from app.models.user import User, Notification
-from app.schemas.consultation import ConsultationCreate, ConsultationResponse
-from app.api.deps import get_current_user, get_optional_current_user
+from app.schemas.consultation import ConsultationCreate, ConsultationResponse, ConsultationStatusUpdate
+from app.api.deps import get_current_user, get_optional_current_user, get_current_admin_user
 
 router = APIRouter(prefix="/consultations", tags=["consultations"])
 
@@ -132,13 +132,17 @@ def list_user_consultations(
     current_user: User = Depends(get_current_user)
 ):
     """
-    List all consultations booked by the authenticated user.
+    List all consultations:
+    - If Administrator: returns ALL client consultation requests across the platform.
+    - If Client: returns only consultations associated with current user.
     """
-    consultations = db.query(Consultation).filter(
+    is_admin = current_user.role and current_user.role.name == "Administrator"
+    if is_admin:
+        return db.query(Consultation).order_by(Consultation.created_at.desc()).all()
+
+    return db.query(Consultation).filter(
         (Consultation.user_id == current_user.id) | (Consultation.email == current_user.email)
     ).order_by(Consultation.created_at.desc()).all()
-
-    return consultations
 
 @router.get("/{id}", response_model=ConsultationResponse)
 def get_consultation(
@@ -181,6 +185,41 @@ def cancel_consultation(
         )
 
     consultation.status = "Cancelled"
+    consultation.updated_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(consultation)
+    return consultation
+
+@router.patch("/{id}/status", response_model=ConsultationResponse)
+def update_consultation_status(
+    id: str,
+    payload: ConsultationStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """
+    Admin endpoint to update consultation workflow status, assigned partner, or resolution summary.
+    """
+    consultation = db.query(Consultation).filter(Consultation.id == id).first()
+    if not consultation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Consultation {id} not found"
+        )
+
+    if payload.status:
+        consultation.status = payload.status
+    if payload.assigned_expert:
+        consultation.assigned_expert = payload.assigned_expert
+    if payload.expert_role:
+        consultation.expert_role = payload.expert_role
+    if payload.notes:
+        consultation.notes = payload.notes
+    if payload.resolution_summary:
+        consultation.resolution_summary = payload.resolution_summary
+    if payload.meeting_platform:
+        consultation.meeting_platform = payload.meeting_platform
+
     consultation.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(consultation)

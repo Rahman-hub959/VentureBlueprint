@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { ShieldAlert, Users, Database, FileText, CheckCircle2, Activity, RefreshCw } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ShieldAlert, Users, Database, FileText, CheckCircle2, Activity, RefreshCw, CalendarCheck } from "lucide-react";
 import { adminApi, regulationsApi } from "../../api/client";
 
 export const AdminPortalPage: React.FC = () => {
@@ -53,13 +54,22 @@ export const AdminPortalPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={loadAdminData}
-          className="glass-button-secondary text-xs py-2 px-3.5 flex items-center gap-2 font-bold"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Refresh Metrics</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            to="/admin/consultations"
+            className="corpsetu-btn-navy text-xs py-2 px-3.5 flex items-center gap-2 font-bold shadow-sm"
+          >
+            <CalendarCheck className="w-3.5 h-3.5 text-[#C59B27]" />
+            <span>Consultation Requests Console</span>
+          </Link>
+          <button
+            onClick={loadAdminData}
+            className="glass-button-secondary text-xs py-2 px-3.5 flex items-center gap-2 font-bold"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh Metrics</span>
+          </button>
+        </div>
       </div>
 
       {/* Admin Sub-Tabs */}

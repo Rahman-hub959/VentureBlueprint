@@ -166,13 +166,23 @@ export const ConsultationsPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => setModalOpen(true)}
-          className="corpsetu-btn-gold text-xs py-3 px-6 shadow-md whitespace-nowrap z-10 font-bold inline-flex items-center gap-2"
-        >
-          <PlusCircle className="w-4 h-4" />
-          <span>Book New Consultation</span>
-        </button>
+        {user?.role === "Administrator" ? (
+          <Link
+            to="/admin/consultations"
+            className="corpsetu-btn-gold text-xs py-3 px-6 shadow-md whitespace-nowrap z-10 font-bold inline-flex items-center gap-2"
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Open Admin Consultation Console</span>
+          </Link>
+        ) : (
+          <button
+            onClick={() => setModalOpen(true)}
+            className="corpsetu-btn-gold text-xs py-3 px-6 shadow-md whitespace-nowrap z-10 font-bold inline-flex items-center gap-2"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Book New Consultation</span>
+          </button>
+        )}
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}

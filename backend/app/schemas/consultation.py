@@ -36,3 +36,12 @@ class ConsultationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class ConsultationStatusUpdate(BaseModel):
+    status: Optional[str] = None
+    assigned_expert: Optional[str] = None
+    expert_role: Optional[str] = None
+    notes: Optional[str] = None
+    resolution_summary: Optional[str] = None
+    meeting_platform: Optional[str] = None
+

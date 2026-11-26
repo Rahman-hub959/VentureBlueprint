@@ -230,6 +230,13 @@ export const consultationsApi = {
   list: () => apiRequest<ConsultationItem[]>("/consultations"),
   get: (id: string) => apiRequest<ConsultationItem>(`/consultations/${id}`),
   cancel: (id: string) => apiRequest<ConsultationItem>(`/consultations/${id}/cancel`, { method: "PATCH" }),
+  updateStatus: (id: string, data: {
+    status?: string;
+    assigned_expert?: string;
+    expert_role?: string;
+    notes?: string;
+    resolution_summary?: string;
+  }) => apiRequest<ConsultationItem>(`/consultations/${id}/status`, { method: "PATCH", body: JSON.stringify(data) }),
 };
 
 // Complaints & Grievances API
