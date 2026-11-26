@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useToast } from "../context/ToastContext";
 import "../styles/BrandingWorkspace.css";
 
 interface BrandingData {
@@ -55,6 +56,7 @@ export default function BrandingWorkspace({
   projectName = "My Business",
   onBack,
 }: BrandingWorkspaceProps) {
+  const { showToast } = useToast();
   const storageKey = `vb-branding:${projectId}`;
 
   const [branding, setBranding] =
@@ -116,12 +118,12 @@ export default function BrandingWorkspace({
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file.");
+      showToast("Please upload an image file (PNG, JPG, SVG).", "warning");
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      alert("Please upload an image smaller than 2 MB.");
+      showToast("Please upload an image smaller than 2 MB.", "warning");
       return;
     }
 
@@ -138,8 +140,9 @@ export default function BrandingWorkspace({
     try {
       localStorage.setItem(storageKey, JSON.stringify(branding));
       setSaved(true);
+      showToast("Brand styling saved successfully!", "success");
     } catch {
-      alert("Unable to save. The logo image may be too large.");
+      showToast("Unable to save. The logo image may be too large.", "warning");
     }
   };
 

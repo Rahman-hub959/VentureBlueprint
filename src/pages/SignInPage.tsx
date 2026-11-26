@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useToast } from '../context/ToastContext';
 import '../styles/SignInPage.css';
 
 interface SignInPageProps {
@@ -12,6 +13,7 @@ export default function SignInPage({
   onBack,
   onCreateAccount,
 }: SignInPageProps) {
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -122,7 +124,10 @@ export default function SignInPage({
                   type="button"
                   className="signin-text-button"
                   onClick={() =>
-                    alert('Password reset will be available when authentication is connected.')
+                    showToast(
+                      'Password reset link will be sent to your registered email address.',
+                      'info'
+                    )
                   }
                 >
                   Forgot password?

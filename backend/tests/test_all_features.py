@@ -236,3 +236,35 @@ def test_consultations_lifecycle():
     assert cancel_res.status_code == 200
     assert cancel_res.json()["status"] == "Cancelled"
 
+def test_complaints_crud():
+    # 1. Create complaint (Grievance)
+    payload = {
+        "company_name": "TestCorp LLP",
+        "email": "testfounder@ventureblueprint.in",
+        "phone_number": "+91 9988776655",
+        "pillar": "CS",
+        "category": "MCA SPICe+ Resubmission Query",
+        "priority": "High",
+        "description": "Need assistance with Clause 3(a) object drafting for MCA approval."
+    }
+    res = client.post("/api/v1/complaints", json=payload)
+    assert res.status_code == 201
+    data = res.json()
+    assert data["id"].startswith("CS-GRV-2026-")
+    assert data["company_name"] == "TestCorp LLP"
+    assert data["status"] == "Registered"
+    assert "Priyanjali Sen" in data["assigned_expert"]
+
+    # 2. List complaints
+    list_res = client.get("/api/v1/complaints")
+    assert list_res.status_code == 200
+    tickets = list_res.json()
+    assert len(tickets) >= 1
+    assert any(t["id"] == data["id"] for t in tickets)
+
+    # 3. Get single complaint
+    get_res = client.get(f"/api/v1/complaints/{data['id']}")
+    assert get_res.status_code == 200
+    assert get_res.json()["id"] == data["id"]
+
+

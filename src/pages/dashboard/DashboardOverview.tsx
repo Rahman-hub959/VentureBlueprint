@@ -35,6 +35,7 @@ import {
   Award
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { ComplianceScoreRing } from "../../components/ComplianceScoreRing";
 import { projectsApi, documentsApi, complianceApi, consultationsApi } from "../../api/client";
 
 export const DashboardOverview: React.FC = () => {
@@ -1124,13 +1125,16 @@ export const DashboardOverview: React.FC = () => {
               <p className="text-[11px] text-slate-600 dark:text-slate-300 font-semibold mt-1">Bank Mandate &amp; Shares Allotted</p>
             </div>
 
-            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
-              <div className="flex items-center justify-between text-slate-700 dark:text-slate-300 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider">Legal Risk Score</span>
-                <Scale className="w-4 h-4 text-blue-600" />
+            <div className="spatial-card p-5 rounded-2xl flex items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 mb-1">
+                  <span className="text-xs font-bold uppercase tracking-wider">Legal Health Score</span>
+                  <Scale className="w-3.5 h-3.5 text-blue-600" />
+                </div>
+                <div className="text-xl font-extrabold text-slate-900 dark:text-white">Low Risk Profile</div>
+                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">Statutory Protection Active</p>
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 dark:text-white">96 / 100</div>
-              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">Low Dispute Exposure</p>
+              <ComplianceScoreRing score={96} size={58} strokeWidth={5} />
             </div>
           </div>
 

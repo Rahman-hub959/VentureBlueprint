@@ -26,6 +26,7 @@ from app.models.compliance import (
 from app.models.document import DocumentTemplate, GeneratedDocument, DocumentVersion
 from app.models.audit import AuditLog
 from app.models.consultation import Consultation
+from app.models.complaint import Complaint
 
 __all__ = [
     "Base",
@@ -35,6 +36,7 @@ __all__ = [
     "Notification",
     "SupportTicket",
     "Consultation",
+    "Complaint",
     "BusinessDomain",
     "BusinessActivity",
     "StartupProject",

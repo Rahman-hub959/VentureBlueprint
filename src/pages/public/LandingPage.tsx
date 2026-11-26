@@ -26,9 +26,13 @@ import {
   CalendarCheck
 } from "lucide-react";
 import { CorpSetuLogo } from "../../components/CorpSetuLogo";
+import { ComplianceScoreRing } from "../../components/ComplianceScoreRing";
+import { InteractiveFeeEstimator } from "../../components/InteractiveFeeEstimator";
+import { useToast } from "../../context/ToastContext";
 import { consultationsApi } from "../../api/client";
 
 export const LandingPage: React.FC = () => {
+  const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPillar, setSelectedPillar] = useState<"ALL" | "LAW" | "CS" | "CA">("ALL");
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
@@ -51,10 +55,47 @@ export const LandingPage: React.FC = () => {
     notes: "",
   });
 
+  const handleOpenSearchConsultation = (customQuery?: string) => {
+    const query = (customQuery !== undefined ? customQuery : searchQuery).trim();
+    let pillar: "CS" | "CA" | "LAW" = "CS";
+    const lower = query.toLowerCase();
+    if (
+      lower.includes("gst") ||
+      lower.includes("tax") ||
+      lower.includes("account") ||
+      lower.includes("audit") ||
+      lower.includes("tds") ||
+      lower.includes("itr")
+    ) {
+      pillar = "CA";
+    } else if (
+      lower.includes("law") ||
+      lower.includes("contract") ||
+      lower.includes("agreement") ||
+      lower.includes("trademark") ||
+      lower.includes("ipr") ||
+      lower.includes("litigat") ||
+      lower.includes("dispute") ||
+      lower.includes("employment")
+    ) {
+      pillar = "LAW";
+    } else {
+      pillar = "CS";
+    }
+
+    setConsultData((prev) => ({
+      ...prev,
+      serviceType: pillar,
+      notes: query ? `Inquiry regarding: ${query}` : prev.notes,
+    }));
+    if (query) setSearchQuery(query);
+    setConsultationModalOpen(true);
+  };
+
   const handleConsultSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!consultData.phone.trim()) {
-      alert("Please provide a valid phone number.");
+      showToast("Please provide a valid phone number for callback.", "warning");
       return;
     }
     setSubmittingConsult(true);
@@ -75,8 +116,9 @@ export const LandingPage: React.FC = () => {
         topic: res.topic,
         email: res.email || consultData.email,
       });
+      showToast("Consultation requested successfully!", "success");
     } catch (err: any) {
-      alert(err?.message || "Failed to submit consultation request. Please try again.");
+      showToast(err?.message || "Failed to submit consultation request. Please try again.", "warning");
     } finally {
       setSubmittingConsult(false);
     }
@@ -147,33 +189,43 @@ export const LandingPage: React.FC = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleOpenSearchConsultation(searchQuery);
+                      }
+                    }}
                     placeholder="Search: Company Registration, GST, ROC Filing, Trademark..."
                     className="w-full bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 outline-none font-medium"
                   />
                 </div>
                 <button
-                  onClick={() => setConsultationModalOpen(true)}
+                  type="button"
+                  onClick={() => handleOpenSearchConsultation(searchQuery)}
                   className="corpsetu-btn-gold text-xs py-2.5 px-5 w-full sm:w-auto whitespace-nowrap"
                 >
                   Check Price Instantly
                 </button>
               </div>
 
-              {/* Popular tags: Starting from Format */}
+              {/* Popular tags: Interactive Clickable Pills */}
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-1">
                 <span className="font-bold text-slate-900 dark:text-white">Popular:</span>
-                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  Pvt Ltd Starting from ₹6,999
-                </span>
-                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  GST Starting from ₹499/mo
-                </span>
-                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  Trademark Starting from ₹4,999
-                </span>
-                <span className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                  ROC Annual Starting from ₹1,499
-                </span>
+                {[
+                  { label: "Pvt Ltd Starting from ₹6,999", query: "Private Limited Company Registration" },
+                  { label: "GST Starting from ₹499/mo", query: "GST Registration & Monthly Return Filing" },
+                  { label: "Trademark Starting from ₹4,999", query: "Trademark Brand Protection (1 Class)" },
+                  { label: "ROC Annual Starting from ₹1,499", query: "ROC Annual Filings (AOC-4, MGT-7)" },
+                ].map((pill, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleOpenSearchConsultation(pill.query)}
+                    className="px-2.5 py-1 rounded-lg spatial-glass-pill text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-[#C59B27] hover:text-[#C59B27] dark:hover:border-[#C59B27] dark:hover:text-[#C59B27] transition-all cursor-pointer shadow-xs active:scale-95 text-left"
+                  >
+                    {pill.label}
+                  </button>
+                ))}
               </div>
 
               {/* Call-to-action Buttons */}
@@ -211,12 +263,9 @@ export const LandingPage: React.FC = () => {
                   </span>
                 </div>
 
-                {/* Score Widget */}
+                {/* Score Widget with Animated Circular Compliance Ring */}
                 <div className="flex items-center gap-4 p-4 rounded-2xl spatial-card border border-slate-200 dark:border-slate-700">
-                  <div className="w-14 h-14 rounded-2xl bg-[#0B2559] text-white flex flex-col items-center justify-center font-extrabold shadow-sm">
-                    <span className="text-lg leading-none">96</span>
-                    <span className="text-[9px] text-[#C59B27]">/100</span>
-                  </div>
+                  <ComplianceScoreRing score={96} size={64} strokeWidth={6} />
                   <div>
                     <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">Compliance Health Score</h2>
                     <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold mt-0.5">
@@ -552,6 +601,21 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
+      {/* =========================================================================
+          INTERACTIVE LIVE FEE ESTIMATOR & STATUTORY CALCULATOR
+          ========================================================================= */}
+      <section id="pricing" className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <InteractiveFeeEstimator
+          onSelectPlan={(summary, pillar, fee) => {
+            setConsultData((prev) => ({
+              ...prev,
+              serviceType: pillar,
+              notes: `Selected Configuration: ${summary} (Est. starting ₹${fee.toLocaleString("en-IN")})`,
+            }));
+            setConsultationModalOpen(true);
+          }}
+        />
+      </section>
 
       {/* =========================================================================
           COMPREHENSIVE CORPORATE SERVICES (CLEAN & UNCLUTTERED)

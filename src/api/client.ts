@@ -231,3 +231,36 @@ export const consultationsApi = {
   get: (id: string) => apiRequest<ConsultationItem>(`/consultations/${id}`),
   cancel: (id: string) => apiRequest<ConsultationItem>(`/consultations/${id}/cancel`, { method: "PATCH" }),
 };
+
+// Complaints & Grievances API
+export interface ComplaintItem {
+  id: string;
+  user_id?: string;
+  company_name: string;
+  email?: string;
+  phone_number?: string;
+  pillar: "CS" | "CA" | "LAW" | "GENERAL";
+  category: string;
+  priority: "Low" | "Standard" | "High" | "Critical";
+  status: "Registered" | "In Review by Expert" | "Action In Progress" | "Resolved";
+  assigned_expert: string;
+  expert_role?: string;
+  description: string;
+  resolution_note?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const complaintsApi = {
+  create: (data: {
+    company_name?: string;
+    email?: string;
+    phone_number?: string;
+    pillar?: "CS" | "CA" | "LAW" | "GENERAL";
+    category: string;
+    priority?: "Low" | "Standard" | "High" | "Critical";
+    description: string;
+  }) => apiRequest<ComplaintItem>("/complaints", { method: "POST", body: JSON.stringify(data) }),
+  list: () => apiRequest<ComplaintItem[]>("/complaints"),
+  get: (id: string) => apiRequest<ComplaintItem>(`/complaints/${id}`),
+};

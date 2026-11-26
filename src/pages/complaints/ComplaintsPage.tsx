@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LifeBuoy,
   PlusCircle,
@@ -15,9 +15,12 @@ import {
   ShieldAlert,
   ChevronRight,
   Send,
-  X
+  X,
+  Loader2
 } from "lucide-react";
 import { CorpSetuLogo } from "../../components/CorpSetuLogo";
+import { useToast } from "../../context/ToastContext";
+import { complaintsApi, ComplaintItem } from "../../api/client";
 
 interface GrievanceTicket {
   id: string;
@@ -33,11 +36,14 @@ interface GrievanceTicket {
 }
 
 export const ComplaintsPage: React.FC = () => {
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<"ALL" | "ACTIVE" | "RESOLVED">("ALL");
   const [modalOpen, setModalOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [tickets, setTickets] = useState<GrievanceTicket[]>([
+  const initialSeedTickets: GrievanceTicket[] = [
     {
       id: "CS-GRV-2026-8912",
       companyName: "Lumora Technologies Pvt Ltd",
@@ -73,46 +79,107 @@ export const ComplaintsPage: React.FC = () => {
       description: "Add 1-year cliff and 48-month accelerated vesting clause in case of Series A acquisition.",
       resolutionNote: "Tri-party amended Founder Agreement executed on stamp paper and notarized. Case closed successfully.",
     },
-  ]);
+  ];
+
+  const [tickets, setTickets] = useState<GrievanceTicket[]>(initialSeedTickets);
+
+  useEffect(() => {
+    async function fetchComplaints() {
+      try {
+        setLoading(true);
+        const remote = await complaintsApi.list();
+        if (remote && remote.length > 0) {
+          const mapped: GrievanceTicket[] = remote.map((r: ComplaintItem) => ({
+            id: r.id,
+            companyName: r.company_name,
+            pillar: r.pillar,
+            category: r.category,
+            priority: r.priority,
+            status: r.status,
+            assignedExpert: r.assigned_expert + (r.expert_role ? ` (${r.expert_role})` : ""),
+            createdAt: new Date(r.created_at).toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }),
+            description: r.description,
+            resolutionNote: r.resolution_note,
+          }));
+
+          // Merge any remote ones with seeds avoiding duplicate IDs
+          const existingIds = new Set(mapped.map((m) => m.id));
+          const extraSeeds = initialSeedTickets.filter((s) => !existingIds.has(s.id));
+          setTickets([...mapped, ...extraSeeds]);
+        }
+      } catch (err) {
+        console.warn("Could not load complaints from API, using cached view", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchComplaints();
+  }, []);
 
   // New Ticket Form State
   const [formData, setFormData] = useState({
     companyName: "",
+    email: "",
+    phoneNumber: "",
     pillar: "CS" as "CS" | "CA" | "LAW" | "GENERAL",
     category: "MCA SPICe+ Filing Issue",
     priority: "High" as "Low" | "Standard" | "High" | "Critical",
     description: "",
   });
 
-  const handleCreateTicket = (e: React.FormEvent) => {
+  const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newId = `CS-GRV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-    const newTicket: GrievanceTicket = {
-      id: newId,
-      companyName: formData.companyName || "My Venture",
-      pillar: formData.pillar,
-      category: formData.category,
-      priority: formData.priority,
-      status: "Registered",
-      assignedExpert:
-        formData.pillar === "CS"
-          ? "CS Priyanjali Sen"
-          : formData.pillar === "CA"
-          ? "CA Aniket Kulkarni"
-          : "Adv. Rajesh Varma",
-      createdAt: "Just now",
-      description: formData.description,
-    };
+    if (!formData.companyName.trim() || !formData.description.trim()) {
+      showToast("Please fill in company name and grievance description", "warning");
+      return;
+    }
 
-    setTickets([newTicket, ...tickets]);
-    setModalOpen(false);
-    setFormData({
-      companyName: "",
-      pillar: "CS",
-      category: "MCA SPICe+ Filing Issue",
-      priority: "High",
-      description: "",
-    });
+    setSubmitting(true);
+    try {
+      const created = await complaintsApi.create({
+        company_name: formData.companyName,
+        email: formData.email || undefined,
+        phone_number: formData.phoneNumber || undefined,
+        pillar: formData.pillar,
+        category: formData.category,
+        priority: formData.priority,
+        description: formData.description,
+      });
+
+      const newTicket: GrievanceTicket = {
+        id: created.id,
+        companyName: created.company_name,
+        pillar: created.pillar,
+        category: created.category,
+        priority: created.priority,
+        status: created.status,
+        assignedExpert: created.assigned_expert + (created.expert_role ? ` (${created.expert_role})` : ""),
+        createdAt: "Just now",
+        description: created.description,
+        resolutionNote: created.resolution_note,
+      };
+
+      setTickets([newTicket, ...tickets]);
+      setModalOpen(false);
+      setFormData({
+        companyName: "",
+        email: "",
+        phoneNumber: "",
+        pillar: "CS",
+        category: "MCA SPICe+ Filing Issue",
+        priority: "High",
+        description: "",
+      });
+      showToast(`Grievance registered successfully! Reference: ${created.id}`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to register ticket. Please try again.", "warning");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const filteredTickets = tickets.filter((t) => {
@@ -325,6 +392,33 @@ export const ComplaintsPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
+                    Contact Email (Optional)
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="founder@company.com"
+                    className="w-full glass-input text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
+                    Phone / WhatsApp (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    placeholder="+91 98765 43210"
+                    className="w-full glass-input text-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
                     Service Pillar *
                   </label>
                   <select
@@ -386,9 +480,11 @@ export const ComplaintsPage: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full corpsetu-btn-navy text-xs py-3 justify-center shadow-md font-bold"
+                disabled={submitting}
+                className="w-full corpsetu-btn-navy text-xs py-3 justify-center shadow-md font-bold disabled:opacity-50 flex items-center gap-2"
               >
-                Submit Grievance & Dispatch to Expert
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                <span>{submitting ? "Registering Grievance..." : "Submit Grievance & Dispatch to Expert"}</span>
               </button>
             </form>
           </div>
