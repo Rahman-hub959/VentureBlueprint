@@ -97,12 +97,32 @@ def create_consultation(
     db.commit()
     db.refresh(consultation)
 
+    # Dispatch confirmation email to client's email address
+    try:
+        from app.services.email_service import send_consultation_confirmation_email
+        send_consultation_confirmation_email(
+            recipient_email=consultation.email,
+            recipient_name=consultation.full_name,
+            reference_id=consultation.id,
+            pillar=consultation.pillar,
+            assigned_expert=consultation.assigned_expert,
+            expert_role=consultation.expert_role,
+            topic=consultation.topic,
+            preferred_date=consultation.preferred_date,
+            preferred_time_slot=consultation.preferred_time_slot,
+            meeting_link=consultation.meeting_link,
+            company_name=consultation.company_name
+        )
+    except Exception:
+        # Non-blocking graceful fallback
+        pass
+
     # If linked to a registered user, record an in-app notification
     if user_id:
         notif = Notification(
             user_id=user_id,
             title=f"Consultation Request Confirmed ({consultation.id})",
-            message=f"Your consultation request for {consultation.topic} has been registered with {consultation.assigned_expert}. In a short period of time our team will contact you with meeting coordinates.",
+            message=f"Your request has been assigned and sent the details about your consultation to {consultation.email}",
             category="success",
             link="/consultations"
         )

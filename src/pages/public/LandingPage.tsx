@@ -72,6 +72,7 @@ export const LandingPage: React.FC = () => {
         id: res.id,
         expert: res.assigned_expert || "Senior Partner",
         topic: res.topic,
+        email: res.email || consultData.email,
       });
     } catch (err: any) {
       alert(err?.message || "Failed to submit consultation request. Please try again.");
@@ -808,10 +809,16 @@ export const LandingPage: React.FC = () => {
                 <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-sm">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <div className="space-y-1">
-                  <h4 className="font-extrabold text-lg text-emerald-900 dark:text-emerald-100">Consultation Requested Successfully!</h4>
+                <div className="space-y-2">
+                  <h4 className="font-extrabold text-lg text-emerald-900 dark:text-emerald-100">Consultation Assigned Successfully!</h4>
+                  <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-300 dark:border-emerald-700 text-xs text-slate-800 dark:text-slate-100 font-semibold leading-relaxed shadow-xs">
+                    Your request has been assigned and sent the details about your consultation to{" "}
+                    <span className="font-extrabold text-[#0B2559] dark:text-[#E5B842] underline">
+                      {(consultationResult as any).email || consultData.email}
+                    </span>
+                  </div>
                   <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
-                    In a short period of time our team will contact you via phone &amp; email with meeting details.
+                    In a short period of time our team will contact you via phone &amp; email with meeting coordinates.
                   </p>
                 </div>
 

@@ -77,11 +77,108 @@ export const DashboardLayout: React.FC = () => {
       <div className="spatial-glow-top-right opacity-60" />
       <div className="spatial-glow-bottom-left opacity-60" />
 
+      {/* Mobile Sidebar Drawer */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+          <div className="relative w-72 max-w-[85vw] bg-white dark:bg-slate-900 h-full p-4 flex flex-col z-10 shadow-2xl overflow-y-auto border-r border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-200 dark:border-slate-800">
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileSidebarOpen(false)}
+                className="flex items-center justify-center flex-1"
+              >
+                <CorpSetuLogo size="md" className="justify-center mx-auto" />
+              </Link>
+              <button
+                onClick={() => setMobileSidebarOpen(false)}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Mobile Project Selector Box */}
+            {projects.length > 0 && (
+              <div className="mb-4 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <span className="text-[10px] font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider block mb-1">
+                  Active Project
+                </span>
+                <select
+                  aria-label="Active Project"
+                  value={selectedProjectId}
+                  onChange={(e) => {
+                    setSelectedProjectId(e.target.value);
+                    navigate(`/projects/${e.target.value}`);
+                    setMobileSidebarOpen(false);
+                  }}
+                  className="w-full bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-300 dark:border-slate-600 text-xs font-bold py-2 px-2.5 rounded-lg cursor-pointer truncate shadow-xs"
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-1">
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Mobile Nav Links */}
+            <nav className="flex-1 flex flex-col gap-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
+                return (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    onClick={() => setMobileSidebarOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                      isActive
+                        ? "bg-emerald-50 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-700 shadow-xs"
+                        : "text-slate-800 dark:text-slate-200 hover:text-blue-700 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800/80"
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${isActive ? "text-emerald-600 dark:text-emerald-400" : "text-slate-600 dark:text-slate-400"}`} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-600 text-emerald-800 dark:text-emerald-200 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                  {user?.full_name?.charAt(0) || "U"}
+                </div>
+                <div className="truncate">
+                  <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user?.full_name}</p>
+                  <p className="text-[10px] text-slate-700 dark:text-slate-300 font-semibold truncate">{user?.role}</p>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                title="Sign out"
+                className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-rose-600 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar Navigation */}
       <aside className="hidden md:flex flex-col w-64 glass-panel m-3 mr-0 rounded-2xl z-20 sticky top-3 h-[calc(100vh-24px)] p-4 shadow-sm">
-        {/* Brand */}
-        <Link to="/dashboard" className="flex items-center px-2 py-3 mb-5 border-b border-slate-200 dark:border-slate-800">
-          <CorpSetuLogo size="lg" />
+        {/* Brand - Centered in Sidebar */}
+        <Link
+          to="/dashboard"
+          className="flex items-center justify-center w-full px-2 py-3 mb-5 border-b border-slate-200 dark:border-slate-800 text-center"
+        >
+          <CorpSetuLogo size="lg" className="w-full justify-center mx-auto" />
         </Link>
 
         {/* Project Selector Box */}

@@ -51,12 +51,12 @@ export const CorpSetuLogo: React.FC<CorpSetuLogoProps> = ({
   }
 
   return (
-    <div className={`relative inline-flex items-center flex-shrink-0 ${className}`}>
+    <div className={`relative inline-flex items-center justify-center flex-shrink-0 ${className}`}>
       {/* Light Mode Full Brand Lockup */}
       <img
         src="/corpsetu-logo.png"
         alt="CorpSetu · Law, CS, CA. One Bridge."
-        className={`${currentSize.imgH} w-auto max-w-none object-contain dark:hidden transition-all`}
+        className={`${currentSize.imgH} w-auto max-w-none object-contain mx-auto dark:hidden transition-all`}
         onError={(e) => {
           (e.target as HTMLImageElement).src = "/corpsetu-logo.jpg";
         }}
@@ -65,7 +65,7 @@ export const CorpSetuLogo: React.FC<CorpSetuLogoProps> = ({
       <img
         src="/corpsetu-logo-dark.png"
         alt="CorpSetu · Law, CS, CA. One Bridge."
-        className={`${currentSize.imgH} w-auto max-w-none object-contain hidden dark:block transition-all`}
+        className={`${currentSize.imgH} w-auto max-w-none object-contain mx-auto hidden dark:block transition-all`}
         onError={(e) => {
           (e.target as HTMLImageElement).src = "/corpsetu-logo.png";
         }}

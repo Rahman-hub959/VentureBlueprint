@@ -285,3 +285,141 @@ The VentureBlueprint Team
         action_type="blueprint_generated",
         extra_meta={"project_id": project_id, "project_name": project_name, "doc_id": doc_id}
     )
+
+
+def send_consultation_confirmation_email(
+    recipient_email: str,
+    recipient_name: str,
+    reference_id: str,
+    pillar: str,
+    assigned_expert: str,
+    expert_role: str,
+    topic: str,
+    preferred_date: Optional[str] = None,
+    preferred_time_slot: Optional[str] = None,
+    meeting_link: Optional[str] = None,
+    company_name: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Dispatches instant consultation booking and expert assignment confirmation email
+    to the user's registered or provided email address.
+    """
+    name = recipient_name.strip() or "Entrepreneur"
+    subject = f"Consultation Confirmed: {reference_id} · Assigned to {assigned_expert} ({pillar})"
+
+    date_str = preferred_date or "To be scheduled within 24 hours"
+    time_str = preferred_time_slot or "Morning Slot (10:00 AM - 1:00 PM)"
+    meet_url = meeting_link or "https://meet.google.com/corpsetu-advisory"
+    comp_str = f" for {company_name}" if company_name else ""
+
+    body_text = f"""Dear {name},
+
+Your consultation request has been successfully assigned!
+
+We have assigned your session{comp_str} to our empanelled expert:
+- Specialist: {assigned_expert} ({expert_role})
+- Practice Area: {pillar} (Corporate Law, CS & CA)
+- Reference ID: {reference_id}
+- Topic: {topic}
+- Scheduled Date: {date_str}
+- Preferred Time: {time_str}
+- Video Meeting Room: {meet_url}
+
+Our expert has received your dossier and will connect with you via phone and the video meeting link above.
+
+You can track your consultation live anytime on your CorpSetu Dashboard:
+{settings.PORTAL_URL}/consultations
+
+Warm regards,
+CorpSetu Advisory & Dispatch Team
+Law · CS · CA — One Bridge
+{settings.PORTAL_URL}
+"""
+
+    body_html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Consultation Assigned &amp; Confirmed</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">CorpSetu</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">Law · CS · CA — One Bridge</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <div style="display: inline-block; background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 20px; padding: 4px 14px; margin-bottom: 16px;">
+        <span style="color: #065F46; font-size: 12px; font-weight: 700;">✓ Request Assigned Successfully</span>
+      </div>
+      <h2 style="font-size: 20px; font-weight: 800; color: #0B2559; margin-top: 0;">Hello, {name}!</h2>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Your consultation request has been assigned to our verified professional desk{comp_str}. Below are your official tracking reference and session details:
+      </p>
+
+      <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr>
+            <td style="padding: 6px 0; color: #64748B; width: 140px; font-weight: 600;">Reference ID:</td>
+            <td style="padding: 6px 0; font-weight: 800; color: #0B2559; font-family: monospace;">{reference_id}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Assigned Expert:</td>
+            <td style="padding: 6px 0; font-weight: 700; color: #0F172A;">{assigned_expert}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Role / Pillar:</td>
+            <td style="padding: 6px 0; color: #047857; font-weight: 700;">{expert_role} ({pillar})</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Topic / Requirement:</td>
+            <td style="padding: 6px 0; color: #1E293B;">{topic}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Preferred Slot:</td>
+            <td style="padding: 6px 0; color: #1E293B;">{date_str} ({time_str})</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="background-color: #EFF6FF; border-left: 4px solid #1E40AF; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
+        <h4 style="margin: 0 0 6px; font-size: 13px; color: #1E40AF; font-weight: 700;">Video Meeting Room:</h4>
+        <p style="margin: 0; font-size: 13px; color: #1E3A8A;">
+          <a href="{meet_url}" style="color: #1E40AF; font-weight: 700; text-decoration: underline;">{meet_url}</a>
+        </p>
+        <p style="margin: 6px 0 0; font-size: 12px; color: #475569;">
+          Our expert will contact you by phone prior to the call. Please keep any financial/ROC documents ready.
+        </p>
+      </div>
+
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{settings.PORTAL_URL}/consultations" style="background-color: #0B2559; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; display: inline-block;">
+          Track in Your Consultations &rarr;
+        </a>
+      </div>
+
+      <p style="font-size: 13px; line-height: 1.6; color: #64748B; margin-bottom: 0;">
+        Warm regards,<br>
+        <b>CorpSetu Advisory &amp; Dispatch Team</b><br>
+        <a href="{settings.PORTAL_URL}" style="color: #0B2559; text-decoration: none;">www.corpsetu.com</a>
+      </p>
+    </div>
+    <div style="background: #F1F5F9; padding: 14px 24px; text-align: center; font-size: 11px; color: #64748B; border-top: 1px solid #E2E8F0;">
+      Confirmation email dispatched to <b>{recipient_email}</b> · Reference: <b>{reference_id}</b>
+    </div>
+  </div>
+</body>
+</html>
+"""
+
+    return _deliver_email(
+        to_email=recipient_email,
+        to_name=name,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        action_type="consultation_assigned",
+        extra_meta={
+            "reference_id": reference_id,
+            "pillar": pillar,
+            "assigned_expert": assigned_expert,
+            "topic": topic
+        }
+    )

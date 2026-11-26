@@ -80,6 +80,12 @@ export const DashboardOverview: React.FC = () => {
   const [tmSearchQuery, setTmSearchQuery] = useState<string>("");
   const [tmSearchResult, setTmSearchResult] = useState<any>(null);
   const [lawBookedModal, setLawBookedModal] = useState<boolean>(false);
+  const [consultationSuccessModal, setConsultationSuccessModal] = useState<{
+    id: string;
+    expert: string;
+    topic: string;
+    email: string;
+  } | null>(null);
 
   const toggleDeadline = (id: string) => {
     setCompletedDeadlines((prev) => {
@@ -1371,11 +1377,17 @@ export const DashboardOverview: React.FC = () => {
                       pillar: "CA",
                       topic: caConsultTopic,
                       phone_number: user?.phone_number || "+91 9988776655",
+                      email: user?.email,
+                      full_name: user?.full_name,
                       notes: "Scheduled via Dashboard CA Financial Desk",
                     });
                     setCaBookedModal(false);
-                    alert(`Your CA Consultation (${res.id}) has been recorded in the database! In a short period of time our team will contact you with meeting coordinates. You can track this in 'Your Consultations'.`);
-                    navigate("/consultations");
+                    setConsultationSuccessModal({
+                      id: res.id,
+                      expert: res.assigned_expert || "CA Aniket Kulkarni",
+                      topic: res.topic,
+                      email: res.email || user?.email || "your email",
+                    });
                   } catch (err: any) {
                     alert(err?.message || "Failed to book CA consultation");
                   }
@@ -1441,11 +1453,17 @@ export const DashboardOverview: React.FC = () => {
                       pillar: "LAW",
                       topic: "Corporate Counsel Legal Session",
                       phone_number: user?.phone_number || "+91 9988776655",
+                      email: user?.email,
+                      full_name: user?.full_name,
                       notes: "Scheduled via Dashboard Corporate Law Vault",
                     });
                     setLawBookedModal(false);
-                    alert(`Your Legal Consultation (${res.id}) has been recorded in the database! In a short period of time our team will contact you with meeting coordinates. You can track this in 'Your Consultations'.`);
-                    navigate("/consultations");
+                    setConsultationSuccessModal({
+                      id: res.id,
+                      expert: res.assigned_expert || "Adv. Rajesh Varma",
+                      topic: res.topic,
+                      email: res.email || user?.email || "your email",
+                    });
                   } catch (err: any) {
                     alert(err?.message || "Failed to book Legal consultation");
                   }
@@ -1453,6 +1471,74 @@ export const DashboardOverview: React.FC = () => {
                 className="corpsetu-btn-navy px-4 py-2 text-xs font-bold"
               >
                 Confirm Legal Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* INSTANT REASSURANCE CONFIRMATION POPUP MODAL                  */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {consultationSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
+          <div className="spatial-surface rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-emerald-400/50 shadow-2xl space-y-5 text-center relative">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-sm">
+              <Check className="w-9 h-9" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+                Request Assigned Successfully
+              </span>
+              <h3 className="text-xl font-extrabold text-[#0B2559] dark:text-white">
+                Consultation Assigned &amp; Dispatched!
+              </h3>
+              <div className="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-950 dark:text-blue-100 text-xs font-semibold leading-relaxed shadow-xs">
+                Your request has been assigned and sent the details about your consultation to{" "}
+                <span className="font-extrabold text-[#0B2559] dark:text-[#E5B842] underline">
+                  {consultationSuccessModal.email}
+                </span>
+              </div>
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                In a short period of time our team will contact you via phone &amp; email with meeting coordinates.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-left space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Tracking Reference:</span>
+                <span className="font-mono font-extrabold text-[#0B2559] dark:text-white bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                  {consultationSuccessModal.id}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Assigned Specialist:</span>
+                <span className="font-bold text-slate-900 dark:text-white">{consultationSuccessModal.expert}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Topic:</span>
+                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[220px]">{consultationSuccessModal.topic}</span>
+              </div>
+            </div>
+
+            <div className="pt-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setConsultationSuccessModal(null);
+                  navigate("/consultations");
+                }}
+                className="flex-1 corpsetu-btn-navy py-3 text-xs font-bold justify-center"
+              >
+                Track in Your Consultations &rarr;
+              </button>
+              <button
+                type="button"
+                onClick={() => setConsultationSuccessModal(null)}
+                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+              >
+                Close
               </button>
             </div>
           </div>

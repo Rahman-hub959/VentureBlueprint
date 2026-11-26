@@ -49,14 +49,14 @@ export const LiveChatWidget: React.FC = () => {
       avatarColor: "bg-blue-600",
       badgeColor: "bg-blue-100 text-blue-900 dark:bg-blue-900/60 dark:text-blue-200 border-blue-200 dark:border-blue-700",
       icon: Scale,
-      placeholder: "Ask Adv. Rajesh about contracts, vesting, trademark, IP protection...",
+      placeholder: "Ask Adv. Rajesh about contracts, equity sharing, trademark, IP...",
       faqs: [
-        { q: "How does 4-year vesting with a 1-year cliff work?", topic: "vesting" },
-        { q: "Which Trademark class applies to software & SaaS?", topic: "trademark" },
-        { q: "What clauses are essential in an NDA?", topic: "nda" },
-        { q: "How to legally assign pre-incorporation IP?", topic: "ip_assignment" },
-        { q: "Are Non-Compete clauses enforceable in India?", topic: "non_compete" },
-        { q: "How to resolve a 50:50 founder deadlock?", topic: "deadlock" }
+        { q: "How should founder shares and equity be split?", topic: "vesting" },
+        { q: "How do I trademark my brand name and logo?", topic: "trademark" },
+        { q: "When do I need a Non-Disclosure Agreement (NDA)?", topic: "nda" },
+        { q: "How do I protect my website or app source code?", topic: "ip_assignment" },
+        { q: "Can an ex-founder start a competing business?", topic: "non_compete" },
+        { q: "What happens if two 50-50 co-founders disagree?", topic: "deadlock" }
       ]
     },
     CS: {
@@ -67,14 +67,14 @@ export const LiveChatWidget: React.FC = () => {
       avatarColor: "bg-[#C59B27]",
       badgeColor: "bg-amber-100 text-amber-900 dark:bg-amber-900/60 dark:text-amber-200 border-amber-200 dark:border-amber-700",
       icon: Building2,
-      placeholder: "Ask CS Priyanjali about SPICe+, RUN name approval, INC-20A, ADT-1...",
+      placeholder: "Ask CS Priyanjali about company name, registration, DIN, ROC filings...",
       faqs: [
-        { q: "What are the rules for SPICe+ Part A name approval?", topic: "name_approval" },
-        { q: "How to file Form INC-20A within 180 days?", topic: "inc_20a" },
-        { q: "When must Statutory Auditor Form ADT-1 be filed?", topic: "adt_1" },
-        { q: "How many directors can get DIN in SPICe+ Part B?", topic: "din_spice" },
-        { q: "What statutory registers are mandatory under §88?", topic: "registers" },
-        { q: "What are the annual ROC filing deadlines (AOC-4 / MGT-7)?", topic: "annual_roc" }
+        { q: "How do I choose and approve my company name?", topic: "name_approval" },
+        { q: "What is the 180-day bank deposit rule (INC-20A)?", topic: "inc_20a" },
+        { q: "When should I appoint my first company auditor?", topic: "adt_1" },
+        { q: "How do new directors get their DIN number?", topic: "din_spice" },
+        { q: "What official registers and records must I keep?", topic: "registers" },
+        { q: "What are the yearly ROC filing deadlines?", topic: "annual_roc" }
       ]
     },
     CA: {
@@ -85,14 +85,14 @@ export const LiveChatWidget: React.FC = () => {
       avatarColor: "bg-emerald-600",
       badgeColor: "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/60 dark:text-emerald-200 border-emerald-200 dark:border-emerald-700",
       icon: FileSpreadsheet,
-      placeholder: "Ask CA Aniket about GST returns, advance tax, TDS, statutory audit...",
+      placeholder: "Ask CA Aniket about GST, tax saving, audit, vendor payments...",
       faqs: [
-        { q: "When is GST registration mandatory (₹20L vs ₹40L)?", topic: "gst_threshold" },
-        { q: "How is Advance Tax calculated under Section 208?", topic: "advance_tax" },
-        { q: "What are monthly due dates for GSTR-1 and GSTR-3B?", topic: "gst_dates" },
-        { q: "How to match Input Tax Credit (ITC) with GSTR-2B?", topic: "itc_reconciliation" },
-        { q: "Is Statutory Audit mandatory for Private Limited companies?", topic: "statutory_audit" },
-        { q: "What TDS rate applies to contractors vs professionals?", topic: "tds_rates" }
+        { q: "Do I need GST for my new business?", topic: "gst_threshold" },
+        { q: "When do I have to pay Income Tax & Advance Tax?", topic: "advance_tax" },
+        { q: "What are the monthly GST filing dates?", topic: "gst_dates" },
+        { q: "How do I save tax and claim GST refunds (ITC)?", topic: "itc_reconciliation" },
+        { q: "Do I need an audit if my company has zero revenue?", topic: "statutory_audit" },
+        { q: "How much TDS should I cut when paying vendors or freelancers?", topic: "tds_rates" }
       ]
     },
   };
@@ -138,69 +138,69 @@ export const LiveChatWidget: React.FC = () => {
     const q = text.toLowerCase();
 
     if (expert === "CS") {
-      if (q.includes("name") || q.includes("rule 8") || q.includes("spice+ part a")) {
-        return "Under Rule 8 of the Companies (Incorporation) Rules 2014, your corporate name must have three parts: (1) A unique distinctive prefix, (2) An activity noun reflecting your main object (e.g. Technologies, Solutions), and (3) The statutory suffix 'Private Limited' or 'LLP'. SPICe+ Part A reservations are reviewed by the Central Registration Centre (CRC) and are valid for 20 days upon approval.";
+      if (q.includes("name") || q.includes("choose") || q.includes("rule 8") || q.includes("spice+ part a")) {
+        return "Choosing and Approving Your Company Name:\n\n1. Name Structure: Must have a distinctive unique word + your main activity (e.g. Solutions, Technologies) + suffix 'Private Limited' or 'LLP'.\n2. Avoid Rejections: Check that your name is not identical to existing companies on MCA or active registered trademarks.\n3. Approval Window: We submit your top 2 name preferences via MCA SPICe+ Part A / RUN. Once approved, the name is reserved for 20 days to complete registration.";
       }
-      if (q.includes("inc-20a") || q.includes("commencement") || q.includes("180")) {
-        return "Section 10A requires every newly incorporated company to file Form INC-20A (Declaration of Commencement of Business) within 180 days of the Certificate of Incorporation (COI). Before filing, each subscriber must deposit their subscribed equity capital into the corporate bank account, and bank statement proofs must be attached. Failure to file attracts ₹50,000 fine and risk of ROC strike-off.";
+      if (q.includes("inc-20a") || q.includes("180") || q.includes("bank") || q.includes("commencement")) {
+        return "The 180-Day Bank Deposit Rule (Form INC-20A):\n\n• What is it? Within 180 days of company registration, every shareholder must deposit their promised share capital money into the company bank account.\n• Proof needed: A bank statement showing the money deposit must be filed with MCA in Form INC-20A.\n• Why it matters: You cannot legally start business operations or borrow money before filing this. Filing on time avoids a ₹50,000 penalty.";
       }
-      if (q.includes("adt-1") || q.includes("auditor appointment") || q.includes("30 days")) {
-        return "Under Section 139(6) of the Companies Act, 2013, the Board of Directors must appoint the company's first Statutory Auditor within 30 days of incorporation. Form ADT-1 should be filed with ROC within 15 days of that board meeting, attaching the auditor's written consent and eligibility certificate under Section 141.";
+      if (q.includes("adt-1") || q.includes("auditor") || q.includes("appoint") || q.includes("30 days")) {
+        return "Appointing Your First Company Auditor:\n\n• Mandatory Deadline: The Board of Directors must appoint your first Statutory Auditor (Chartered Accountant) within 30 days of registration.\n• Form ADT-1: Filed with the ROC along with the CA's consent letter and eligibility certificate.\n• Tenure: The first auditor holds office until the conclusion of your first Annual General Meeting (AGM).";
       }
       if (q.includes("din") || q.includes("director")) {
-        return "Up to 3 new directors can apply for their Director Identification Number (DIN) directly inside the unified SPICe+ Part B form without needing separate DIR-3 filings. Ensure identity and address proofs (PAN, Aadhaar/Passport, Utility bill) are certified by a practicing CS or CA.";
+        return "Getting a Director Identification Number (DIN):\n\n• Instant Application: Up to 3 new directors can apply for their DIN directly inside the company registration application (SPICe+ Part B).\n• Documents Needed: Self-attested PAN card, Identity proof (Aadhaar/Passport/Voter ID), and latest Address proof (Bank statement or utility bill < 2 months old).\n• Existing DIN: If you already have a DIN from another company, you simply enter your existing DIN number.";
       }
-      if (q.includes("register") || q.includes("88") || q.includes("statutory registers")) {
-        return "Under Section 88 of the Companies Act, companies must maintain: (1) Register of Members (Form MGT-1), (2) Register of Debenture holders, (3) Register of Directors & KMP, and (4) Register of Charges (CHG-7). These must be kept at the registered office and updated after every allotment or transfer.";
+      if (q.includes("register") || q.includes("record") || q.includes("88")) {
+        return "Mandatory Company Registers and Records:\n\nUnder Company Law, every registered company must keep organized registers at its registered office:\n1. Register of Members (Shareholders list and share counts)\n2. Register of Directors and Key Managerial Personnel\n3. Register of Charges (Bank loans / security created)\n4. Minutes Book: Signed records of Board Meetings and AGM decisions.";
       }
-      if (q.includes("annual") || q.includes("aoc-4") || q.includes("mgt-7")) {
-        return "Annual ROC compliance requires convening an AGM within 6 months of fiscal close (by Sept 30), followed by filing Form AOC-4 (Financial Statements & Board's Report) within 30 days of AGM, and Form MGT-7/7A (Annual Return) within 60 days of AGM. Delays incur additional fees of ₹100 per day.";
+      if (q.includes("annual") || q.includes("yearly") || q.includes("deadline") || q.includes("aoc-4") || q.includes("mgt-7")) {
+        return "Yearly ROC Filing Deadlines:\n\nEvery year, your company completes 3 main statutory filings:\n• Form AOC-4 (Financial Statements): Due within 30 days of AGM (usually by Oct 30).\n• Form MGT-7/7A (Annual Return): Due within 60 days of AGM (usually by Nov 29).\n• Form DIR-3 KYC (Director verification): Due every year by September 30.\n\nFiling on time saves ₹100/day per form in late penalty fees.";
       }
-      return `Thank you for your secretarial query regarding "${text}". As your assigned CS, our team will review the applicable MCA21 regulations, prepare the requisite board minutes/resolutions, and guide you through the verified CRC statutory filing procedure.`;
+      return `Thank you for your secretarial query regarding "${text}". As your assigned Company Secretary, our team will review your requirements, draft the necessary board resolutions, and handle the official MCA/ROC filing smoothly for you.`;
     }
 
     if (expert === "CA") {
-      if (q.includes("gst") && (q.includes("threshold") || q.includes("mandatory") || q.includes("turnover"))) {
-        return "GST registration is mandatory under Section 22 of the CGST Act if aggregate annual turnover exceeds ₹20 Lakhs for service providers (₹10 Lakhs in Special Category states) or ₹40 Lakhs for goods suppliers. Voluntary registration is recommended for startups to claim Input Tax Credit (ITC) on capital assets, cloud hosting, and professional services.";
+      if (q.includes("gst") && (q.includes("need") || q.includes("threshold") || q.includes("mandatory") || q.includes("turnover") || q.includes("new business"))) {
+        return "Do you need GST for your new business?\n\n• For Service Businesses (Tech, Consulting, Agencies): Mandatory once your yearly sales cross ₹20 Lakhs (₹10L in special northeast states).\n• For Goods/Products (Trading, Manufacturing): Mandatory once your yearly sales cross ₹40 Lakhs.\n• Selling Online or Out of State: Mandatory from Day 1 if you sell via Amazon/Flipkart or sell to clients outside your home state.\n\n💡 Founder Tip: Even if your sales are ₹0, registering voluntarily lets you claim back all the 18% GST you spend on laptops, office rent, AWS servers, and consultant fees!";
       }
-      if (q.includes("advance tax") || q.includes("208") || q.includes("211")) {
-        return "Under Section 208 of the Income Tax Act, every company whose estimated tax liability exceeds ₹10,000 must pay Advance Tax in 4 quarterly installments: 15% by 15th June, 45% by 15th September, 75% by 15th December, and 100% by 15th March. Late or deficient payments attract statutory interest under Sections 234B and 234C.";
+      if (q.includes("advance tax") || q.includes("income tax") || q.includes("pay") || q.includes("208") || q.includes("installment")) {
+        return "When do you have to pay Income Tax & Advance Tax?\n\nIf your company's estimated tax for the year is over ₹10,000, you cannot wait until year-end. You pay Advance Tax in 4 quarterly installments:\n\n1. 15% of tax by June 15th\n2. 45% of tax by September 15th\n3. 75% of tax by December 15th\n4. 100% of tax by March 15th\n\n💡 Founder Tip: Paying these 4 installments on time avoids the 1% per month interest penalty.";
       }
-      if (q.includes("date") || q.includes("gstr-1") || q.includes("gstr-3b")) {
-        return "Standard GST compliance schedule: Form GSTR-1 (monthly outward supplies) is due by the 11th of every month. Form GSTR-3B (summary return and net tax settlement) is due by the 20th of every month. Late filing attracts ₹50/day (₹20/day for NIL returns) plus 18% annual interest on delayed cash tax payments.";
+      if (q.includes("date") || q.includes("monthly") || q.includes("gstr-1") || q.includes("gstr-3b")) {
+        return "Monthly GST Filing Deadlines:\n\nEvery registered business has two routine monthly filings:\n\n• GSTR-1 (Sales Summary): Due by the 11th of every month (details of all bills you issued to clients).\n• GSTR-3B (Tax Payment): Due by the 20th of every month (you calculate sales GST, subtract input GST, and pay the balance).\n\n💡 Important: Even if you had ₹0 sales in a month, you must file a NIL return. Skipping it costs ₹50/day in late fees.";
       }
-      if (q.includes("itc") || q.includes("gstr-2b") || q.includes("reconcil")) {
-        return "Rule 36(4) restricts Input Tax Credit (ITC) claims strictly to invoices auto-populated in Form GSTR-2B. Invoices missing from your vendor's GSTR-1 cannot be claimed in GSTR-3B. We conduct automated two-way reconciliation each month to avoid tax mismatch notices (DRC-01C).";
+      if (q.includes("save") || q.includes("credit") || q.includes("itc") || q.includes("refund") || q.includes("gstr-2b")) {
+        return "How to Save Tax with Input Tax Credit (ITC):\n\nWhenever you purchase business supplies (laptops, software, internet, rent, packaging), the GST you paid is NOT an expense — it is an asset!\n\n• How it works: If you collect ₹50,000 GST from a client, but already paid ₹30,000 GST on your expenses, you only pay ₹20,000 to the government!\n• Key Requirement: The vendor must file their GST return so the invoice reflects in your official GSTR-2B statement. Always give vendors your official company GST number.";
       }
-      if (q.includes("statutory audit") || q.includes("mandatory") || q.includes("zero")) {
-        return "Yes, under Section 139 of the Companies Act, Statutory Audit is mandatory for all Private Limited companies, even with zero revenue or active losses. The independent Chartered Accountant must audit the books, verify compliance with Accounting Standards (AS), and issue an independent Auditor's Report.";
+      if (q.includes("audit") || q.includes("zero") || q.includes("revenue") || q.includes("loss") || q.includes("statutory audit")) {
+        return "Do you need an audit if your company has zero revenue or losses?\n\n• Private Limited Company: YES, mandatory. Under Section 139 of the Companies Act, every Private Limited company MUST be audited annually by an independent Chartered Accountant, even with ₹0 income.\n• Limited Liability Partnership (LLP): Audit is only required if turnover exceeds ₹40 Lakhs or capital contribution exceeds ₹25 Lakhs.\n\n💡 Founder Tip: We offer affordable NIL annual audit and tax filing packages for early-stage startups.";
       }
-      if (q.includes("tds") || q.includes("194c") || q.includes("194j")) {
-        return "TDS deduction rates: Section 194C (contractors/vendors) is 1% for individuals/HUFs and 2% for corporate entities. Section 194J (technical and professional services) is 2% for technical fees and 10% for legal/accounting professional fees. Deposited via Challan 281 by the 7th of the following month.";
+      if (q.includes("tds") || q.includes("vendor") || q.includes("freelancer") || q.includes("contractor") || q.includes("cut") || q.includes("194")) {
+        return "How much TDS should you cut when paying vendors or freelancers?\n\nWhen paying service providers, you must deduct tax (TDS) and deposit it with the government:\n\n• Freelancers & Technical Services (Section 194J): Deduct 2% for IT/tech development, or 10% for legal/accounting/marketing advisory.\n• Contractors & Vendors (Section 194C): Deduct 1% if paying an individual, or 2% if paying a company/firm (applicable if a bill is > ₹30,000 or annual payments > ₹1,00,000).\n• Due Date: Deposited by the 7th of the following month.";
       }
-      return `Thank you for your tax inquiry regarding "${text}". As your empanelled CA, we will calculate the applicable statutory tax liability, review your input tax credits, and ensure all filings adhere strictly to ICAI standards and CBDT/CBIC deadlines.`;
+      return `Thank you for your tax inquiry regarding "${text}". As your empanelled Chartered Accountant, I will review your books, calculate your tax credits, and ensure all filings adhere strictly to ICAI standards.`;
     }
 
     // ADV (Corporate Law)
-    if (q.includes("vesting") || q.includes("cliff") || q.includes("equity")) {
-      return "The market standard for startup founder agreements is a 4-year vesting schedule with a 1-year cliff. During the first 12 months, 0% of equity vests. On the 1-year milestone, 25% vests in lump sum, and the remaining 75% vests monthly or quarterly over the next 36 months. If a founder leaves early, unvested equity is repurchased by the company at nominal face value.";
+    if (q.includes("vesting") || q.includes("shares") || q.includes("equity") || q.includes("split")) {
+      return "How should Founder Shares and Equity be split?\n\n• The standard best practice is a 4-Year Vesting Schedule with a 1-Year Cliff:\n1. Year 1 (Cliff): 0% vests until completing 12 months with the company.\n2. Month 12: 25% of total shares vest in a lump sum.\n3. Years 2-4: The remaining 75% vests gradually each month or quarter.\n\n💡 Why this matters: If a co-founder leaves after 6 months, they walk away without 50% of the company, protecting the active founders and future investors.";
     }
-    if (q.includes("trademark") || q.includes("class") || q.includes("brand")) {
-      return "For tech and internet companies, trademark protection under the Trade Marks Act 1999 typically spans: Class 9 (downloadable software, mobile apps, SaaS tokens), Class 35 (online business operations, digital marketing, corporate advisory), and Class 42 (software development, cloud computing, AI services). We conduct phonetic clearance search to avoid Section 11(1) conflict objections.";
+    if (q.includes("trademark") || q.includes("brand") || q.includes("logo") || q.includes("class")) {
+      return "How to Trademark Your Brand Name and Logo:\n\n• Step 1: Conduct a trademark search across the IP India portal to ensure no matching phonetic names exist.\n• Step 2: Choose the right classes:\n  - Class 9: Mobile apps, downloadable software\n  - Class 35: E-commerce platforms, consulting services\n  - Class 42: SaaS, cloud software, IT development\n• Step 3: File TM-A. You can use the '™' symbol from Day 1 of filing!";
     }
     if (q.includes("nda") || q.includes("non-disclosure") || q.includes("confidential")) {
-      return "An enforceable Non-Disclosure Agreement (NDA) must clearly define: (1) Specific confidential information exclusions (public domain, independently developed), (2) Permitted use solely for evaluation, (3) Survival period (typically 2 to 3 years; perpetual for trade secrets), (4) Injunctive relief clause, and (5) Clear governing law and arbitration venue (e.g. Bengaluru/Mumbai).";
+      return "When do you need a Non-Disclosure Agreement (NDA)?\n\n• You need an NDA before sharing business ideas, software code, customer lists, or financial data with:\n1. Potential co-founders or advisors\n2. External freelance developers or agencies\n3. Strategic vendors or corporate partners\n\nAn effective NDA defines what is confidential, restricts use solely to evaluating the project, and lasts for 2 to 3 years.";
     }
-    if (q.includes("ip") || q.includes("assignment") || q.includes("code")) {
-      return "All software architecture, source code, designs, and business models created by founders prior to incorporation must be formally assigned to the corporate entity via a written IP Assignment Agreement. Without this, IP legally belongs to the individual founder, creating severe impediments during VC due diligence.";
+    if (q.includes("ip") || q.includes("code") || q.includes("source") || q.includes("website") || q.includes("app")) {
+      return "Protecting Your Website or App Source Code (IP):\n\n• Common Pitfall: If founders write code or hire freelancers before the company is registered, the intellectual property legally belongs to the individuals, NOT the company!\n• Solution: Execute an IP Assignment Agreement transferring all software, designs, and domain rights to the company entity. Investors will insist on seeing this before funding.";
     }
-    if (q.includes("non-compete") || q.includes("27") || q.includes("restraint")) {
-      return "Under Section 27 of the Indian Contract Act 1872, agreements in restraint of trade are void post-employment. However, non-compete covenants during the subsistence of founder directorship and shareholding are fully enforceable. Furthermore, non-solicitation and strict non-disclosure covenants remain enforceable post-exit.";
+    if (q.includes("non-compete") || q.includes("competing") || q.includes("ex-founder") || q.includes("compete")) {
+      return "Can an ex-founder start a competing business?\n\n• Under Section 27 of the Indian Contract Act, non-compete clauses after leaving a job are generally not enforceable in court.\n• What IS Enforceable: Non-solicitation (they cannot poach your team or clients) and strict Non-Disclosure (they cannot use your code, trade secrets, or customer data). Also, non-compete clauses while they are still a director or shareholder are 100% enforceable.";
     }
-    if (q.includes("deadlock") || q.includes("50:50") || q.includes("dispute")) {
-      return "In equal 50:50 shareholding companies, statutory deadlocks prevent board decisions. We draft multi-tiered dispute resolution mechanisms in the Shareholders Agreement (SHA): (1) Executive negotiation, (2) Mediation, and (3) Russian Roulette / Texas Shootout buy-sell mechanism where one founder offers to buy the other's shares or sell theirs at a set valuation.";
+    if (q.includes("deadlock") || q.includes("50:50") || q.includes("disagree") || q.includes("co-founders")) {
+      return "What happens if two 50-50 Co-Founders disagree?\n\n• The 50:50 Trap: When two equal founders disagree on a major decision, the board reaches a deadlock and the company can become completely paralyzed.\n• Solutions we draft in your Founders Agreement:\n1. Casting Vote or Domain Split (e.g. CEO decides product, CTO decides tech).\n2. Independent Advisory Tie-Breaker.\n3. Shotgun / Buy-Sell Clause: One founder offers a set price to buy the other's shares, and the other can choose to sell or buy at that same price.";
     }
-    return `Thank you for consulting on "${text}". As your corporate legal counsel, I will review the commercial implications under the Indian Contract Act and Companies Act, prepare protective indemnity and dispute resolution clauses, and ensure your business assets remain legally insulated.`;
+    return `Thank you for consulting on "${text}". As your corporate legal counsel, I will review your agreements, ensure founder protections, and prepare clear contracts to keep your business safe.`;
   };
 
   const handleSend = (overrideQuery?: string) => {
@@ -422,7 +422,7 @@ export const LiveChatWidget: React.FC = () => {
           {/* FAQ Quick-Prompt Chips */}
           <div className="p-2.5 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
             <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block px-1">
-              Quick Inquiries for {currentExpert.role}:
+              Common Questions for {currentExpert.name} ({currentExpert.role.includes('&') ? currentExpert.role.split('&')[0].trim() : currentExpert.role}):
             </span>
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
               {currentExpert.faqs.map((f, i) => (

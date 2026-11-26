@@ -44,6 +44,7 @@ export const ConsultationsPage: React.FC = () => {
     consultationId: string;
     expertName: string;
     topic: string;
+    userEmail: string;
   } | null>(null);
 
   // Form State
@@ -118,6 +119,7 @@ export const ConsultationsPage: React.FC = () => {
         consultationId: res.id,
         expertName: res.assigned_expert || "Empanelled Lead",
         topic: res.topic,
+        userEmail: res.email || formData.email || user?.email || "your registered email",
       });
 
       // Reload list
@@ -183,15 +185,21 @@ export const ConsultationsPage: React.FC = () => {
               <CheckCircle2 className="w-9 h-9" />
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-3">
               <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Request Logged Successfully
+                Request Assigned Successfully
               </span>
               <h3 className="text-xl font-extrabold text-[#0B2559] dark:text-white">
-                Consultation Request Confirmed!
+                Consultation Assigned &amp; Dispatched!
               </h3>
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                In a short period of time our team will contact you via phone &amp; email with meeting details.
+              <div className="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-950 dark:text-blue-100 text-xs font-semibold leading-relaxed shadow-xs">
+                Your request has been assigned and sent the details about your consultation to{" "}
+                <span className="font-extrabold text-[#0B2559] dark:text-[#E5B842] underline">
+                  {successPopup.userEmail}
+                </span>
+              </div>
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                In a short period of time our team will contact you via phone &amp; email with meeting coordinates.
               </p>
             </div>
 
