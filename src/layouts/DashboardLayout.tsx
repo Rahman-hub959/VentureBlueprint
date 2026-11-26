@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   MessageSquareWarning,
-  Scale
+  Scale,
+  CalendarCheck
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -54,6 +55,7 @@ export const DashboardLayout: React.FC = () => {
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
     { label: "My Projects", path: "/projects", icon: FolderKanban },
     { label: "Create Project", path: "/projects/new", icon: PlusCircle },
+    { label: "Your Consultations", path: "/consultations", icon: CalendarCheck },
     { label: "Compliance Checklist", path: `/projects/${activeProjectId}/compliance`, icon: CheckSquare },
     { label: "Generated Documents", path: `/projects/${activeProjectId}/documents`, icon: FileText },
     { label: "Role Recommendations", path: `/projects/${activeProjectId}/roles`, icon: Users },
@@ -79,7 +81,7 @@ export const DashboardLayout: React.FC = () => {
       <aside className="hidden md:flex flex-col w-64 glass-panel m-3 mr-0 rounded-2xl z-20 sticky top-3 h-[calc(100vh-24px)] p-4 shadow-sm">
         {/* Brand */}
         <Link to="/dashboard" className="flex items-center px-2 py-3 mb-5 border-b border-slate-200 dark:border-slate-800">
-          <CorpSetuLogo size="md" />
+          <CorpSetuLogo size="lg" />
         </Link>
 
         {/* Project Selector Box */}

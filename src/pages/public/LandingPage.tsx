@@ -21,16 +21,24 @@ import {
   X,
   Phone,
   Mail,
-  Building
+  Building,
+  Check,
+  CalendarCheck
 } from "lucide-react";
 import { CorpSetuLogo } from "../../components/CorpSetuLogo";
+import { consultationsApi } from "../../api/client";
 
 export const LandingPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPillar, setSelectedPillar] = useState<"ALL" | "LAW" | "CS" | "CA">("ALL");
   const [consultationModalOpen, setConsultationModalOpen] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-  const [consultationSubmitted, setConsultationSubmitted] = useState(false);
+  const [submittingConsult, setSubmittingConsult] = useState(false);
+  const [consultationResult, setConsultationResult] = useState<{
+    id: string;
+    expert: string;
+    topic: string;
+  } | null>(null);
 
   // Consultation Form state
   const [consultData, setConsultData] = useState({
@@ -42,16 +50,34 @@ export const LandingPage: React.FC = () => {
     notes: "",
   });
 
-  const handleConsultSubmit = (e: React.FormEvent) => {
+  const handleConsultSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setConsultationSubmitted(true);
-    setTimeout(() => {
-      // Auto close after 2.5s
-      setTimeout(() => {
-        setConsultationModalOpen(false);
-        setConsultationSubmitted(false);
-      }, 2500);
-    }, 500);
+    if (!consultData.phone.trim()) {
+      alert("Please provide a valid phone number.");
+      return;
+    }
+    setSubmittingConsult(true);
+    try {
+      const res = await consultationsApi.create({
+        full_name: consultData.name,
+        email: consultData.email,
+        phone_number: consultData.phone,
+        company_name: consultData.companyName,
+        pillar: consultData.serviceType as any,
+        topic: consultData.notes.trim() || `${consultData.serviceType} Professional Advisory Session`,
+        notes: consultData.notes,
+      });
+
+      setConsultationResult({
+        id: res.id,
+        expert: res.assigned_expert || "Senior Partner",
+        topic: res.topic,
+      });
+    } catch (err: any) {
+      alert(err?.message || "Failed to submit consultation request. Please try again.");
+    } finally {
+      setSubmittingConsult(false);
+    }
   };
 
   const faqs = [
@@ -526,211 +552,158 @@ export const LandingPage: React.FC = () => {
 
 
       {/* =========================================================================
-          PROFESSIONAL SUPPORT FOR EVERY STAGE (User Copy)
+          COMPREHENSIVE CORPORATE SERVICES (CLEAN & UNCLUTTERED)
           ========================================================================= */}
       <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div className="text-center space-y-3">
+        <div className="max-w-6xl mx-auto space-y-10">
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#C59B27] dark:text-[#E5B842]">
-              Professional Support For Every Stage Of Your Business
+              Professional Support For Every Stage
             </h2>
-            <h3 className="text-3xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">
-              Running a business involves more than serving customers and generating revenue.
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">
+              One Integrated Partner For Registration, Compliance &amp; Legal
             </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+              Direct access to certified Company Secretaries, Chartered Accountants, and Advocates on a single unified platform.
+            </p>
           </div>
 
-          <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed text-center max-w-3xl mx-auto">
-            You also need the right structure, accurate documentation, timely compliance, and sound legal guidance.
-            Our CA, CS, and legal professionals provide practical support for both new company registration and existing business operations, so you can make important decisions with greater confidence.
-            Whether you are launching a new venture, expanding an existing company, or resolving a corporate or legal requirement, we help you move forward with a clear plan.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
-            <div className="p-6 rounded-2xl spatial-card space-y-3">
-              <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
-                <Building className="w-5 h-5 text-[#C59B27]" />
-                Company Registration and Business Setup
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Turn your business idea into a properly structured company with support throughout the registration process.
-              </p>
-              <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 pt-2">
-                <li>• Company and business registration guidance</li>
-                <li>• Selection of the appropriate business structure (Pvt Ltd, LLP, OPC)</li>
-                <li>• Documentation and application support</li>
-                <li>• Startup compliance planning</li>
-                <li>• Assistance for founders and first-time business owners</li>
-              </ul>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {/* 1. Setup */}
+            <div className="p-5 rounded-2xl spatial-card space-y-3 flex flex-col justify-between">
+              <div className="space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-[#C59B27] flex items-center justify-center font-bold">
+                  <Building className="w-5 h-5" />
+                </div>
+                <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white">Business Setup</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Pvt Ltd, LLP, OPC incorporation, SPICe+ filing, MoA/AoA drafting, PAN/TAN &amp; bank accounts.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setConsultData(prev => ({ ...prev, serviceType: "CS", notes: "New Company Incorporation Guidance" }));
+                  setConsultationModalOpen(true);
+                }}
+                className="text-xs font-bold text-[#C59B27] hover:underline text-left inline-flex items-center gap-1 pt-2"
+              >
+                Incorporate Company &rarr;
+              </button>
             </div>
 
-            <div className="p-6 rounded-2xl spatial-card space-y-3">
-              <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#0B2559] dark:text-blue-300" />
-                Corporate Secretarial Services
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Keep your company’s records, filings, and statutory responsibilities organized.
-              </p>
-              <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 pt-2">
-                <li>• Annual compliance support</li>
-                <li>• Corporate documentation and SPICe+ dossiers</li>
-                <li>• Board and shareholder resolutions</li>
-                <li>• Statutory registers and records</li>
-                <li>• Company changes and updates (Directors, Capital, Office)</li>
-                <li>• Compliance calendars and reminders</li>
-              </ul>
+            {/* 2. Secretarial */}
+            <div className="p-5 rounded-2xl spatial-card space-y-3 flex flex-col justify-between">
+              <div className="space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#0B2559] dark:text-blue-300 flex items-center justify-center font-bold">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white">Secretarial Desk</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  ROC annual filings (AOC-4, MGT-7), Form INC-20A, DIN e-KYC, and statutory registers.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setConsultData(prev => ({ ...prev, serviceType: "CS", notes: "Annual ROC & MCA Secretarial Support" }));
+                  setConsultationModalOpen(true);
+                }}
+                className="text-xs font-bold text-[#0B2559] dark:text-blue-400 hover:underline text-left inline-flex items-center gap-1 pt-2"
+              >
+                Annual ROC Filing &rarr;
+              </button>
             </div>
 
-            <div className="p-6 rounded-2xl spatial-card space-y-3">
-              <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
-                <FileSpreadsheet className="w-5 h-5 text-emerald-600" />
-                Accounting and Financial Support
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Get better visibility into your business finances and make decisions based on accurate information.
-              </p>
-              <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 pt-2">
-                <li>• Accounting and bookkeeping support</li>
-                <li>• Financial reporting and statements</li>
-                <li>• Tax planning and GST compliance assistance</li>
-                <li>• Business financial reviews</li>
-                <li>• Support with financial documentation for banking and investors</li>
-              </ul>
+            {/* 3. Accounting & Tax */}
+            <div className="p-5 rounded-2xl spatial-card space-y-3 flex flex-col justify-between">
+              <div className="space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 flex items-center justify-center font-bold">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white">CA &amp; Tax Engine</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Monthly GST (GSTR-1, 3B), Advance Tax calculation (§208), TDS compliance, and Statutory Audit.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setConsultData(prev => ({ ...prev, serviceType: "CA", notes: "GST Filing & Advance Tax Advisory" }));
+                  setConsultationModalOpen(true);
+                }}
+                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline text-left inline-flex items-center gap-1 pt-2"
+              >
+                GST &amp; Tax Review &rarr;
+              </button>
             </div>
 
-            <div className="p-6 rounded-2xl spatial-card space-y-3">
-              <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
-                <Scale className="w-5 h-5 text-[#C59B27]" />
-                Legal and Business Advisory
-              </h4>
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Protect your business with practical legal guidance for everyday decisions and important transactions.
-              </p>
-              <ul className="text-xs text-slate-600 dark:text-slate-300 space-y-1.5 pt-2">
-                <li>• Business agreements and commercial contracts</li>
-                <li>• Founder agreements, vesting, and NDA documentation</li>
-                <li>• Corporate legal support & regulatory guidance</li>
-                <li>• Risk identification and prevention</li>
-                <li>• Support for business restructuring and expansion</li>
-              </ul>
+            {/* 4. Legal & Contracts */}
+            <div className="p-5 rounded-2xl spatial-card space-y-3 flex flex-col justify-between">
+              <div className="space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950 text-purple-700 flex items-center justify-center font-bold">
+                  <Scale className="w-5 h-5" />
+                </div>
+                <h4 className="text-base font-extrabold text-[#0B2559] dark:text-white">Legal &amp; Contracts</h4>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                  Founder equity vesting, bilateral NDAs, employment agreements, and Trademark TM-A filings.
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setConsultData(prev => ({ ...prev, serviceType: "LAW", notes: "Founder Agreement & Trademark Review" }));
+                  setConsultationModalOpen(true);
+                }}
+                className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline text-left inline-flex items-center gap-1 pt-2"
+              >
+                Legal Drafting &rarr;
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-
       {/* =========================================================================
-          WHY BUSINESSES CHOOSE US (User Copy)
+          WHY BUSINESSES CHOOSE US (CLEAN 3-PILLAR ADVANTAGE)
           ========================================================================= */}
-      <section id="why-us" className="py-16 md:py-24 bg-slate-50/70 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center max-w-3xl mx-auto space-y-3">
+      <section id="why-us" className="py-14 md:py-18 bg-slate-50/70 dark:bg-slate-900/50 border-y border-slate-200 dark:border-slate-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#C59B27] dark:text-[#E5B842]">
               Why Businesses Choose Us
             </h2>
-            <h3 className="text-3xl sm:text-4xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">
-              One Professional Partner for Multiple Business Needs
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">
+              Integrated Corporate Advantage
             </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              CA, CS, and legal requirements often overlap. Our integrated approach helps reduce confusion and saves you from coordinating with multiple disconnected providers.
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="spatial-card p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-[#C59B27] flex items-center justify-center font-bold shadow-2xs">
+            <div className="spatial-card p-6 space-y-2.5">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950 text-[#C59B27] flex items-center justify-center font-extrabold text-sm">
                 01
               </div>
-              <h4 className="font-extrabold text-base text-[#0B2559] dark:text-white">Clear Advice Without Unnecessary Complexity</h4>
+              <h4 className="font-extrabold text-sm text-[#0B2559] dark:text-white">Three Services Under One Roof</h4>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Business compliance and legal processes can feel overwhelming. We explain your options in straightforward language, so you understand what needs to happen and why.
+                CA, CS, and corporate legal requirements overlap. Stop coordinating with 3 separate offices when one platform syncs all filings.
               </p>
             </div>
 
-            <div className="spatial-card p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#0B2559] dark:text-blue-300 flex items-center justify-center font-bold shadow-2xs">
+            <div className="spatial-card p-6 space-y-2.5">
+              <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 text-[#0B2559] dark:text-blue-300 flex items-center justify-center font-extrabold text-sm">
                 02
               </div>
-              <h4 className="font-extrabold text-base text-[#0B2559] dark:text-white">Support for Both New and Established Companies</h4>
+              <h4 className="font-extrabold text-sm text-[#0B2559] dark:text-white">Direct Empanelled Experts</h4>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Whether you are registering your first company or managing an established business, our services can be tailored to your current stage and priorities.
+                Every consultation is handled by certified members of ICAI, ICSI, or Bar Council of India with guaranteed response times.
               </p>
             </div>
 
-            <div className="spatial-card p-6 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center font-bold shadow-2xs">
+            <div className="spatial-card p-6 space-y-2.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 flex items-center justify-center font-extrabold text-sm">
                 03
               </div>
-              <h4 className="font-extrabold text-base text-[#0B2559] dark:text-white">Practical, Business-Focused Solutions</h4>
+              <h4 className="font-extrabold text-sm text-[#0B2559] dark:text-white">Zero-Penalty Guarantee</h4>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                We focus on solutions that support your actual business goals, not just paperwork. Our aim is to help you remain compliant while building a stronger foundation for growth.
+                Automated statutory clocks and proactive reminder calendars keep your company 100% compliant and penalty-free.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* =========================================================================
-          COMPLIANCE SUPPORT FOR EXISTING COMPANIES & SMES (User Copy)
-          ========================================================================= */}
-      <section id="compliance-calendar" className="py-16 md:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto bg-gradient-to-br from-[#0B2559] to-[#061838] rounded-3xl p-8 sm:p-12 text-white shadow-2xl space-y-8">
-          <div className="max-w-3xl space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#C59B27]">
-              Ongoing Governance Assistance
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-              Compliance Support for Existing Companies and SMEs
-            </h3>
-            <p className="text-sm text-slate-300 leading-relaxed">
-              Staying compliant is an ongoing responsibility, not a one-time task. Our compliance support helps existing companies and SMEs manage their corporate, financial, and legal obligations in an organized and timely manner. We help you stay focused on your business while keeping essential compliance work on track.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs text-slate-200">
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#C59B27] flex-shrink-0 mt-0.5" />
-              <span>Annual and periodic statutory filings (MCA, ROC, Income Tax, GST)</span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#C59B27] flex-shrink-0 mt-0.5" />
-              <span>Corporate records and statutory registers maintenance</span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#C59B27] flex-shrink-0 mt-0.5" />
-              <span>Board meeting and shareholder documentation</span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#C59B27] flex-shrink-0 mt-0.5" />
-              <span>Preparation of board resolutions and minutes</span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#C59B27] flex-shrink-0 mt-0.5" />
-              <span>Changes to directors, shareholders, or registered office details</span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#C59B27] flex-shrink-0 mt-0.5" />
-              <span>Compliance calendars and automated deadline tracking</span>
-            </div>
-          </div>
-
-          <div className="pt-4 flex flex-wrap items-center gap-4">
-            <button
-              onClick={() => {
-                setConsultData(prev => ({ ...prev, serviceType: "ALL", notes: "Existing SME Annual Compliance Review" }));
-                setConsultationModalOpen(true);
-              }}
-              className="corpsetu-btn-gold text-xs py-3 px-6 shadow-md"
-            >
-              Book Compliance Review Consultation
-            </button>
-            <Link
-              to="/complaints"
-              className="px-5 py-3 rounded-xl bg-white/15 hover:bg-white/20 text-xs font-semibold text-white border border-white/20 transition-colors"
-            >
-              Have a Grievance? Register Complaint
-            </Link>
           </div>
         </div>
       </section>
@@ -822,7 +795,7 @@ export const LandingPage: React.FC = () => {
 
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <CorpSetuLogo size="sm" showTagline={false} />
+                <CorpSetuLogo size="md" />
               </div>
               <h3 className="text-xl font-extrabold text-[#0B2559] dark:text-white">Book a Professional Consultation</h3>
               <p className="text-xs text-slate-500">
@@ -830,13 +803,48 @@ export const LandingPage: React.FC = () => {
               </p>
             </div>
 
-            {consultationSubmitted ? (
-              <div className="p-6 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-center space-y-3">
-                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                <h4 className="font-extrabold text-base text-emerald-900 dark:text-emerald-100">Consultation Scheduled!</h4>
-                <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                  Our compliance officer will reach out via WhatsApp and phone within 15 minutes with meeting details.
-                </p>
+            {consultationResult ? (
+              <div className="p-6 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto shadow-sm">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-extrabold text-lg text-emerald-900 dark:text-emerald-100">Consultation Requested Successfully!</h4>
+                  <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                    In a short period of time our team will contact you via phone &amp; email with meeting details.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-emerald-200 dark:border-emerald-800 text-left space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium">Tracking Reference:</span>
+                    <span className="font-mono font-bold text-[#0B2559] dark:text-white bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                      {consultationResult.id}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium">Assigned Expert:</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{consultationResult.expert}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <Link
+                    to="/consultations"
+                    className="flex-1 corpsetu-btn-navy py-2.5 text-xs font-bold text-center justify-center"
+                  >
+                    View in Your Consultations
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setConsultationModalOpen(false);
+                      setConsultationResult(null);
+                    }}
+                    className="px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    Done
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleConsultSubmit} className="space-y-3.5 text-left" autoComplete="off">
@@ -934,9 +942,10 @@ export const LandingPage: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="w-full corpsetu-btn-gold text-xs py-3 justify-center shadow-md font-bold"
+                  disabled={submittingConsult}
+                  className="w-full corpsetu-btn-gold text-xs py-3 justify-center shadow-md font-bold disabled:opacity-60"
                 >
-                  Confirm Free Consultation Call
+                  {submittingConsult ? "Saving Request to Database..." : "Confirm Free Consultation Call"}
                 </button>
               </form>
             )}

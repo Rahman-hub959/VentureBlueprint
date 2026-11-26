@@ -191,3 +191,43 @@ export const adminApi = {
     }),
   getHealth: () => apiRequest<any>("/admin/health"),
 };
+
+// Consultations API
+export interface ConsultationItem {
+  id: string;
+  user_id?: string;
+  full_name: string;
+  email: string;
+  phone_number: string;
+  company_name?: string;
+  pillar: "CS" | "CA" | "LAW" | "GENERAL";
+  topic: string;
+  preferred_date?: string;
+  preferred_time_slot?: string;
+  status: "Requested" | "Scheduled" | "In Progress" | "Completed" | "Cancelled";
+  assigned_expert?: string;
+  expert_role?: string;
+  notes?: string;
+  meeting_link?: string;
+  meeting_platform?: string;
+  resolution_summary?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const consultationsApi = {
+  create: (data: {
+    full_name?: string;
+    email?: string;
+    phone_number: string;
+    company_name?: string;
+    pillar?: "CS" | "CA" | "LAW" | "GENERAL";
+    topic: string;
+    preferred_date?: string;
+    preferred_time_slot?: string;
+    notes?: string;
+  }) => apiRequest<ConsultationItem>("/consultations", { method: "POST", body: JSON.stringify(data) }),
+  list: () => apiRequest<ConsultationItem[]>("/consultations"),
+  get: (id: string) => apiRequest<ConsultationItem>(`/consultations/${id}`),
+  cancel: (id: string) => apiRequest<ConsultationItem>(`/consultations/${id}/cancel`, { method: "PATCH" }),
+};

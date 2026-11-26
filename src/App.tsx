@@ -33,6 +33,7 @@ import { RolesPage } from "./pages/roles/RolesPage";
 import { AdminPortalPage } from "./pages/admin/AdminPortalPage";
 import SettingsPage from "./pages/SettingsPage";
 import { ComplaintsPage } from "./pages/complaints/ComplaintsPage";
+import { ConsultationsPage } from "./pages/consultations/ConsultationsPage";
 
 // Global Widgets
 import { LiveChatWidget } from "./components/LiveChatWidget";
@@ -140,6 +141,7 @@ export default function App() {
                 <Route path="/faq" element={<FaqPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/complaints" element={<ComplaintsPage />} />
+                <Route path="/consultations" element={<ConsultationsPage />} />
                 <Route path="/privacy" element={<PrivacyPolicyPage />} />
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/login" element={<LoginPage />} />
@@ -164,6 +166,7 @@ export default function App() {
                 <Route path="/projects/:id/documents" element={<DocumentsPage />} />
                 <Route path="/projects/:id/roles" element={<RolesPage />} />
                 <Route path="/complaints" element={<ComplaintsPage />} />
+                <Route path="/consultations" element={<ConsultationsPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
 
                 {/* Admin Portal */}

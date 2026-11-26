@@ -35,7 +35,7 @@ import {
   Award
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
-import { projectsApi, documentsApi, complianceApi } from "../../api/client";
+import { projectsApi, documentsApi, complianceApi, consultationsApi } from "../../api/client";
 
 export const DashboardOverview: React.FC = () => {
   const { user } = useAuth();
@@ -1365,9 +1365,20 @@ export const DashboardOverview: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  alert("Your CA consultation request has been confirmed! CA Aniket Kulkarni will connect with you via Google Meet link sent to your registered email.");
-                  setCaBookedModal(false);
+                onClick={async () => {
+                  try {
+                    const res = await consultationsApi.create({
+                      pillar: "CA",
+                      topic: caConsultTopic,
+                      phone_number: user?.phone_number || "+91 9988776655",
+                      notes: "Scheduled via Dashboard CA Financial Desk",
+                    });
+                    setCaBookedModal(false);
+                    alert(`Your CA Consultation (${res.id}) has been recorded in the database! In a short period of time our team will contact you with meeting coordinates. You can track this in 'Your Consultations'.`);
+                    navigate("/consultations");
+                  } catch (err: any) {
+                    alert(err?.message || "Failed to book CA consultation");
+                  }
                 }}
                 className="corpsetu-btn-gold px-4 py-2 text-xs font-bold"
               >
@@ -1424,9 +1435,20 @@ export const DashboardOverview: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  alert("Your legal counsel appointment is confirmed! Adv. Rajesh Varma will connect via encrypted video bridge.");
-                  setLawBookedModal(false);
+                onClick={async () => {
+                  try {
+                    const res = await consultationsApi.create({
+                      pillar: "LAW",
+                      topic: "Corporate Counsel Legal Session",
+                      phone_number: user?.phone_number || "+91 9988776655",
+                      notes: "Scheduled via Dashboard Corporate Law Vault",
+                    });
+                    setLawBookedModal(false);
+                    alert(`Your Legal Consultation (${res.id}) has been recorded in the database! In a short period of time our team will contact you with meeting coordinates. You can track this in 'Your Consultations'.`);
+                    navigate("/consultations");
+                  } catch (err: any) {
+                    alert(err?.message || "Failed to book Legal consultation");
+                  }
                 }}
                 className="corpsetu-btn-navy px-4 py-2 text-xs font-bold"
               >

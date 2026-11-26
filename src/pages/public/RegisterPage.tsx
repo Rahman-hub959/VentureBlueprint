@@ -46,7 +46,7 @@ export const RegisterPage: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6 transition-colors">
         <div className="text-center space-y-3">
           <div className="flex justify-center">
-            <CorpSetuLogo size="lg" />
+            <CorpSetuLogo size="xl" />
           </div>
           <h1 className="text-2xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">Create Your Account</h1>
           <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">

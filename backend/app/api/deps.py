@@ -31,6 +31,20 @@ def get_current_user(
         raise credentials_exception
     return user
 
+def get_optional_current_user(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    if not token:
+        return None
+    payload = decode_token(token)
+    if not payload:
+        return None
+    user_id = payload.get("sub")
+    if not user_id:
+        return None
+    return db.query(User).filter(User.id == user_id, User.is_active == True).first()
+
 def get_current_user_from_token(token: str, db: Session) -> User:
     """Validates arbitrary JWT token string from headers or query parameters."""
     credentials_exception = HTTPException(

@@ -5,6 +5,9 @@ from main import app
 from app.database import Base, engine, SessionLocal
 from app.models.user import User, Role
 from app.models.project import StartupProject
+from app import models as _app_models
+
+Base.metadata.create_all(bind=engine)
 
 client = TestClient(app)
 
@@ -175,3 +178,60 @@ def test_admin_permissions_and_health():
     health_res = client.get("/api/v1/admin/health", headers=headers)
     assert health_res.status_code == 200
     assert health_res.json()["status"] == "healthy"
+
+def test_consultations_lifecycle():
+    # 1. Create a public consultation
+    consult_payload = {
+        "full_name": "Rohan Deshmukh",
+        "email": "rohan.deshmukh@example.com",
+        "phone_number": "+91 9876543210",
+        "company_name": "Deshmukh Logistics Pvt Ltd",
+        "pillar": "CA",
+        "topic": "Advance Tax & GST Reconciliation Advisory",
+        "preferred_time_slot": "Morning (10:00 AM - 1:00 PM)",
+        "notes": "Need CA to review input tax credit mismatch"
+    }
+    create_res = client.post("/api/v1/consultations", json=consult_payload)
+    assert create_res.status_code == 201
+    data = create_res.json()
+    assert data["id"].startswith("CONS-2026-")
+    assert data["status"] == "Requested"
+    assert "Aniket Kulkarni" in data["assigned_expert"]
+    assert "meet.google.com" in data["meeting_link"]
+    cons_id = data["id"]
+
+    # 2. Get consultation by ID
+    get_res = client.get(f"/api/v1/consultations/{cons_id}")
+    assert get_res.status_code == 200
+    assert get_res.json()["id"] == cons_id
+
+    # 3. Create consultation as authenticated user
+    login_res = client.post("/api/v1/auth/login", json={
+        "email": "testfounder@ventureblueprint.in",
+        "password": "SecurePassword123!"
+    })
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    auth_consult = client.post("/api/v1/consultations", json={
+        "phone_number": "+91 9988776655",
+        "pillar": "LAW",
+        "topic": "Founder Vesting Agreement Review"
+    }, headers=headers)
+    assert auth_consult.status_code == 201
+    auth_data = auth_consult.json()
+    assert auth_data["email"] == "testfounder@ventureblueprint.in"
+    assert "Rajesh Varma" in auth_data["assigned_expert"]
+
+    # 4. List user's consultations
+    list_res = client.get("/api/v1/consultations", headers=headers)
+    assert list_res.status_code == 200
+    user_consults = list_res.json()
+    assert len(user_consults) >= 1
+    assert any(c["id"] == auth_data["id"] for c in user_consults)
+
+    # 5. Cancel consultation
+    cancel_res = client.patch(f"/api/v1/consultations/{auth_data['id']}/cancel", headers=headers)
+    assert cancel_res.status_code == 200
+    assert cancel_res.json()["status"] == "Cancelled"
+

@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from app.config import settings
 from app.database import engine, Base
+from app import models as _app_models  # Ensures all SQLAlchemy models are registered
 from app.seed import seed_database
 
 # Routers
@@ -16,6 +17,7 @@ from app.api.regulations import router as regulations_router
 from app.api.compliance import router as compliance_router
 from app.api.documents import router as documents_router
 from app.api.admin import router as admin_router
+from app.api.consultations import router as consultations_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -55,6 +57,7 @@ app.include_router(regulations_router, prefix=settings.API_V1_STR)
 app.include_router(compliance_router, prefix=settings.API_V1_STR)
 app.include_router(documents_router, prefix=settings.API_V1_STR)
 app.include_router(admin_router, prefix=settings.API_V1_STR)
+app.include_router(consultations_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
