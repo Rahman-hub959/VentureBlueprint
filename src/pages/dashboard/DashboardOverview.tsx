@@ -33,7 +33,8 @@ import {
   HelpCircle,
   PhoneCall,
   Lock,
-  Award
+  Award,
+  RefreshCw
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -73,7 +74,6 @@ export const DashboardOverview: React.FC = () => {
   const [estimatedProfit, setEstimatedProfit] = useState<number>(1500000);
   const [taxTurnover, setTaxTurnover] = useState<number>(4500000);
   const [gstQuarter, setGstQuarter] = useState<string>("Q3 (Oct - Dec)");
-  const [caBookedModal, setCaBookedModal] = useState<boolean>(false);
   const [caConsultTopic, setCaConsultTopic] = useState<string>("GST & Advance Tax Planning");
 
   // LAW Tools State
@@ -83,13 +83,156 @@ export const DashboardOverview: React.FC = () => {
   const [cliffMonths, setCliffMonths] = useState<number>(12);
   const [tmSearchQuery, setTmSearchQuery] = useState<string>("");
   const [tmSearchResult, setTmSearchResult] = useState<any>(null);
-  const [lawBookedModal, setLawBookedModal] = useState<boolean>(false);
+
+  // Dedicated Consultation & Registration Modals (CS, CA, LAW)
+  const [activeConsultationModal, setActiveConsultationModal] = useState<"CS" | "CA" | "LAW" | null>(null);
+  const [submittingConsultation, setSubmittingConsultation] = useState<boolean>(false);
+
+  // CS Form State
+  const [csForm, setCsForm] = useState({
+    full_name: "",
+    email: "",
+    phone_number: "",
+    alternate_phone: "",
+    company_name: "",
+    preferred_entity_type: "Private Limited Company (Pvt Ltd)",
+    service_category: "New Company Incorporation (SPICe+)",
+    notes: ""
+  });
+
+  // CA Form State
+  const [caForm, setCaForm] = useState({
+    full_name: "",
+    email: "",
+    phone_number: "",
+    alternate_phone: "",
+    company_name: "",
+    service_category: "GST Registration & Monthly Filing (GSTR-1, 3B)",
+    notes: ""
+  });
+
+  // LAW Form State
+  const [lawForm, setLawForm] = useState({
+    full_name: "",
+    email: "",
+    phone_number: "",
+    alternate_phone: "",
+    company_name: "",
+    service_category: "Founder Vesting & Co-founder Agreement",
+    notes: ""
+  });
+
+  // Sync user details to forms when authenticated user is loaded
+  useEffect(() => {
+    if (user) {
+      setCsForm((prev) => ({
+        ...prev,
+        full_name: prev.full_name || user.full_name || "",
+        email: prev.email || user.email || "",
+        phone_number: prev.phone_number || user.phone_number || "",
+      }));
+      setCaForm((prev) => ({
+        ...prev,
+        full_name: prev.full_name || user.full_name || "",
+        email: prev.email || user.email || "",
+        phone_number: prev.phone_number || user.phone_number || "",
+      }));
+      setLawForm((prev) => ({
+        ...prev,
+        full_name: prev.full_name || user.full_name || "",
+        email: prev.email || user.email || "",
+        phone_number: prev.phone_number || user.phone_number || "",
+      }));
+    }
+  }, [user]);
+
   const [consultationSuccessModal, setConsultationSuccessModal] = useState<{
     id: string;
     expert: string;
     topic: string;
     email: string;
+    pillar: string;
+    pdf_url?: string;
   } | null>(null);
+
+  const handleConsultationSubmit = async (pillar: "CS" | "CA" | "LAW") => {
+    setSubmittingConsultation(true);
+    try {
+      let payload: any = { pillar };
+      if (pillar === "CS") {
+        if (!csForm.phone_number.trim()) {
+          showToast("Please enter your contact phone number", "warning");
+          setSubmittingConsultation(false);
+          return;
+        }
+        payload = {
+          pillar: "CS",
+          full_name: csForm.full_name || user?.full_name || "Client",
+          email: csForm.email || user?.email,
+          phone_number: csForm.phone_number,
+          alternate_phone: csForm.alternate_phone || undefined,
+          company_name: csForm.company_name || undefined,
+          preferred_entity_type: csForm.preferred_entity_type,
+          service_category: csForm.service_category,
+          topic: `${csForm.service_category} · ${csForm.company_name || "Proposed Entity"}`,
+          notes: csForm.notes || `CS setup request under ${csForm.preferred_entity_type}`,
+          preferred_time_slot: "Within 24 to 48 Hours",
+        };
+      } else if (pillar === "CA") {
+        if (!caForm.phone_number.trim()) {
+          showToast("Please enter your contact phone number", "warning");
+          setSubmittingConsultation(false);
+          return;
+        }
+        payload = {
+          pillar: "CA",
+          full_name: caForm.full_name || user?.full_name || "Client",
+          email: caForm.email || user?.email,
+          phone_number: caForm.phone_number,
+          alternate_phone: caForm.alternate_phone || undefined,
+          company_name: caForm.company_name || undefined,
+          service_category: caForm.service_category,
+          topic: `${caForm.service_category} · ${caForm.company_name || "Tax Advisory"}`,
+          notes: caForm.notes || `CA consultation for ${caForm.service_category}`,
+          preferred_time_slot: "Within 24 to 48 Hours",
+        };
+      } else if (pillar === "LAW") {
+        if (!lawForm.phone_number.trim()) {
+          showToast("Please enter your contact phone number", "warning");
+          setSubmittingConsultation(false);
+          return;
+        }
+        payload = {
+          pillar: "LAW",
+          full_name: lawForm.full_name || user?.full_name || "Client",
+          email: lawForm.email || user?.email,
+          phone_number: lawForm.phone_number,
+          alternate_phone: lawForm.alternate_phone || undefined,
+          company_name: lawForm.company_name || undefined,
+          service_category: lawForm.service_category,
+          topic: `${lawForm.service_category} · ${lawForm.company_name || "Legal Matter"}`,
+          notes: lawForm.notes || `Legal counsel request for ${lawForm.service_category}`,
+          preferred_time_slot: "Within 24 to 48 Hours",
+        };
+      }
+
+      const res = await consultationsApi.create(payload);
+      setActiveConsultationModal(null);
+      setConsultationSuccessModal({
+        id: res.id,
+        expert: res.assigned_expert || (pillar === "CS" ? "CS Priyanjali Sen" : pillar === "CA" ? "CA Aniket Kulkarni" : "Adv. Rajesh Varma"),
+        topic: res.topic,
+        email: res.email || user?.email || "your email",
+        pillar: res.pillar,
+        pdf_url: res.pdf_summary_url || `/api/v1/consultations/${res.id}/pdf`,
+      });
+      showToast("Consultation registered! Structured PDF summary generated.", "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to submit consultation request", "warning");
+    } finally {
+      setSubmittingConsultation(false);
+    }
+  };
 
   const toggleDeadline = (id: string) => {
     setCompletedDeadlines((prev) => {
@@ -364,21 +507,24 @@ export const DashboardOverview: React.FC = () => {
         </div>
 
         {/* 3 Perfect Square Category Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5">
-          {/* Card 1: CS Services */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6">
+          {/* Card 1: CS Services - Perfect Square */}
           <button
             type="button"
-            onClick={() => handleSelectPillar("CS")}
-            className={`w-full aspect-square p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${
+            onClick={() => {
+              handleSelectPillar("CS");
+              setActiveConsultationModal("CS");
+            }}
+            className={`w-full aspect-square p-5 sm:p-6 rounded-3xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group shadow-md hover:shadow-xl ${
               activePillar === "CS"
-                ? "spatial-card-gold ring-2 ring-emerald-500/40 shadow-xl"
-                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-emerald-400 hover:shadow-md"
+                ? "spatial-card-gold ring-2 ring-emerald-500/50"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-emerald-400"
             }`}
           >
             {/* Top Row: Icon & Status Indicator */}
             <div className="flex items-center justify-between w-full">
               <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
                   activePillar === "CS"
                     ? "bg-emerald-600 text-white shadow-md scale-105"
                     : "bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 group-hover:scale-105"
@@ -386,20 +532,14 @@ export const DashboardOverview: React.FC = () => {
               >
                 <Building2 className="w-6 h-6" />
               </div>
-              <span
-                className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                  activePillar === "CS"
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
-                }`}
-              >
-                {activePillar === "CS" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-                {activePillar === "CS" ? "Active Desk" : "Available"}
+              <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 flex items-center gap-1.5 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Click to Consult</span>
               </span>
             </div>
 
             {/* Middle: Domain Details & Scope */}
-            <div className="space-y-2.5 my-auto py-2">
+            <div className="space-y-2 my-auto py-1">
               <div>
                 <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
                   CS Services
@@ -409,18 +549,18 @@ export const DashboardOverview: React.FC = () => {
                 </p>
               </div>
 
-              <div className="text-xs font-extrabold text-[#C59B27]">
+              <div className="text-[11px] font-extrabold text-[#C59B27] uppercase tracking-wide">
                 Statutory MCA &amp; ROC Desk
               </div>
 
               <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pt-1">
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span>MCA SPICe+ &amp; ROC Annual Filings</span>
+                  <span>SPICe+ Part A &amp; B Incorporation</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                  <span>Board Resolutions &amp; Statutory Registers</span>
+                  <span>ROC Annual Returns &amp; Registers</span>
                 </li>
                 <li className="flex items-center gap-1.5">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
@@ -430,34 +570,31 @@ export const DashboardOverview: React.FC = () => {
             </div>
 
             {/* Bottom: Action Trigger Button */}
-            <div className="w-full pt-2">
-              <div
-                className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all ${
-                  activePillar === "CS"
-                    ? "bg-emerald-600 text-white shadow-md flex items-center justify-center gap-2"
-                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600"
-                }`}
-              >
-                <span>{activePillar === "CS" ? "Active Workspace Selected" : "Switch to CS Desk"}</span>
+            <div className="w-full pt-1">
+              <div className="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all bg-emerald-600 hover:bg-emerald-700 text-white shadow-md flex items-center justify-center gap-2">
+                <span>Book CS Consultation Form</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
           </button>
 
-          {/* Card 2: CA Services */}
+          {/* Card 2: CA Services - Perfect Square */}
           <button
             type="button"
-            onClick={() => handleSelectPillar("CA")}
-            className={`w-full aspect-square p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${
+            onClick={() => {
+              handleSelectPillar("CA");
+              setActiveConsultationModal("CA");
+            }}
+            className={`w-full aspect-square p-5 sm:p-6 rounded-3xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group shadow-md hover:shadow-xl ${
               activePillar === "CA"
-                ? "spatial-card-gold ring-2 ring-amber-500/40 shadow-xl"
-                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-amber-400 hover:shadow-md"
+                ? "spatial-card-gold ring-2 ring-amber-500/50"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-amber-400"
             }`}
           >
             {/* Top Row: Icon & Status Indicator */}
             <div className="flex items-center justify-between w-full">
               <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
                   activePillar === "CA"
                     ? "bg-amber-600 text-white shadow-md scale-105"
                     : "bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 group-hover:scale-105"
@@ -465,20 +602,14 @@ export const DashboardOverview: React.FC = () => {
               >
                 <Landmark className="w-6 h-6" />
               </div>
-              <span
-                className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                  activePillar === "CA"
-                    ? "bg-amber-600 text-white shadow-sm"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
-                }`}
-              >
-                {activePillar === "CA" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-                {activePillar === "CA" ? "Active Desk" : "Available"}
+              <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider bg-amber-100 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 flex items-center gap-1.5 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                <span>Click to Consult</span>
               </span>
             </div>
 
             {/* Middle: Domain Details & Scope */}
-            <div className="space-y-2.5 my-auto py-2">
+            <div className="space-y-2 my-auto py-1">
               <div>
                 <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
                   CA Services
@@ -488,7 +619,7 @@ export const DashboardOverview: React.FC = () => {
                 </p>
               </div>
 
-              <div className="text-xs font-extrabold text-[#C59B27]">
+              <div className="text-[11px] font-extrabold text-[#C59B27] uppercase tracking-wide">
                 Corporate Tax &amp; GST Advisory
               </div>
 
@@ -509,34 +640,31 @@ export const DashboardOverview: React.FC = () => {
             </div>
 
             {/* Bottom: Action Trigger Button */}
-            <div className="w-full pt-2">
-              <div
-                className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all ${
-                  activePillar === "CA"
-                    ? "bg-amber-600 text-white shadow-md flex items-center justify-center gap-2"
-                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 group-hover:bg-amber-600 group-hover:text-white group-hover:border-amber-600"
-                }`}
-              >
-                <span>{activePillar === "CA" ? "Active Workspace Selected" : "Switch to CA Desk"}</span>
+            <div className="w-full pt-1">
+              <div className="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all bg-amber-600 hover:bg-amber-700 text-white shadow-md flex items-center justify-center gap-2">
+                <span>Book CA Consultation Form</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
           </button>
 
-          {/* Card 3: Corporate Law */}
+          {/* Card 3: Corporate Law - Perfect Square */}
           <button
             type="button"
-            onClick={() => handleSelectPillar("LAW")}
-            className={`w-full aspect-square p-5 sm:p-6 rounded-2xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group ${
+            onClick={() => {
+              handleSelectPillar("LAW");
+              setActiveConsultationModal("LAW");
+            }}
+            className={`w-full aspect-square p-5 sm:p-6 rounded-3xl text-left transition-all duration-300 flex flex-col justify-between cursor-pointer relative overflow-hidden group shadow-md hover:shadow-xl ${
               activePillar === "LAW"
-                ? "spatial-card-navy ring-2 ring-blue-500/40 shadow-xl"
-                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-blue-400 hover:shadow-md"
+                ? "spatial-card-navy ring-2 ring-blue-500/50"
+                : "spatial-surface border border-slate-200 dark:border-slate-800 hover:border-blue-400"
             }`}
           >
             {/* Top Row: Icon & Status Indicator */}
             <div className="flex items-center justify-between w-full">
               <div
-                className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
                   activePillar === "LAW"
                     ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-md scale-105"
                     : "bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 group-hover:scale-105"
@@ -544,20 +672,14 @@ export const DashboardOverview: React.FC = () => {
               >
                 <Scale className="w-6 h-6" />
               </div>
-              <span
-                className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider transition-all flex items-center gap-1.5 ${
-                  activePillar === "LAW"
-                    ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-sm"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
-                }`}
-              >
-                {activePillar === "LAW" && <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-                {activePillar === "LAW" ? "Active Desk" : "Available"}
+              <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 border border-blue-300 dark:border-blue-700 flex items-center gap-1.5 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <span>Click to Consult</span>
               </span>
             </div>
 
             {/* Middle: Domain Details & Scope */}
-            <div className="space-y-2.5 my-auto py-2">
+            <div className="space-y-2 my-auto py-1">
               <div>
                 <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white leading-tight">
                   Corporate Law
@@ -567,7 +689,7 @@ export const DashboardOverview: React.FC = () => {
                 </p>
               </div>
 
-              <div className="text-xs font-extrabold text-[#C59B27]">
+              <div className="text-[11px] font-extrabold text-[#C59B27] uppercase tracking-wide">
                 Corporate Law &amp; IP Protection
               </div>
 
@@ -588,15 +710,9 @@ export const DashboardOverview: React.FC = () => {
             </div>
 
             {/* Bottom: Action Trigger Button */}
-            <div className="w-full pt-2">
-              <div
-                className={`w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all ${
-                  activePillar === "LAW"
-                    ? "bg-[#0B2559] dark:bg-blue-600 text-white shadow-md flex items-center justify-center gap-2"
-                    : "bg-slate-100 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 group-hover:bg-[#0B2559] group-hover:text-white group-hover:border-[#0B2559]"
-                }`}
-              >
-                <span>{activePillar === "LAW" ? "Active Workspace Selected" : "Switch to Law Desk"}</span>
+            <div className="w-full pt-1">
+              <div className="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold text-center transition-all bg-[#0B2559] hover:bg-[#153a80] text-white shadow-md flex items-center justify-center gap-2">
+                <span>Book Legal Consultation Form</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
@@ -1067,8 +1183,8 @@ export const DashboardOverview: React.FC = () => {
               </Link>
             ) : (
               <button
-                onClick={() => { setCaConsultTopic("General CA Tax Strategy"); setCaBookedModal(true); }}
-                className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
+                onClick={() => { setCaConsultTopic("General CA Tax Strategy"); setActiveConsultationModal("CA"); }}
+                className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto cursor-pointer"
               >
                 Consult Empanelled CA · Advisory Review
               </button>
@@ -1222,8 +1338,8 @@ export const DashboardOverview: React.FC = () => {
                   </Link>
                 ) : (
                   <button
-                    onClick={() => { setCaConsultTopic("Statutory Audit under Section 139"); setCaBookedModal(true); }}
-                    className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
+                    onClick={() => { setCaConsultTopic("Statutory Audit under Section 139"); setActiveConsultationModal("CA"); }}
+                    className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline cursor-pointer"
                   >
                     Book CA Review &rarr; Advisory Desk
                   </button>
@@ -1263,8 +1379,8 @@ export const DashboardOverview: React.FC = () => {
               </Link>
             ) : (
               <button
-                onClick={() => setLawBookedModal(true)}
-                className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
+                onClick={() => setActiveConsultationModal("LAW")}
+                className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto cursor-pointer"
               >
                 Consult High Court Advocate · Advisory Call
               </button>
@@ -1501,8 +1617,8 @@ export const DashboardOverview: React.FC = () => {
                   </Link>
                 ) : (
                   <button
-                    onClick={() => setLawBookedModal(true)}
-                    className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline"
+                    onClick={() => setActiveConsultationModal("LAW")}
+                    className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline cursor-pointer"
                   >
                     File with IP Attorney &rarr; Legal Advisory
                   </button>
@@ -1514,159 +1630,491 @@ export const DashboardOverview: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* CA CONSULTATION MODAL                                         */}
+      {/* 1. CS CONSULTATION & SETUP MODAL                                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      {caBookedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="spatial-surface rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200/90 dark:border-slate-800 shadow-2xl space-y-4">
+      {activeConsultationModal === "CS" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+          <div className="spatial-surface rounded-3xl p-6 sm:p-7 max-w-lg w-full border border-emerald-500/40 shadow-2xl space-y-4 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold">
-                  <Landmark className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
+                  <Building2 className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Empanelled CA Session</h3>
-                  <span className="text-xs text-slate-500">Chartered Accountant Consultation · Senior Desk</span>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">CS Services · Consultation &amp; Setup</h3>
+                  <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold">Empanelled FCS #11428 · MCA &amp; ROC Secretarial Desk</span>
                 </div>
               </div>
               <button
-                onClick={() => setCaBookedModal(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 flex items-center justify-center text-sm font-bold"
+                type="button"
+                onClick={() => setActiveConsultationModal(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer"
               >
                 &times;
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300">
-              You are requesting a 1-on-1 strategy call with our Senior Chartered Accountant regarding <strong>{caConsultTopic}</strong>.
-            </p>
+            <div className="p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-950 dark:text-emerald-200 leading-relaxed font-semibold">
+              Fill in your incorporation &amp; compliance requirements below. A structured table PDF will be generated immediately, and our Company Secretary desk will contact you within 24 to 48 hours.
+            </div>
 
-            <div className="space-y-2 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                <span className="text-slate-500 font-bold block">Assigned CA Specialist:</span>
-                <span className="font-extrabold text-slate-900 dark:text-white">CA Aniket Kulkarni, FCA (ICAI Reg #418290)</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold block text-[11px]">Online · Available within ~20 mins</span>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleConsultationSubmit("CS");
+              }}
+              className="space-y-3 text-xs"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={csForm.full_name}
+                    onChange={(e) => setCsForm({ ...csForm, full_name: e.target.value })}
+                    placeholder="Enter your name"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={csForm.email}
+                    onChange={(e) => setCsForm({ ...csForm, email: e.target.value })}
+                    placeholder="name@company.com"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setCaBookedModal(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const res = await consultationsApi.create({
-                      pillar: "CA",
-                      topic: caConsultTopic,
-                      phone_number: user?.phone_number || "+91 9988776655",
-                      email: user?.email,
-                      full_name: user?.full_name,
-                      notes: "Scheduled via Dashboard CA Financial Desk",
-                    });
-                    setCaBookedModal(false);
-                    setConsultationSuccessModal({
-                      id: res.id,
-                      expert: res.assigned_expert || "CA Aniket Kulkarni",
-                      topic: res.topic,
-                      email: res.email || user?.email || "your email",
-                    });
-                  } catch (err: any) {
-                    showToast(err?.message || "Failed to book CA consultation", "warning");
-                  }
-                }}
-                className="corpsetu-btn-gold px-4 py-2 text-xs font-bold"
-              >
-                Confirm CA Appointment
-              </button>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Primary Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={csForm.phone_number}
+                    onChange={(e) => setCsForm({ ...csForm, phone_number: e.target.value })}
+                    placeholder="+91 9876543210"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Optional / Alternate Phone</label>
+                  <input
+                    type="tel"
+                    value={csForm.alternate_phone}
+                    onChange={(e) => setCsForm({ ...csForm, alternate_phone: e.target.value })}
+                    placeholder="+91 9123456789 (optional)"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Proposed Company Name</label>
+                  <input
+                    type="text"
+                    value={csForm.company_name}
+                    onChange={(e) => setCsForm({ ...csForm, company_name: e.target.value })}
+                    placeholder="e.g. Kaveri Tech Solutions Pvt Ltd"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Preferred Structure *</label>
+                  <select
+                    value={csForm.preferred_entity_type}
+                    onChange={(e) => setCsForm({ ...csForm, preferred_entity_type: e.target.value })}
+                    className="w-full glass-input text-xs !py-2"
+                  >
+                    <option value="Private Limited Company (Pvt Ltd)">Private Limited Company (Pvt Ltd)</option>
+                    <option value="Limited Liability Partnership (LLP)">Limited Liability Partnership (LLP)</option>
+                    <option value="One Person Company (OPC)">One Person Company (OPC)</option>
+                    <option value="Public Limited Company">Public Limited Company</option>
+                    <option value="Section 8 Non-Profit Company">Section 8 Non-Profit Company</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Specific CS Service Required *</label>
+                <select
+                  value={csForm.service_category}
+                  onChange={(e) => setCsForm({ ...csForm, service_category: e.target.value })}
+                  className="w-full glass-input text-xs !py-2"
+                >
+                  <option value="New Company Incorporation (SPICe+)">New Company Incorporation (SPICe+ Part A &amp; B)</option>
+                  <option value="LLP Formation & Agreement Drafting">LLP Formation &amp; Agreement Drafting</option>
+                  <option value="ROC Annual Compliance & Form AOC-4/MGT-7">ROC Annual Compliance &amp; Form AOC-4 / MGT-7</option>
+                  <option value="Director DIN, DSC & e-KYC Compliance">Director DIN, DSC &amp; e-KYC Compliance</option>
+                  <option value="Share Capital Increase & Allotment (PAS-3)">Share Capital Increase &amp; Allotment (PAS-3)</option>
+                  <option value="Registered Office / Director Change">Registered Office / Director Change</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  Description of Incorporation / Secretarial Requirement *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={csForm.notes}
+                  onChange={(e) => setCsForm({ ...csForm, notes: e.target.value })}
+                  placeholder="Describe your business model, proposed directors, authorized share capital, or any specific MCA compliance assistance needed..."
+                  className="w-full glass-input text-xs !py-2 leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setActiveConsultationModal(null)}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingConsultation}
+                  className="corpsetu-btn-emerald px-5 py-2.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  {submittingConsultation ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Submitting &amp; Generating PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Submit CS Consultation Request &rarr;</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* LAW CONSULTATION MODAL                                        */}
+      {/* 2. CA CONSULTATION & TAX ADVISORY MODAL                         */}
       {/* ───────────────────────────────────────────────────────────── */}
-      {lawBookedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
-          <div className="spatial-surface rounded-3xl p-6 sm:p-7 max-w-md w-full border border-slate-200/90 dark:border-slate-800 shadow-2xl space-y-4">
+      {activeConsultationModal === "CA" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+          <div className="spatial-surface rounded-3xl p-6 sm:p-7 max-w-lg w-full border border-amber-500/40 shadow-2xl space-y-4 my-8">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold">
-                  <Scale className="w-4 h-4" />
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs">
+                  <Landmark className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Corporate Counsel Session</h3>
-                  <span className="text-xs text-slate-500">High Court Advocate Consultation · Senior Legal Desk</span>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">CA Services · Consultation &amp; Tax Desk</h3>
+                  <span className="text-[11px] text-amber-700 dark:text-amber-400 font-bold">Empanelled FCA #418290 · Chartered Accountant &amp; Statutory Audit</span>
                 </div>
               </div>
               <button
-                onClick={() => setLawBookedModal(false)}
-                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 flex items-center justify-center text-sm font-bold"
+                type="button"
+                onClick={() => setActiveConsultationModal(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer"
               >
                 &times;
               </button>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-300">
-              Schedule an executive consultation regarding contract drafting, founder vesting dispute prevention, or trademark objection filings.
-            </p>
+            <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-950 dark:text-amber-200 leading-relaxed font-semibold">
+              Fill in your taxation, GST, or audit requirements. A structured table PDF will be generated immediately, and our Chartered Accountant desk will contact you within 24 to 48 hours.
+            </div>
 
-            <div className="space-y-2 text-xs">
-              <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
-                <span className="text-slate-500 font-bold block">Assigned Legal Counsel:</span>
-                <span className="font-extrabold text-slate-900 dark:text-white">Adv. Rajesh Varma, LL.M (Bar Council KAR/2012/842)</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-semibold block text-[11px]">Online · Available within ~15 mins</span>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleConsultationSubmit("CA");
+              }}
+              className="space-y-3 text-xs"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={caForm.full_name}
+                    onChange={(e) => setCaForm({ ...caForm, full_name: e.target.value })}
+                    placeholder="Enter your name"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={caForm.email}
+                    onChange={(e) => setCaForm({ ...caForm, email: e.target.value })}
+                    placeholder="name@company.com"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setLawBookedModal(false)}
-                className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  try {
-                    const res = await consultationsApi.create({
-                      pillar: "LAW",
-                      topic: "Corporate Counsel Legal Session",
-                      phone_number: user?.phone_number || "+91 9988776655",
-                      email: user?.email,
-                      full_name: user?.full_name,
-                      notes: "Scheduled via Dashboard Corporate Law Vault",
-                    });
-                    setLawBookedModal(false);
-                    setConsultationSuccessModal({
-                      id: res.id,
-                      expert: res.assigned_expert || "Adv. Rajesh Varma",
-                      topic: res.topic,
-                      email: res.email || user?.email || "your email",
-                    });
-                  } catch (err: any) {
-                    showToast(err?.message || "Failed to book Legal consultation", "warning");
-                  }
-                }}
-                className="corpsetu-btn-navy px-4 py-2 text-xs font-bold"
-              >
-                Confirm Legal Session
-              </button>
-            </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Primary Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={caForm.phone_number}
+                    onChange={(e) => setCaForm({ ...caForm, phone_number: e.target.value })}
+                    placeholder="+91 9876543210"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Optional / Alternate Phone</label>
+                  <input
+                    type="tel"
+                    value={caForm.alternate_phone}
+                    onChange={(e) => setCaForm({ ...caForm, alternate_phone: e.target.value })}
+                    placeholder="+91 9123456789 (optional)"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Company / Firm Name (if any)</label>
+                <input
+                  type="text"
+                  value={caForm.company_name}
+                  onChange={(e) => setCaForm({ ...caForm, company_name: e.target.value })}
+                  placeholder="e.g. Bharat Logistics LLP / Startup Venture"
+                  className="w-full glass-input text-xs !py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Specific CA Service Required *</label>
+                <select
+                  value={caForm.service_category}
+                  onChange={(e) => setCaForm({ ...caForm, service_category: e.target.value })}
+                  className="w-full glass-input text-xs !py-2"
+                >
+                  <option value="GST Registration & Monthly Filing (GSTR-1, 3B)">GST Registration &amp; Monthly Filing (GSTR-1, 3B)</option>
+                  <option value="Corporate Tax Audit & Statutory Reporting (Sec 44AB)">Corporate Tax Audit &amp; Statutory Reporting (§44AB)</option>
+                  <option value="Advance Tax Planning & Corporate ITR Filing (ITR-6)">Advance Tax Planning &amp; Corporate ITR Filing (ITR-6)</option>
+                  <option value="Monthly Bookkeeping, MIS & Management Accounts">Monthly Bookkeeping, MIS &amp; Management Accounts</option>
+                  <option value="TDS Return Filing & Form 26AS/AIS Reconciliation">TDS Return Filing &amp; Form 26AS/AIS Reconciliation</option>
+                  <option value="Annual Balance Sheet, P&L & Audit Compilation">Annual Balance Sheet, P&amp;L &amp; Audit Compilation</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  Description of Tax / Financial Service Required *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={caForm.notes}
+                  onChange={(e) => setCaForm({ ...caForm, notes: e.target.value })}
+                  placeholder="Describe your turnover, accounting software used, pending tax notices, or specific audit guidance required..."
+                  className="w-full glass-input text-xs !py-2 leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setActiveConsultationModal(null)}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingConsultation}
+                  className="corpsetu-btn-gold px-5 py-2.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  {submittingConsultation ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Submitting &amp; Generating PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Submit CA Consultation Request &rarr;</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* INSTANT REASSURANCE CONFIRMATION POPUP MODAL                  */}
+      {/* 3. CORPORATE LAW CONSULTATION & DISPUTE MODAL                   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {activeConsultationModal === "LAW" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+          <div className="spatial-surface rounded-3xl p-6 sm:p-7 max-w-lg w-full border border-blue-500/40 shadow-2xl space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#0B2559] text-white flex items-center justify-center font-bold shadow-xs">
+                  <Scale className="w-5 h-5 text-[#C59B27]" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Corporate Law · Counsel &amp; Legal Desk</h3>
+                  <span className="text-[11px] text-blue-700 dark:text-blue-400 font-bold">High Court Advocates · Bar Council Empanelled Counsel</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveConsultationModal(null)}
+                className="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 flex items-center justify-center text-sm font-bold cursor-pointer"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div className="p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-[11px] text-blue-950 dark:text-blue-200 leading-relaxed font-semibold">
+              Fill in your corporate contract, IP, or legal matter details. A structured table PDF will be generated immediately, and our Corporate Counsel desk will contact you within 24 to 48 hours.
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleConsultationSubmit("LAW");
+              }}
+              className="space-y-3 text-xs"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={lawForm.full_name}
+                    onChange={(e) => setLawForm({ ...lawForm, full_name: e.target.value })}
+                    placeholder="Enter your name"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={lawForm.email}
+                    onChange={(e) => setLawForm({ ...lawForm, email: e.target.value })}
+                    placeholder="name@company.com"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Primary Phone Number *</label>
+                  <input
+                    type="tel"
+                    required
+                    value={lawForm.phone_number}
+                    onChange={(e) => setLawForm({ ...lawForm, phone_number: e.target.value })}
+                    placeholder="+91 9876543210"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Optional / Alternate Phone</label>
+                  <input
+                    type="tel"
+                    value={lawForm.alternate_phone}
+                    onChange={(e) => setLawForm({ ...lawForm, alternate_phone: e.target.value })}
+                    placeholder="+91 9123456789 (optional)"
+                    className="w-full glass-input text-xs !py-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Company / Organization Name (if any)</label>
+                <input
+                  type="text"
+                  value={lawForm.company_name}
+                  onChange={(e) => setLawForm({ ...lawForm, company_name: e.target.value })}
+                  placeholder="e.g. Apex Innovations Private Limited"
+                  className="w-full glass-input text-xs !py-2"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">Legal Practice Area / Requirement *</label>
+                <select
+                  value={lawForm.service_category}
+                  onChange={(e) => setLawForm({ ...lawForm, service_category: e.target.value })}
+                  className="w-full glass-input text-xs !py-2"
+                >
+                  <option value="Founder Vesting & Co-founder Agreement">Founder Vesting &amp; Co-founder Agreement Drafting</option>
+                  <option value="Trademark Search, Class Selection & IP Filing">Trademark Search, Class Selection &amp; IP Filing</option>
+                  <option value="Commercial Contracts, MSA & Vendor Agreements">Commercial Contracts, MSA &amp; Vendor Agreements</option>
+                  <option value="Non-Disclosure Agreements (NDA) & IP Assignment">Non-Disclosure Agreements (NDA) &amp; IP Assignment</option>
+                  <option value="Dispute Resolution, ROC Defense & Legal Notices">Dispute Resolution, ROC Defense &amp; Legal Notices</option>
+                  <option value="Shareholder Agreement (SHA) & Investment Term Sheets">Shareholder Agreement (SHA) &amp; Investment Term Sheets</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-800 dark:text-slate-200 mb-1">
+                  What is the Problem / Matter Description? *
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={lawForm.notes}
+                  onChange={(e) => setLawForm({ ...lawForm, notes: e.target.value })}
+                  placeholder="Explain the background of the legal matter, dispute, trademark conflict, or agreement structure needed..."
+                  className="w-full glass-input text-xs !py-2 leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setActiveConsultationModal(null)}
+                  className="px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingConsultation}
+                  className="corpsetu-btn-navy px-5 py-2.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md"
+                >
+                  {submittingConsultation ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Submitting &amp; Generating PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Submit Legal Consultation Request &rarr;</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* 4. INSTANT REASSURANCE CONFIRMATION POPUP MODAL               */}
       {/* ───────────────────────────────────────────────────────────── */}
       {consultationSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in">
@@ -1677,26 +2125,26 @@ export const DashboardOverview: React.FC = () => {
 
             <div className="space-y-2">
               <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-                Request Assigned Successfully
+                ✓ Consultation Request Registered
               </span>
               <h3 className="text-xl font-extrabold text-[#0B2559] dark:text-white">
                 Consultation Assigned &amp; Dispatched!
               </h3>
-              <div className="p-3.5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-950 dark:text-blue-100 text-xs font-semibold leading-relaxed shadow-xs">
-                Your request has been assigned and sent the details about your consultation to{" "}
-                <span className="font-extrabold text-[#0B2559] dark:text-[#E5B842] underline">
-                  {consultationSuccessModal.email}
-                </span>
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 dark:text-amber-200 text-xs font-bold leading-relaxed shadow-xs">
+                Your consultation form is submitted successfully and our team will contact you within 24 to 48 hours.
               </div>
               <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                In a short period of time our team will contact you via phone &amp; email to discuss your requirements.
+                Official confirmation and structured details have been dispatched to{" "}
+                <span className="font-extrabold text-[#0B2559] dark:text-[#E5B842] underline">
+                  {consultationSuccessModal.email}
+                </span>.
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-left space-y-2 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-left space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-slate-600 dark:text-slate-400 font-medium">Tracking Reference:</span>
-                <span className="font-mono font-extrabold text-[#0B2559] dark:text-white bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700">
+                <span className="font-mono font-extrabold text-[#0B2559] dark:text-white bg-white dark:bg-slate-800 px-2.5 py-0.5 rounded border border-slate-200 dark:border-slate-700">
                   {consultationSuccessModal.id}
                 </span>
               </div>
@@ -1705,9 +2153,26 @@ export const DashboardOverview: React.FC = () => {
                 <span className="font-bold text-slate-900 dark:text-white">{consultationSuccessModal.expert}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-600 dark:text-slate-400 font-medium">Topic:</span>
-                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[220px]">{consultationSuccessModal.topic}</span>
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Pillar / Topic:</span>
+                <span className="font-bold text-slate-900 dark:text-white truncate max-w-[240px]">{consultationSuccessModal.topic}</span>
               </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Turnaround SLA:</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400">Official Call within 24–48 Hours</span>
+              </div>
+            </div>
+
+            {/* Mandatory Structured Table PDF Download Link */}
+            <div className="pt-1">
+              <a
+                href={consultationSuccessModal.pdf_url || `/api/v1/consultations/${consultationSuccessModal.id}/pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full corpsetu-btn-gold py-3 text-xs font-extrabold justify-center flex items-center gap-2 shadow-md cursor-pointer"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Download Structured PDF Summary (Table Format) &rarr;</span>
+              </a>
             </div>
 
             <div className="pt-2 flex items-center gap-2">
@@ -1717,14 +2182,14 @@ export const DashboardOverview: React.FC = () => {
                   setConsultationSuccessModal(null);
                   navigate("/consultations");
                 }}
-                className="flex-1 corpsetu-btn-navy py-3 text-xs font-bold justify-center"
+                className="flex-1 corpsetu-btn-navy py-2.5 text-xs font-bold justify-center cursor-pointer"
               >
                 Track in Your Consultations &rarr;
               </button>
               <button
                 type="button"
                 onClick={() => setConsultationSuccessModal(null)}
-                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               >
                 Close
               </button>

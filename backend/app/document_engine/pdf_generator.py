@@ -676,3 +676,208 @@ def build_pdf_document(output_path: Path, doc_data: Dict[str, Any]) -> str:
         while chunk := f.read(65536):
             hasher.update(chunk)
     return hasher.hexdigest()
+
+
+def build_consultation_summary_pdf(output_path: Path, data: Dict[str, Any]) -> str:
+    """
+    Builds an official publication-grade structured PDF table summarizing a client's
+    consultation and service registration intake (CS, CA, or LAW).
+    Branded with CorpSetu spatial themes, high-contrast tables, and statutory disclaimers.
+    Returns the SHA-256 checksum of the generated PDF file.
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    styles = _create_styles()
+    story = []
+
+    cid = data.get("id", "CONS-2026-0000")
+    pillar = (data.get("pillar") or "GENERAL").upper()
+    full_name = data.get("full_name") or "Prospective Client"
+    email = data.get("email") or "client@example.com"
+    phone = data.get("phone_number") or "Not provided"
+    alt_phone = data.get("alternate_phone") or "Not provided"
+    company = data.get("company_name") or "Proposed New Venture / Enterprise"
+    service_cat = data.get("service_category") or data.get("topic") or "Statutory Corporate Advisory"
+    entity_type = data.get("preferred_entity_type") or "Private Limited Company (Pvt Ltd)"
+    topic = data.get("topic") or f"{pillar} Professional Advisory"
+    notes = data.get("notes") or "Standard corporate consultation requested via CorpSetu web portal."
+    expert = data.get("assigned_expert") or "CorpSetu Senior Advisory Partner"
+    expert_role = data.get("expert_role") or "Empanelled Practitioner Desk"
+    slot = data.get("preferred_time_slot") or "Within 24 to 48 Hours"
+    now_str = datetime.now(timezone.utc).strftime("%d %B %Y, %I:%M %p UTC")
+
+    pillar_color = EMERALD_DARK if pillar == "CS" else (GOLD_ACCENT if pillar == "CA" else BLUE_ACCENT)
+    pillar_title = "Company Secretarial (CS) Desk" if pillar == "CS" else (
+        "Chartered Accountant & Tax (CA) Desk" if pillar == "CA" else (
+            "Corporate Counsel & Legal (LAW) Desk" if pillar == "LAW" else "Unified Multi-Disciplinary Advisory"
+        )
+    )
+
+    # 1. Header Banner Box
+    header_table = Table([
+        [
+            Paragraph("<b>CORPSETU</b><br/><font size='8' color='#C59B27'>LAW • CS • CA  — ONE BRIDGE</font>", ParagraphStyle("H1", fontName="Helvetica-Bold", fontSize=16, leading=19, textColor=colors.white)),
+            Paragraph(f"<font size='8' color='#C59B27'><b>CONSULTATION & REGISTRATION INTAKE DOSSIER</b></font><br/><font size='9' color='white'><b>Ref: {cid}</b></font><br/><font size='7' color='#CBD5E1'>Date: {now_str}</font>", ParagraphStyle("H2", fontName="Helvetica", fontSize=8, leading=11, textColor=colors.white, alignment=2))
+        ]
+    ], colWidths=[3.25 * inch, 4.0 * inch])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), CORPSETU_NAVY),
+        ('TOPPADDING', (0, 0), (-1, -1), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('LEFTPADDING', (0, 0), (-1, -1), 14),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 14),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    story.append(header_table)
+    story.append(Spacer(1, 14))
+
+    # 2. Status Callout Box
+    status_table = Table([
+        [
+            Paragraph(f"<b>STATUS:</b> <font color='#059669'><b>SUBMITTED & ASSIGNED</b></font> &nbsp;|&nbsp; <b>DESK:</b> {pillar_title} &nbsp;|&nbsp; <b>SLA:</b> Official contact within 24 to 48 hours",
+                      ParagraphStyle("StatusP", fontName="Helvetica", fontSize=8.5, leading=11, textColor=CORPSETU_NAVY))
+        ]
+    ], colWidths=[7.25 * inch])
+    status_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor("#ECFDF5")),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor("#6EE7B7")),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 12),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+    ]))
+    story.append(status_table)
+    story.append(Spacer(1, 14))
+
+    # 3. Section 1: Client & Contact Profile Table
+    story.append(Paragraph("1. Client Contact &amp; Venture Profile", styles["sec_title"]))
+    story.append(Paragraph("Official details captured for statutory compliance records and verified advisor contact:", styles["body"]))
+    story.append(Spacer(1, 4))
+
+    client_table_data = [
+        [Paragraph("<b>Parameter</b>", styles["th"]), Paragraph("<b>Client Submission Record</b>", styles["th"])],
+        [Paragraph("<b>Tracking Reference ID</b>", styles["td"]), Paragraph(f"<b>{cid}</b>", styles["td"])],
+        [Paragraph("<b>Full Name</b>", styles["td"]), Paragraph(full_name, styles["td"])],
+        [Paragraph("<b>Registered Email Address</b>", styles["td"]), Paragraph(email, styles["td"])],
+        [Paragraph("<b>Primary Phone Number</b>", styles["td"]), Paragraph(f"<b>{phone}</b>", styles["td"])],
+        [Paragraph("<b>Alternate / Optional Phone</b>", styles["td"]), Paragraph(alt_phone, styles["td"])],
+        [Paragraph("<b>Company / Proposed Entity</b>", styles["td"]), Paragraph(company, styles["td"])],
+        [Paragraph("<b>Preferred Structure</b>", styles["td"]), Paragraph(entity_type, styles["td"])],
+    ]
+    t1 = Table(client_table_data, colWidths=[2.5 * inch, 4.75 * inch])
+    t1.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), CORPSETU_NAVY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, BG_LIGHT]),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(t1)
+    story.append(Spacer(1, 14))
+
+    # 4. Section 2: Service & Requirement Specifications Table
+    story.append(Paragraph("2. Advisory Scope &amp; Statutory Service Selection", styles["sec_title"]))
+    story.append(Paragraph("Scope of corporate advisory, statutory filings, and problem description registered:", styles["body"]))
+    story.append(Spacer(1, 4))
+
+    service_table_data = [
+        [Paragraph("<b>Statutory Dimension</b>", styles["th"]), Paragraph("<b>Intake Specifications</b>", styles["th"])],
+        [Paragraph("<b>Professional Pillar</b>", styles["td"]), Paragraph(f"<b>{pillar}</b> — {pillar_title}", styles["td"])],
+        [Paragraph("<b>Specific Service Category</b>", styles["td"]), Paragraph(f"<b>{service_cat}</b>", styles["td"])],
+        [Paragraph("<b>Subject / Problem Statement</b>", styles["td"]), Paragraph(f"<b>{topic}</b>", styles["td"])],
+        [Paragraph("<b>Detailed Description / Notes</b>", styles["td"]), Paragraph(notes, styles["td"])],
+        [Paragraph("<b>Assigned Lead Specialist</b>", styles["td"]), Paragraph(f"<b>{expert}</b> ({expert_role})", styles["td"])],
+        [Paragraph("<b>Preferred Consultation Window</b>", styles["td"]), Paragraph(f"<b>{slot}</b>", styles["td"])],
+    ]
+    t2 = Table(service_table_data, colWidths=[2.5 * inch, 4.75 * inch])
+    t2.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), CORPSETU_NAVY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, BG_LIGHT]),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(t2)
+    story.append(Spacer(1, 14))
+
+    # 5. Section 3: CorpSetu 24-48 Hour SLA Protocol
+    story.append(Paragraph("3. Engagement &amp; Advisory Protocol (Mandatory Notice)", styles["sec_title"]))
+    sla_data = [
+        [Paragraph("<b>Step</b>", styles["th"]), Paragraph("<b>Protocol Milestone</b>", styles["th"]), Paragraph("<b>Timeframe</b>", styles["th"])],
+        [
+            Paragraph("<b>Stage 1</b>", styles["td"]),
+            Paragraph("<b>Telephonic Discovery Outreach</b><br/>Our Senior Desk calls the primary contact to confirm requirements, corporate structure, and compliance deliverables.", styles["td"]),
+            Paragraph("<b>Within 24 to 48 Hours</b>", styles["td"])
+        ],
+        [
+            Paragraph("<b>Stage 2</b>", styles["td"]),
+            Paragraph("<b>Fee Confirmation &amp; Questionnaire Link</b><br/>Once engagement parameters are agreed, admin dispatches the statutory questionnaire directly to the client's registered email.", styles["td"]),
+            Paragraph("Post-Discovery", styles["td"])
+        ],
+        [
+            Paragraph("<b>Stage 3</b>", styles["td"]),
+            Paragraph("<b>Statutory Document Generation (Admin Controlled)</b><br/>Empanelled CA / CS / High Court Legal practitioners draft the formal incorporation dossier, tax audit filings, or legal agreements.", styles["td"]),
+            Paragraph("Statutory Filing SLA", styles["td"])
+        ],
+        [
+            Paragraph("<b>Stage 4</b>", styles["td"]),
+            Paragraph("<b>Official Dispatch to Registered Email</b><br/>Final MCA SPICe+ forms, COI, tax certifications, or executed contracts are emailed directly to the client's registered email.", styles["td"]),
+            Paragraph("Execution SLA", styles["td"])
+        ],
+    ]
+    t3 = Table(sla_data, colWidths=[1.0 * inch, 4.5 * inch, 1.75 * inch])
+    t3.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), CORPSETU_NAVY),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('GRID', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, BG_LIGHT]),
+        ('TOPPADDING', (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING', (0, 0), (-1, -1), 8),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+    ]))
+    story.append(t3)
+    story.append(Spacer(1, 16))
+
+    # 6. Statutory Authentication Footer
+    footer_table = Table([
+        [
+            Paragraph("<b>CorpSetu Statutory Certification &amp; Authentication</b><br/><font size='7' color='#475569'>This document is generated digitally by the CorpSetu Corporate Advisory Engine upon submission of a formal consultation and service request. In accordance with the Information Technology Act, 2000 and applicable statutory frameworks, this electronic dossier is securely stored and verifiable under Reference ID " + cid + ".</font>",
+                      ParagraphStyle("FootP", fontName="Helvetica", fontSize=7.5, leading=10.5, textColor=TEXT_MUTED)),
+            Paragraph("<font size='7.5'><b>CorpSetu Advisory Desk</b><br/>Law • CS • CA One Bridge<br/>Bengaluru · Mumbai · Delhi<br/><i>support@ventureblueprint.in</i></font>",
+                      ParagraphStyle("FootDesk", fontName="Helvetica", fontSize=7.5, leading=10, textColor=CORPSETU_NAVY, alignment=2))
+        ]
+    ], colWidths=[5.0 * inch, 2.25 * inch])
+    footer_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), BG_LIGHT),
+        ('BOX', (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+        ('TOPPADDING', (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING', (0, 0), (-1, -1), 10),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    story.append(footer_table)
+
+    doc = SimpleDocTemplate(
+        str(output_path),
+        pagesize=letter,
+        leftMargin=45,
+        rightMargin=45,
+        topMargin=45,
+        bottomMargin=45
+    )
+    doc.build(story)
+
+    # Compute SHA-256 Checksum
+    hasher = hashlib.sha256()
+    with open(output_path, "rb") as f:
+        while chunk := f.read(65536):
+            hasher.update(chunk)
+    return hasher.hexdigest()

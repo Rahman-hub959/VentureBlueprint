@@ -136,11 +136,18 @@ def test_project_crud_and_validation():
     comp_data = comp_res.json()
     assert comp_data["total_rules_assessed"] > 0
 
+    # Login as Admin Desk for statutory compilation
+    admin_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": "admin@ventureblueprint.in", "password": "Admin@Venture2026!"}
+    )
+    admin_headers = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}
+
     # Generate PDF Document (Formation Blueprint)
     pdf_res = client.post(f"/api/v1/documents/projects/{proj_id}/generate", json={
         "document_type": "formation_blueprint",
         "file_format": "pdf"
-    }, headers=headers)
+    }, headers=admin_headers)
     assert pdf_res.status_code == 200
     doc_id = pdf_res.json()["id"]
     assert pdf_res.json()["file_size_bytes"] > 0
@@ -155,7 +162,7 @@ def test_project_crud_and_validation():
     docx_res = client.post(f"/api/v1/documents/projects/{proj_id}/generate", json={
         "document_type": "mca_compliance",
         "file_format": "docx"
-    }, headers=headers)
+    }, headers=admin_headers)
     assert docx_res.status_code == 200
     assert docx_res.json()["file_size_bytes"] > 0
 

@@ -424,8 +424,11 @@ export interface ConsultationItem {
   full_name: string;
   email: string;
   phone_number: string;
+  alternate_phone?: string;
   company_name?: string;
   pillar: "CS" | "CA" | "LAW" | "GENERAL";
+  service_category?: string;
+  preferred_entity_type?: string;
   topic: string;
   preferred_date?: string;
   preferred_time_slot?: string;
@@ -436,6 +439,10 @@ export interface ConsultationItem {
   meeting_link?: string;
   meeting_platform?: string;
   resolution_summary?: string;
+  pdf_summary_url?: string;
+  questionnaire_sent_at?: string;
+  expert_shared_at?: string;
+  document_sent_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -445,8 +452,11 @@ export const consultationsApi = {
     full_name?: string;
     email?: string;
     phone_number: string;
+    alternate_phone?: string;
     company_name?: string;
     pillar?: "CS" | "CA" | "LAW" | "GENERAL";
+    service_category?: string;
+    preferred_entity_type?: string;
     topic: string;
     preferred_date?: string;
     preferred_time_slot?: string;
@@ -461,7 +471,15 @@ export const consultationsApi = {
     expert_role?: string;
     notes?: string;
     resolution_summary?: string;
+    alternate_phone?: string;
+    service_category?: string;
   }) => apiRequest<ConsultationItem>(`/consultations/${id}/status`, { method: "PATCH", body: JSON.stringify(data) }),
+  sendQuestionnaire: (id: string, data: { pillar?: string; custom_message?: string }) =>
+    apiRequest<ConsultationItem>(`/consultations/${id}/send-questionnaire`, { method: "POST", body: JSON.stringify(data) }),
+  shareExpert: (id: string, data: { expert_name: string; expert_role: string; expert_email?: string; expert_phone?: string; custom_note?: string }) =>
+    apiRequest<ConsultationItem>(`/consultations/${id}/share-expert`, { method: "POST", body: JSON.stringify(data) }),
+  sendDocument: (id: string, data: { document_title?: string; document_format?: string; custom_message?: string }) =>
+    apiRequest<ConsultationItem>(`/consultations/${id}/send-document`, { method: "POST", body: JSON.stringify(data) }),
 };
 
 // Complaints & Grievances API

@@ -143,12 +143,21 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
     db.add(audit)
     db.commit()
 
+    # Alert administrators about user login (mandatory real-time arrival notice)
+    notify_admin(
+        db=db,
+        title=f"User Signed In: {user.full_name}",
+        message=f"{user.full_name} ({user.email}, {user.phone_number or 'No mobile'}) logged into the platform.",
+        category="admin_alert",
+        link="/admin"
+    )
+
     # Dispatch official login security email to user's registered mail
     try:
         from app.services.email_service import send_login_notification_email
         send_login_notification_email(user.email, user.full_name)
-    except Exception:
-        pass
+    except Exception as email_err:
+        logging.getLogger("ventureblueprint.auth").error(f"Login notification email failed: {email_err}")
 
     return {
         "access_token": access_token,

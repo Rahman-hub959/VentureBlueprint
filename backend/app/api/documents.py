@@ -88,6 +88,14 @@ def generate_document(
 
     doc_title = DOC_TITLES.get(doc_type, "Company Assessment Dossier")
 
+    # Statutory document generation is strictly restricted to Administrators and Empanelled Corporate Desks
+    is_admin = current_user.role and current_user.role.name == "Administrator"
+    if not is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Statutory document generation is strictly restricted to authorized Administrators and Empanelled Corporate Advisory Desks (CS/CA/Advocate). Clients receive their verified dossier upon desk compilation."
+        )
+
     # Check existing document for version management
     existing_doc = db.query(GeneratedDocument).filter(
         GeneratedDocument.project_id == project.id,
@@ -97,8 +105,8 @@ def generate_document(
 
     next_version = (existing_doc.version + 1) if existing_doc else 1
 
-    # Storage destination
-    storage_dir = get_project_storage_dir(current_user.id, project.id, doc_format)
+    # Storage destination (stored under project owner)
+    storage_dir = get_project_storage_dir(project.user_id, project.id, doc_format)
     filename = f"{doc_type}_v{next_version}.{doc_format}"
     file_path = storage_dir / filename
 
@@ -218,7 +226,7 @@ def generate_document(
     else:
         target_doc = GeneratedDocument(
             project_id=project.id,
-            user_id=current_user.id,
+            user_id=project.user_id,
             document_type=doc_type,
             title=doc_title,
             file_path=str(file_path),
@@ -307,7 +315,8 @@ def download_document(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
     is_admin = current_user.role and current_user.role.name == "Administrator"
-    if doc.user_id != current_user.id and not is_admin:
+    is_owner = (doc.user_id == current_user.id) or (doc.project and doc.project.user_id == current_user.id)
+    if not is_owner and not is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access denied to this document")
 
     file_path = Path(doc.file_path)

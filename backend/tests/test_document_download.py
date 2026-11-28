@@ -61,11 +61,18 @@ def test_document_generation_and_download_flow():
     )
     assert submit_res.status_code == 200
 
-    # 4. Generate DOC-A (Company Formation Blueprint) PDF
+    # 4. Generate DOC-A (Company Formation Blueprint) PDF via Admin Desk
+    admin_login = client.post(
+        "/api/v1/auth/login",
+        json={"email": "admin@ventureblueprint.in", "password": "Admin@Venture2026!"}
+    )
+    assert admin_login.status_code == 200
+    admin_headers = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}
+
     gen_res = client.post(
         f"/api/v1/documents/projects/{project_id}/generate",
         json={"document_type": "formation_blueprint", "file_format": "pdf"},
-        headers=headers
+        headers=admin_headers
     )
     assert gen_res.status_code == 200
     doc_id = gen_res.json()["id"]

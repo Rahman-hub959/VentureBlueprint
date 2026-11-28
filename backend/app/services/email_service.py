@@ -296,38 +296,48 @@ def send_consultation_confirmation_email(
     expert_role: str,
     topic: str,
     phone_number: Optional[str] = None,
+    alternate_phone: Optional[str] = None,
     preferred_date: Optional[str] = None,
     preferred_time_slot: Optional[str] = None,
-    company_name: Optional[str] = None
+    company_name: Optional[str] = None,
+    service_category: Optional[str] = None,
+    preferred_entity_type: Optional[str] = None,
+    pdf_download_url: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Dispatches instant consultation booking and expert assignment confirmation email
-    to the user's registered or provided email address.
+    Dispatches instant consultation booking, expert assignment confirmation email,
+    and structured table PDF download link to the user's registered email address.
+    Mandatory notice: Our team will contact you within 24 to 48 hours.
     """
     name = recipient_name.strip() or "Entrepreneur"
     subject = f"Consultation Confirmed: {reference_id} · Assigned to {assigned_expert} ({pillar})"
 
-    date_str = preferred_date or "To be scheduled within 24 hours"
-    time_str = preferred_time_slot or "Morning Slot (10:00 AM - 1:00 PM)"
-    phone_str = phone_number or "your contact phone"
+    date_str = preferred_date or "Within 24 to 48 Hours"
+    time_str = preferred_time_slot or "Within 24 to 48 Hours"
+    phone_str = phone_number or "Not provided"
+    alt_phone_str = alternate_phone or "Not provided"
     comp_str = f" for {company_name}" if company_name else ""
+    srv_str = service_category or topic
+    pdf_url = pdf_download_url or f"{settings.PORTAL_URL}/api/v1/consultations/{reference_id}/pdf"
 
     body_text = f"""Dear {name},
 
-Your consultation request has been successfully assigned!
+Your consultation form is submitted successfully and our team will contact you within 24 to 48 hours.
 
-We have assigned your session{comp_str} to our empanelled expert:
-- Specialist: {assigned_expert} ({expert_role})
+We have registered your request{comp_str} and assigned our verified professional desk:
+- Specialist Lead: {assigned_expert} ({expert_role})
 - Practice Area: {pillar} (Corporate Law, CS & CA)
+- Specific Service: {srv_str}
 - Reference ID: {reference_id}
-- Topic: {topic}
-- Scheduled Date: {date_str}
-- Preferred Time: {time_str}
-- Consultation Mode: Direct Phone Callback ({phone_str}) & Email Advisory
+- Primary Contact Phone: {phone_str}
+- Alternate Phone: {alt_phone_str}
+- Preferred Structure: {preferred_entity_type or 'Standard Corporate Entity'}
+- Response Window: Within 24 to 48 Hours
 
-Our expert has received your dossier and will connect directly with you via phone callback and email.
+Your structured submission intake has been converted into an official structured PDF document:
+Download Structured PDF Summary: {pdf_url}
 
-You can track your consultation live anytime on your CorpSetu Dashboard:
+Track your consultation in real time on your CorpSetu Dashboard:
 {settings.PORTAL_URL}/consultations
 
 Warm regards,
@@ -338,7 +348,7 @@ Law · CS · CA — One Bridge
 
     body_html = f"""<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Consultation Assigned &amp; Confirmed</title></head>
+<head><meta charset="utf-8"><title>Consultation Submitted Successfully</title></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
   <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
     <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
@@ -347,59 +357,64 @@ Law · CS · CA — One Bridge
     </div>
     <div style="padding: 32px 24px;">
       <div style="display: inline-block; background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 20px; padding: 4px 14px; margin-bottom: 16px;">
-        <span style="color: #065F46; font-size: 12px; font-weight: 700;">✓ Request Assigned Successfully</span>
+        <span style="color: #065F46; font-size: 12px; font-weight: 700;">✓ Consultation Form Submitted Successfully</span>
       </div>
       <h2 style="font-size: 20px; font-weight: 800; color: #0B2559; margin-top: 0;">Hello, {name}!</h2>
-      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
-        Your consultation request has been assigned to our verified professional desk{comp_str}. Below are your official tracking reference and consultation details:
+      <div style="background-color: #FEF3C7; border-left: 4px solid #C59B27; padding: 14px 16px; border-radius: 8px; margin: 16px 0;">
+        <p style="margin: 0; font-size: 13.5px; font-weight: 700; color: #92400E;">
+          Your consultation form is submitted successfully and our team will contact you within 24 to 48 hours.
+        </p>
+      </div>
+
+      <p style="font-size: 13.5px; line-height: 1.6; color: #334155;">
+        Your submission has been cataloged under <b>Ref ID: {reference_id}</b> and routed directly to our <b>{pillar} Corporate Advisory Desk</b>.
       </p>
 
       <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; margin: 20px 0;">
+        <h4 style="margin: 0 0 12px; font-size: 13px; color: #0B2559; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Structured Intake Summary</h4>
         <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
           <tr>
-            <td style="padding: 6px 0; color: #64748B; width: 140px; font-weight: 600;">Reference ID:</td>
+            <td style="padding: 6px 0; color: #64748B; width: 150px; font-weight: 600;">Reference ID:</td>
             <td style="padding: 6px 0; font-weight: 800; color: #0B2559; font-family: monospace;">{reference_id}</td>
           </tr>
           <tr>
-            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Assigned Expert:</td>
-            <td style="padding: 6px 0; font-weight: 700; color: #0F172A;">{assigned_expert}</td>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Assigned Lead:</td>
+            <td style="padding: 6px 0; font-weight: 700; color: #0F172A;">{assigned_expert} ({expert_role})</td>
           </tr>
           <tr>
-            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Role / Pillar:</td>
-            <td style="padding: 6px 0; color: #047857; font-weight: 700;">{expert_role} ({pillar})</td>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Service Pillar:</td>
+            <td style="padding: 6px 0; color: #047857; font-weight: 700;">{pillar} — {srv_str}</td>
           </tr>
           <tr>
-            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Topic / Requirement:</td>
-            <td style="padding: 6px 0; color: #1E293B;">{topic}</td>
-          </tr>
-          <tr>
-            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Phone Callback:</td>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Primary Phone:</td>
             <td style="padding: 6px 0; color: #1E293B; font-weight: 700;">{phone_str}</td>
           </tr>
+          {f'<tr><td style="padding: 6px 0; color: #64748B; font-weight: 600;">Alternate Phone:</td><td style="padding: 6px 0; color: #1E293B;">{alt_phone_str}</td></tr>' if alternate_phone else ''}
+          {f'<tr><td style="padding: 6px 0; color: #64748B; font-weight: 600;">Proposed Entity:</td><td style="padding: 6px 0; color: #1E293B; font-weight: 700;">{company_name}</td></tr>' if company_name else ''}
           <tr>
-            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Preferred Slot:</td>
-            <td style="padding: 6px 0; color: #1E293B;">{date_str} ({time_str})</td>
+            <td style="padding: 6px 0; color: #64748B; font-weight: 600;">Response SLA:</td>
+            <td style="padding: 6px 0; color: #92400E; font-weight: 700;">Within 24 to 48 Hours</td>
           </tr>
         </table>
       </div>
 
-      <div style="background-color: #EFF6FF; border-left: 4px solid #1E40AF; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
-        <h4 style="margin: 0 0 6px; font-size: 13px; color: #1E40AF; font-weight: 700;">Direct Phone &amp; Email Advisory:</h4>
-        <p style="margin: 0; font-size: 13px; color: #1E3A8A;">
-          Our expert will connect with you directly via phone callback at <b>{phone_str}</b> during your preferred slot.
+      <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 18px 20px; margin: 20px 0; text-align: center;">
+        <h4 style="margin: 0 0 6px; font-size: 13.5px; color: #1E40AF; font-weight: 800;">Official Structured Table PDF Summary</h4>
+        <p style="margin: 0 0 14px; font-size: 12.5px; color: #1E3A8A;">
+          A publication-grade, structured PDF table has been generated for your records containing all submitted details.
         </p>
-        <p style="margin: 6px 0 0; font-size: 12px; color: #475569;">
-          Please keep any relevant company documents, contracts, or tax queries handy.
-        </p>
-      </div>
-
-      <div style="text-align: center; margin: 28px 0;">
-        <a href="{settings.PORTAL_URL}/consultations" style="background-color: #0B2559; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; display: inline-block;">
-          Track in Your Consultations &rarr;
+        <a href="{pdf_url}" style="background-color: #0B2559; color: #ffffff; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 700; display: inline-block;">
+          📄 Download Structured PDF Summary &rarr;
         </a>
       </div>
 
-      <p style="font-size: 13px; line-height: 1.6; color: #64748B; margin-bottom: 0;">
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="{settings.PORTAL_URL}/consultations" style="color: #0B2559; font-size: 12.5px; font-weight: 700; text-decoration: underline;">
+          Track live consultation progress on your CorpSetu Dashboard
+        </a>
+      </div>
+
+      <p style="font-size: 12.5px; line-height: 1.6; color: #64748B; margin-bottom: 0;">
         Warm regards,<br>
         <b>CorpSetu Advisory &amp; Dispatch Team</b><br>
         <a href="{settings.PORTAL_URL}" style="color: #0B2559; text-decoration: none;">www.corpsetu.com</a>
@@ -409,7 +424,7 @@ Law · CS · CA — One Bridge
       Confirmation email dispatched to <b>{recipient_email}</b> · Reference: <b>{reference_id}</b>
     </div>
   </div>
-</body>
+ </body>
 </html>
 """
 
@@ -423,9 +438,220 @@ Law · CS · CA — One Bridge
         extra_meta={
             "reference_id": reference_id,
             "pillar": pillar,
-            "assigned_expert": assigned_expert,
-            "topic": topic
+            "service_category": service_category,
+            "alternate_phone": alternate_phone,
+            "pdf_url": pdf_url
         }
+    )
+
+
+def send_questionnaire_link_email(
+    recipient_email: str,
+    recipient_name: str,
+    reference_id: str,
+    pillar: str,
+    questionnaire_url: Optional[str] = None,
+    custom_message: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Dispatches the official statutory questionnaire link to the client after admin
+    confirms consultation scope and fee arrangements.
+    """
+    name = recipient_name.strip() or "Client"
+    url = questionnaire_url or f"{settings.PORTAL_URL}/questionnaire?pillar={pillar}&consultation_id={reference_id}"
+    subject = f"Action Required: Complete Your {pillar} Questionnaire ({reference_id})"
+
+    body_text = f"""Dear {name},
+
+Following our advisory consultation regarding Ref: {reference_id}, please find below your official questionnaire link:
+
+{url}
+
+{custom_message or 'Please provide the requested company and founder details so our empanelled desk can draft your statutory blueprint and government filings.'}
+
+All responses are saved directly into our secure database and reviewed by your assigned practitioner.
+
+Warm regards,
+CorpSetu Compliance Team
+{settings.PORTAL_URL}
+"""
+
+    body_html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Statutory Questionnaire Link</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 800;">CorpSetu</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">{pillar} Statutory Intake Desk</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <h2 style="font-size: 20px; font-weight: 800; color: #0B2559; margin-top: 0;">Hello, {name}!</h2>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Thank you for speaking with our corporate advisory team regarding <b>Ref: {reference_id}</b>. Your service intake has been approved and moved to the questionnaire stage.
+      </p>
+      {f'<p style="font-size: 13.5px; color: #1E3A8A; background: #EFF6FF; padding: 12px 16px; border-radius: 8px;">{custom_message}</p>' if custom_message else ''}
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="{url}" style="background-color: #059669; color: #ffffff; padding: 14px 32px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 800; display: inline-block;">
+          Fill {pillar} Statutory Questionnaire &rarr;
+        </a>
+      </div>
+      <p style="font-size: 12.5px; line-height: 1.6; color: #64748B;">
+        Once submitted, your inputs will be verified directly by our empanelled desk to compile your statutory blueprint and filing forms.
+      </p>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    return _deliver_email(
+        to_email=recipient_email,
+        to_name=name,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        action_type="questionnaire_link_sent",
+        extra_meta={"reference_id": reference_id, "pillar": pillar, "url": url}
+    )
+
+
+def send_expert_details_email(
+    recipient_email: str,
+    recipient_name: str,
+    reference_id: str,
+    pillar: str,
+    expert_name: str,
+    expert_role: str,
+    expert_email: Optional[str] = None,
+    expert_phone: Optional[str] = None,
+    custom_note: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Shares the assigned Chartered Accountant or Corporate Advocate credentials and contact info
+    with the client so they have verified direct access.
+    """
+    name = recipient_name.strip() or "Client"
+    subject = f"Assigned Specialist Details: {expert_name} ({pillar}) · CorpSetu"
+
+    body_text = f"""Dear {name},
+
+Here are the verified details of your assigned specialist for Ref: {reference_id}:
+
+Specialist: {expert_name}
+Role / Bar & Institute Reg: {expert_role}
+Direct Contact Phone: {expert_phone or '+91 9988776655'}
+Direct Advisory Email: {expert_email or 'advisory@corpsetu.com'}
+
+{custom_note or 'You can connect directly with your assigned specialist to finalize statutory filings and advice.'}
+
+Warm regards,
+CorpSetu Advisory Desk
+{settings.PORTAL_URL}
+"""
+
+    body_html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Assigned Specialist Details</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 800;">CorpSetu</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">Empanelled Practitioner Profile</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <h2 style="font-size: 20px; font-weight: 800; color: #0B2559; margin-top: 0;">Verified Specialist Assigned</h2>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Dear <b>{name}</b>, your matter under <b>Ref: {reference_id}</b> has been assigned to our verified senior specialist:
+      </p>
+      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 18px 20px; margin: 20px 0; font-size: 13px;">
+        <p style="margin: 4px 0;"><b>Name:</b> <span style="color: #0B2559; font-weight: 800;">{expert_name}</span></p>
+        <p style="margin: 4px 0;"><b>Qualification &amp; Credential:</b> {expert_role}</p>
+        <p style="margin: 4px 0;"><b>Practice Area:</b> {pillar} Corporate Advisory</p>
+        <p style="margin: 4px 0;"><b>Direct Phone:</b> <a href="tel:{expert_phone or '+91 9988776655'}" style="color: #059669; font-weight: 700;">{expert_phone or '+91 9988776655'}</a></p>
+        <p style="margin: 4px 0;"><b>Email:</b> <a href="mailto:{expert_email or 'advisory@corpsetu.com'}" style="color: #0B2559;">{expert_email or 'advisory@corpsetu.com'}</a></p>
+      </div>
+      {f'<p style="font-size: 13px; color: #475569; font-style: italic;">Note: {custom_note}</p>' if custom_note else ''}
+    </div>
+  </div>
+</body>
+</html>"""
+
+    return _deliver_email(
+        to_email=recipient_email,
+        to_name=name,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        action_type="expert_details_shared",
+        extra_meta={"reference_id": reference_id, "pillar": pillar, "expert_name": expert_name}
+    )
+
+
+def send_generated_document_email(
+    recipient_email: str,
+    recipient_name: str,
+    reference_id: str,
+    doc_title: str,
+    download_url: str,
+    custom_message: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Dispatches the official generated statutory blueprint / compliance dossier directly
+    to the client's registered email from the Admin Portal.
+    """
+    name = recipient_name.strip() or "Client"
+    subject = f"Your Verified Document is Ready: {doc_title} ({reference_id})"
+
+    body_text = f"""Dear {name},
+
+Your statutory document '{doc_title}' has been compiled and verified by our empanelled corporate advisory desk under Ref: {reference_id}.
+
+Download Document:
+{download_url}
+
+{custom_message or 'Please review your document and let us know if any further statutory filings or notarizations are required.'}
+
+Warm regards,
+CorpSetu Statutory Compilation Desk
+{settings.PORTAL_URL}
+"""
+
+    body_html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>{doc_title} Ready</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #065F46 0%, #047857 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 800;">CorpSetu</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #FDE68A; font-weight: 600;">Verified Statutory Deliverable</p>
+    </div>
+    <div style="padding: 32px 24px;">
+      <h2 style="font-size: 20px; font-weight: 800; color: #065F46; margin-top: 0;">Document Ready for Download</h2>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Dear <b>{name}</b>, your official <b>{doc_title}</b> has been compiled by the CorpSetu Advisory Desk following statutory validation.
+      </p>
+      {f'<p style="font-size: 13px; color: #1E3A8A; background: #EFF6FF; padding: 12px 16px; border-radius: 8px;">{custom_message}</p>' if custom_message else ''}
+      <div style="text-align: center; margin: 28px 0;">
+        <a href="{download_url}" style="background-color: #065F46; color: #ffffff; padding: 13px 30px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 800; display: inline-block;">
+          Download {doc_title} &rarr;
+        </a>
+      </div>
+      <p style="font-size: 12px; color: #64748B;">
+        Ref ID: <b>{reference_id}</b> · Generated &amp; Dispatched by CorpSetu Empanelled Desk
+      </p>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    return _deliver_email(
+        to_email=recipient_email,
+        to_name=name,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        action_type="statutory_document_dispatched",
+        extra_meta={"reference_id": reference_id, "doc_title": doc_title, "download_url": download_url}
     )
 
 

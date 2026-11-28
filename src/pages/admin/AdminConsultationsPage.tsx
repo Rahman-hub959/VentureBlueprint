@@ -20,7 +20,10 @@ import {
   MessageSquare,
   ThumbsUp,
   ThumbsDown,
-  Edit3
+  Edit3,
+  Send,
+  UserCheck,
+  FileCheck
 } from "lucide-react";
 import { consultationsApi, ConsultationItem } from "../../api/client";
 import { useToast } from "../../context/ToastContext";
@@ -112,6 +115,60 @@ export const AdminConsultationsPage: React.FC = () => {
       showToast(err?.message || "Failed to update consultation", "warning");
     } finally {
       setSubmittingAction(false);
+    }
+  };
+
+  const handleSendQuestionnaire = async (item: ConsultationItem) => {
+    try {
+      const updated = await consultationsApi.sendQuestionnaire(item.id, {
+        pillar: item.pillar,
+      });
+      setConsultations((prev) =>
+        prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+      );
+      showToast(`Statutory Questionnaire link emailed to ${item.email} (${item.pillar})`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to send questionnaire link", "warning");
+    }
+  };
+
+  const handleShareExpert = async (item: ConsultationItem) => {
+    try {
+      const expertName = item.assigned_expert || (
+        item.pillar === "CS" ? "CS Priyanjali Sen" :
+        item.pillar === "CA" ? "CA Aniket Kulkarni" :
+        item.pillar === "LAW" ? "Adv. Rajesh Varma" : "CorpSetu Senior Partner Desk"
+      );
+      const expertRole = item.expert_role || (
+        item.pillar === "CS" ? "FCS #11428 · Senior Secretarial Lead" :
+        item.pillar === "CA" ? "FCA #418290 · Chartered Accountant & Tax Partner" :
+        item.pillar === "LAW" ? "Bar Council KAR/2012/842 · High Court Advocate" : "Multi-Disciplinary Corporate Advisory Lead"
+      );
+
+      const updated = await consultationsApi.shareExpert(item.id, {
+        expert_name: expertName,
+        expert_role: expertRole,
+      });
+      setConsultations((prev) =>
+        prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+      );
+      showToast(`Empanelled Specialist profile (${expertName}) dispatched to ${item.email}`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to share specialist details", "warning");
+    }
+  };
+
+  const handleSendDocument = async (item: ConsultationItem) => {
+    try {
+      const updated = await consultationsApi.sendDocument(item.id, {
+        document_title: `${item.pillar} Statutory Dossier & Blueprint`,
+      });
+      setConsultations((prev) =>
+        prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+      );
+      showToast(`Statutory document download link dispatched to ${item.email}`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to send document to client", "warning");
     }
   };
 
@@ -327,15 +384,25 @@ export const AdminConsultationsPage: React.FC = () => {
                             <span>{item.company_name}</span>
                           </div>
                         )}
-                        <div className="mt-1.5 flex items-center gap-1.5">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                           <a
                             href={`tel:${item.phone_number}`}
-                            title={`Click to direct call ${item.phone_number}`}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-[11px] shadow-xs transition-all cursor-pointer"
+                            title={`Click to direct call primary phone ${item.phone_number}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-[11px] shadow-xs transition-all cursor-pointer"
                           >
                             <PhoneCall className="w-3 h-3 text-white" />
                             <span>{item.phone_number}</span>
                           </a>
+                          {item.alternate_phone && (
+                            <a
+                              href={`tel:${item.alternate_phone}`}
+                              title={`Click to direct call alternate phone ${item.alternate_phone}`}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-teal-600 hover:bg-teal-700 active:scale-95 text-white font-extrabold text-[10px] shadow-xs transition-all cursor-pointer"
+                            >
+                              <PhoneCall className="w-2.5 h-2.5 text-white" />
+                              <span>Alt: {item.alternate_phone}</span>
+                            </a>
+                          )}
                         </div>
                         <div className="text-[11px] text-slate-500 truncate max-w-[180px] mt-1">
                           {item.email}
@@ -343,15 +410,37 @@ export const AdminConsultationsPage: React.FC = () => {
                       </td>
 
                       {/* Inquiry Topic & Notes */}
-                      <td className="py-4 px-5 max-w-[240px]">
+                      <td className="py-4 px-5 max-w-[260px]">
                         <div className="font-extrabold text-slate-900 dark:text-white truncate">
                           {item.topic}
                         </div>
+                        {item.service_category && (
+                          <div className="text-[10.5px] font-bold text-amber-700 dark:text-amber-400 mt-0.5">
+                            {item.service_category}
+                          </div>
+                        )}
+                        {item.preferred_entity_type && (
+                          <div className="text-[10px] text-slate-500 font-medium">
+                            Structure: {item.preferred_entity_type}
+                          </div>
+                        )}
                         {item.notes && (
                           <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5 font-normal">
                             {item.notes}
                           </p>
                         )}
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <a
+                            href={`/api/v1/consultations/${item.id}/pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 text-[#C59B27] hover:bg-amber-500/20 border border-amber-500/20 font-bold text-[10.5px] transition-all cursor-pointer"
+                            title="Download Structured Table PDF Summary"
+                          >
+                            <FileText className="w-3 h-3" />
+                            <span>Structured PDF</span>
+                          </a>
+                        </div>
                         <div className="text-[10px] text-slate-400 mt-1 font-mono">
                           {new Date(item.created_at).toLocaleDateString("en-IN", {
                             day: "numeric",
@@ -369,7 +458,7 @@ export const AdminConsultationsPage: React.FC = () => {
                           {item.preferred_date || "Within 24 Hours"}
                         </div>
                         <div className="text-[11px] text-slate-500 mt-0.5">
-                          {item.preferred_time_slot || "Morning"}
+                          {item.preferred_time_slot || "Within 24 to 48 Hours"}
                         </div>
                         <div className="text-[10px] text-slate-400 mt-1">
                           Assigned: <strong>{item.assigned_expert?.split(" ")[1] || "Senior Lead"}</strong>
@@ -420,14 +509,14 @@ export const AdminConsultationsPage: React.FC = () => {
                         </span>
                       </td>
 
-                      {/* Actions: Quick Direct Call, 👍 and 👎 Buttons */}
+                      {/* Actions: Quick Direct Call, 👍 and 👎, Send Form, Share Specialist, Send Doc */}
                       <td className="py-4 px-5 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
                           {/* 📞 Green Direct Call Button */}
                           <a
                             href={`tel:${item.phone_number}`}
                             title={`Direct Call: ${item.phone_number}`}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer"
                           >
                             <PhoneCall className="w-3.5 h-3.5 text-white" />
                             <span>Call</span>
@@ -439,7 +528,7 @@ export const AdminConsultationsPage: React.FC = () => {
                             onClick={() => handleQuickStatus(item.id, "Consulted")}
                             disabled={updatingId === item.id || item.status === "Consulted"}
                             title="Admin talked / approached client. Mark as Consulted"
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                               item.status === "Consulted"
                                 ? "bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/50"
                                 : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 shadow-xs"
@@ -455,7 +544,7 @@ export const AdminConsultationsPage: React.FC = () => {
                             onClick={() => handleQuickStatus(item.id, "Not Accepted")}
                             disabled={updatingId === item.id || item.status === "Not Accepted"}
                             title="Consulted, but not accepted by client or admin"
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
                               item.status === "Not Accepted"
                                 ? "bg-rose-600 text-white shadow-sm ring-2 ring-rose-500/50"
                                 : "bg-rose-50 text-rose-800 hover:bg-rose-100 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-700 shadow-xs"
@@ -463,6 +552,39 @@ export const AdminConsultationsPage: React.FC = () => {
                           >
                             <ThumbsDown className="w-3.5 h-3.5" />
                             <span>Not Accepted</span>
+                          </button>
+
+                          {/* ✉️ Send Questionnaire Link */}
+                          <button
+                            type="button"
+                            onClick={() => handleSendQuestionnaire(item)}
+                            title="Email official questionnaire link to client"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800 text-xs font-bold transition-all cursor-pointer"
+                          >
+                            <Send className="w-3 h-3" />
+                            <span>Send Form</span>
+                          </button>
+
+                          {/* 👤 Share Specialist Profile */}
+                          <button
+                            type="button"
+                            onClick={() => handleShareExpert(item)}
+                            title="Email empanelled CA / Advocate credentials to client"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 text-xs font-bold transition-all cursor-pointer"
+                          >
+                            <UserCheck className="w-3 h-3" />
+                            <span>Share {item.pillar === "CA" ? "CA" : item.pillar === "LAW" ? "Adv" : "CS"}</span>
+                          </button>
+
+                          {/* 📄 Send Generated Document */}
+                          <button
+                            type="button"
+                            onClick={() => handleSendDocument(item)}
+                            title="Email generated statutory blueprint to client"
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700 text-xs font-bold transition-all cursor-pointer"
+                          >
+                            <FileCheck className="w-3 h-3" />
+                            <span>Send Doc</span>
                           </button>
 
                           {/* Edit / Full Manage Modal Button */}

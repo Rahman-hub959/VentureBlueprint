@@ -22,8 +22,9 @@ import {
   Check,
   Copy
 } from "lucide-react";
-import { documentsApi } from "../../api/client";
+import { documentsApi, projectsApi } from "../../api/client";
 import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../context/AuthContext";
 
 interface SectionSummary {
   num: number;
@@ -46,6 +47,7 @@ export const DocumentsPage: React.FC = () => {
   const [expandedSection, setExpandedSection] = useState<number | null>(null);
 
   const { showToast } = useToast();
+  const { user, isAdmin } = useAuth();
 
   // The 18 Sections unified inside the 10-15 Page Company Startup Blueprint
   const unifiedSections: SectionSummary[] = [
@@ -349,30 +351,47 @@ export const DocumentsPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Generate / Download Action */}
+            {/* Generate / Download Action (Admin Controlled) */}
             <div className="flex items-center gap-2">
-              <button
-                onClick={handleCompileAndDownload}
-                disabled={generating || downloading}
-                className="glass-button-primary px-6 py-2.5 text-xs font-bold shadow-md justify-center whitespace-nowrap"
-              >
-                {generating ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin text-white" />
-                    <span>Compiling 15-Page Master {selectedFormat.toUpperCase()}...</span>
-                  </>
-                ) : (
-                  <>
-                    <BookOpen className="w-4 h-4 text-white" />
-                    <span>⚡ Compile & Download Latest {selectedFormat.toUpperCase()}</span>
-                  </>
-                )}
-              </button>
+              {isAdmin ? (
+                <button
+                  onClick={handleCompileAndDownload}
+                  disabled={generating || downloading}
+                  className="glass-button-primary px-6 py-2.5 text-xs font-bold shadow-md justify-center whitespace-nowrap cursor-pointer"
+                >
+                  {generating ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                      <span>Compiling 15-Page Master {selectedFormat.toUpperCase()}...</span>
+                    </>
+                  ) : (
+                    <>
+                      <BookOpen className="w-4 h-4 text-white" />
+                      <span>⚡ Compile &amp; Download Latest {selectedFormat.toUpperCase()}</span>
+                    </>
+                  )}
+                </button>
+              ) : masterDoc ? (
+                <button
+                  onClick={() => handleDownload(masterDoc)}
+                  disabled={downloading}
+                  className="glass-button-primary px-6 py-2.5 text-xs font-bold shadow-md justify-center whitespace-nowrap cursor-pointer"
+                >
+                  <Download className={`w-4 h-4 text-white ${downloading ? "animate-bounce" : ""}`} />
+                  <span>Download Verified Master Blueprint ({selectedFormat.toUpperCase()})</span>
+                </button>
+              ) : (
+                <div className="p-2.5 px-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 text-xs font-bold flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                  <span>Empanelled Desk Verification Pending</span>
+                </div>
+              )}
+
               {masterDoc && (
                 <button
                   onClick={() => handleDownload(masterDoc)}
                   disabled={downloading || generating}
-                  className="glass-button-secondary px-4 py-2.5 text-xs font-bold justify-center whitespace-nowrap"
+                  className="glass-button-secondary px-4 py-2.5 text-xs font-bold justify-center whitespace-nowrap cursor-pointer"
                   title="Download previously compiled file"
                 >
                   <Download className={`w-3.5 h-3.5 ${downloading ? "animate-bounce" : ""}`} />

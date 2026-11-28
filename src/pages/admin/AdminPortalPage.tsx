@@ -37,7 +37,9 @@ import {
   Sliders,
   UserCheck,
   UserX,
-  Globe
+  Globe,
+  Send,
+  Download
 } from "lucide-react";
 import {
   adminApi,
@@ -157,6 +159,63 @@ export const AdminPortalPage: React.FC = () => {
       showToast(err?.message || "Failed to update consultation status", "warning");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleSendQuestionnaire = async (item: ConsultationItem) => {
+    try {
+      const updated = await consultationsApi.sendQuestionnaire(item.id, {
+        pillar: item.pillar,
+      });
+      setConsultations((prev) =>
+        prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+      );
+      showToast(`Statutory Questionnaire link emailed to ${item.email} (${item.pillar})`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to send questionnaire link", "warning");
+    }
+  };
+
+  const handleShareExpert = async (item: ConsultationItem) => {
+    try {
+      const expertName = item.assigned_expert || (
+        item.pillar === "CS" ? "CS Priyanjali Sen" :
+        item.pillar === "CA" ? "CA Aniket Kulkarni" :
+        item.pillar === "LAW" ? "Adv. Rajesh Varma" : "CorpSetu Senior Partner Desk"
+      );
+      const expertRole = item.expert_role || (
+        item.pillar === "CS" ? "FCS #11428 · Senior Secretarial Lead" :
+        item.pillar === "CA" ? "FCA #418290 · Chartered Accountant & Tax Partner" :
+        item.pillar === "LAW" ? "Bar Council KAR/2012/842 · High Court Advocate" : "Multi-Disciplinary Corporate Advisory Lead"
+      );
+      const updated = await consultationsApi.shareExpert(item.id, {
+        expert_name: expertName,
+        expert_role: expertRole,
+      });
+      setConsultations((prev) =>
+        prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+      );
+      showToast(`Specialist profile for ${expertName} dispatched to ${item.email}`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to share specialist details", "warning");
+    }
+  };
+
+  const handleSendDocument = async (item: ConsultationItem) => {
+    try {
+      const docName = item.pillar === "CS" ? "Statutory SPICe+ MCA Blueprint" :
+                      item.pillar === "CA" ? "Annual Tax & Audit Advisory Dossier" :
+                      item.pillar === "LAW" ? "Master Shareholder & Founders Legal Charter" :
+                      "Statutory Corporate Advisory Blueprint";
+      const updated = await consultationsApi.sendDocument(item.id, {
+        document_title: docName,
+      });
+      setConsultations((prev) =>
+        prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+      );
+      showToast(`Generated document dispatched to client: ${item.email}`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to send document to client", "warning");
     }
   };
 
@@ -1430,9 +1489,9 @@ export const AdminPortalPage: React.FC = () => {
                   <tr>
                     <th className="py-3 px-4">Ref ID &amp; Pillar</th>
                     <th className="py-3 px-4">Client Contact</th>
-                    <th className="py-3 px-4">Topic &amp; Notes</th>
-                    <th className="py-3 px-4">Slot</th>
-                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Service Scope &amp; Structured PDF</th>
+                    <th className="py-3 px-4">Slot &amp; Status</th>
+                    <th className="py-3 px-4">Fulfillment Actions</th>
                     <th className="py-3 px-4 text-right">Quick Triage</th>
                   </tr>
                 </thead>
@@ -1441,25 +1500,113 @@ export const AdminPortalPage: React.FC = () => {
                     <tr key={item.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
                       <td className="py-3 px-4">
                         <span className="font-mono font-extrabold text-[#0B2559] dark:text-white block">{item.id}</span>
-                        <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400">{item.pillar} Advisory</span>
+                        <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 block">{item.pillar} Advisory</span>
+                        {item.service_category && (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 inline-block mt-0.5">
+                            {item.service_category}
+                          </span>
+                        )}
+                        {item.preferred_entity_type && (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 inline-block mt-0.5 ml-1">
+                            {item.preferred_entity_type}
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 px-4">
                         <div className="font-extrabold text-slate-900 dark:text-white">{item.full_name}</div>
-                        <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">{item.phone_number}</div>
                         <div className="text-[10px] text-slate-400 truncate max-w-[150px]">{item.email}</div>
+                        {/* Primary Phone with Green Call Button */}
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 font-mono">{item.phone_number}</span>
+                          <a
+                            href={`tel:${item.phone_number}`}
+                            title={`Call Primary: ${item.phone_number}`}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold shadow-2xs transition-all cursor-pointer"
+                          >
+                            <PhoneCall className="w-2.5 h-2.5" />
+                            <span>Call</span>
+                          </a>
+                        </div>
+                        {/* Optional / Alternate Phone with Green Call Button */}
+                        {item.alternate_phone && (
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 font-mono">Alt: {item.alternate_phone}</span>
+                            <a
+                              href={`tel:${item.alternate_phone}`}
+                              title={`Call Alternate: ${item.alternate_phone}`}
+                              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500 hover:bg-emerald-600 text-white text-[9px] font-extrabold shadow-2xs transition-all cursor-pointer"
+                            >
+                              <PhoneCall className="w-2 h-2" />
+                              <span>Alt Call</span>
+                            </a>
+                          </div>
+                        )}
                       </td>
                       <td className="py-3 px-4 max-w-[240px]">
                         <div className="font-bold text-slate-900 dark:text-white truncate">{item.topic}</div>
-                        {item.notes && <p className="text-[10px] text-slate-500 line-clamp-1">{item.notes}</p>}
+                        {item.notes && <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2 mt-0.5">{item.notes}</p>}
+                        {/* Structured Table PDF Download */}
+                        <div className="mt-1.5">
+                          <a
+                            href={`/api/v1/consultations/${item.id}/pdf`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-[#C59B27] border border-amber-500/30 text-[10px] font-extrabold transition-all"
+                          >
+                            <Download className="w-3 h-3 text-[#C59B27]" />
+                            <span>Structured Table PDF</span>
+                          </a>
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         <div className="font-bold text-slate-800 dark:text-slate-200">{item.preferred_time_slot}</div>
                         <div className="text-[10px] text-slate-400">{item.preferred_date}</div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="font-extrabold text-[11px] px-2.5 py-1 rounded-full border bg-slate-100 text-slate-800">
+                        <span className={`inline-block mt-1 font-extrabold text-[10px] px-2 py-0.5 rounded-full border ${
+                          item.status === "Consulted"
+                            ? "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300"
+                            : item.status === "Not Accepted"
+                            ? "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950 dark:text-rose-300"
+                            : "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950 dark:text-amber-300"
+                        }`}>
                           {item.status}
                         </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col gap-1">
+                          {/* Send Questionnaire */}
+                          <button
+                            type="button"
+                            onClick={() => handleSendQuestionnaire(item)}
+                            title="Email questionnaire form link to client"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800 text-[10px] font-bold transition-all cursor-pointer"
+                          >
+                            <Send className="w-2.5 h-2.5" />
+                            <span>Send Form</span>
+                            {item.questionnaire_sent_at && <CheckCircle2 className="w-2.5 h-2.5 text-blue-600 ml-auto" />}
+                          </button>
+                          {/* Share Expert Profile */}
+                          <button
+                            type="button"
+                            onClick={() => handleShareExpert(item)}
+                            title="Email empanelled CA / Advocate credentials to client"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800 text-[10px] font-bold transition-all cursor-pointer"
+                          >
+                            <UserCheck className="w-2.5 h-2.5" />
+                            <span>Share {item.pillar === "CA" ? "CA" : item.pillar === "LAW" ? "Adv" : "CS"}</span>
+                            {item.expert_shared_at && <CheckCircle2 className="w-2.5 h-2.5 text-purple-600 ml-auto" />}
+                          </button>
+                          {/* Send Document */}
+                          <button
+                            type="button"
+                            onClick={() => handleSendDocument(item)}
+                            title="Email generated blueprint to client"
+                            className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700 text-[10px] font-bold transition-all cursor-pointer"
+                          >
+                            <FileCheck className="w-2.5 h-2.5" />
+                            <span>Send Doc</span>
+                            {item.document_sent_at && <CheckCircle2 className="w-2.5 h-2.5 text-amber-600 ml-auto" />}
+                          </button>
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">

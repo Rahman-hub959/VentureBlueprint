@@ -16,18 +16,25 @@ class Consultation(Base):
     full_name = Column(String(255), nullable=False)
     email = Column(String(255), nullable=False, index=True)
     phone_number = Column(String(30), nullable=False)
+    alternate_phone = Column(String(30), nullable=True)
     company_name = Column(String(255), nullable=True)
     pillar = Column(String(30), nullable=False, default="GENERAL")  # CS, CA, LAW, GENERAL
+    service_category = Column(String(100), nullable=True)
+    preferred_entity_type = Column(String(100), nullable=True)
     topic = Column(String(255), nullable=False)
     preferred_date = Column(String(50), nullable=True)
     preferred_time_slot = Column(String(100), nullable=True)
-    status = Column(String(50), nullable=False, default="Requested")  # Requested, Scheduled, In Progress, Completed, Cancelled
+    status = Column(String(50), nullable=False, default="Requested")  # Requested, Consulted, Not Accepted, Scheduled, In Progress, Completed, Cancelled
     assigned_expert = Column(String(255), nullable=True)
     expert_role = Column(String(100), nullable=True)
     notes = Column(Text, nullable=True)
     meeting_link = Column(String(255), nullable=True)
     meeting_platform = Column(String(50), default="Google Meet / Direct Phone")
     resolution_summary = Column(Text, nullable=True)
+    pdf_summary_url = Column(String(255), nullable=True)
+    questionnaire_sent_at = Column(DateTime, nullable=True)
+    expert_shared_at = Column(DateTime, nullable=True)
+    document_sent_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
