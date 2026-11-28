@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 # ─── AUTH SCHEMAS ───
 class UserRegister(BaseModel):
@@ -204,8 +204,7 @@ class ClientEnquiryResponse(BaseModel):
     created_at: Any
     updated_at: Any
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ClientEnquiryStatusUpdate(BaseModel):
     status: Optional[str] = None
