@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   CalendarCheck,
   PlusCircle,
@@ -30,6 +30,11 @@ import { CorpSetuLogo } from "../../components/CorpSetuLogo";
 
 export const ConsultationsPage: React.FC = () => {
   const { user } = useAuth();
+
+  // Administrators do not book consultations; redirect them to Admin Consultation Management Console
+  if (user?.role === "Administrator") {
+    return <Navigate to="/admin/consultations" replace />;
+  }
   const [consultations, setConsultations] = useState<ConsultationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"ALL" | "ACTIVE" | "COMPLETED">("ALL");

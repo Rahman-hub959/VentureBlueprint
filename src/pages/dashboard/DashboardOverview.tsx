@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Users,
   Calendar,
+  CalendarCheck,
   Shield,
   Scale,
   ArrowUpRight,
@@ -1056,12 +1057,22 @@ export const DashboardOverview: React.FC = () => {
                 Maintain accurate books of accounts, automate GST returns (GSTR-1, 3B), estimate advance taxes, and prepare statutory audit schedules.
               </p>
             </div>
-            <button
-              onClick={() => { setCaConsultTopic("General CA Tax Strategy"); setCaBookedModal(true); }}
-              className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
-            >
-              Consult Empanelled CA · Starting from ₹499
-            </button>
+            {user?.role === "Administrator" ? (
+              <Link
+                to="/admin/consultations"
+                className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto inline-flex items-center gap-1.5"
+              >
+                <CalendarCheck className="w-4 h-4" />
+                <span>Manage CA Inquiries &rarr;</span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => { setCaConsultTopic("General CA Tax Strategy"); setCaBookedModal(true); }}
+                className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
+              >
+                Consult Empanelled CA · Starting from ₹499
+              </button>
+            )}
           </div>
 
           {/* CA 4 Metric Cards */}
@@ -1202,12 +1213,21 @@ export const DashboardOverview: React.FC = () => {
 
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <span className="text-xs text-slate-500 font-medium">Need full financial audit?</span>
-                <button
-                  onClick={() => { setCaConsultTopic("Statutory Audit under Section 139"); setCaBookedModal(true); }}
-                  className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
-                >
-                  Book CA Review &rarr; Starting from ₹2,499
-                </button>
+                {user?.role === "Administrator" ? (
+                  <Link
+                    to="/admin/consultations"
+                    className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
+                  >
+                    View Audit Requests in Admin &rarr;
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => { setCaConsultTopic("Statutory Audit under Section 139"); setCaBookedModal(true); }}
+                    className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
+                  >
+                    Book CA Review &rarr; Starting from ₹2,499
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -1233,12 +1253,22 @@ export const DashboardOverview: React.FC = () => {
                 Generate airtight founder vesting agreements, bilateral NDAs, conduct trademark searches, and safeguard corporate intellectual property.
               </p>
             </div>
-            <button
-              onClick={() => setLawBookedModal(true)}
-              className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
-            >
-              Consult High Court Advocate · Starting from ₹999
-            </button>
+            {user?.role === "Administrator" ? (
+              <Link
+                to="/admin/consultations"
+                className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto inline-flex items-center gap-1.5"
+              >
+                <CalendarCheck className="w-4 h-4 text-[#C59B27]" />
+                <span>Manage Legal Inquiries &rarr;</span>
+              </Link>
+            ) : (
+              <button
+                onClick={() => setLawBookedModal(true)}
+                className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
+              >
+                Consult High Court Advocate · Starting from ₹999
+              </button>
+            )}
           </div>
 
           {/* LAW 4 Metric Cards */}
@@ -1462,12 +1492,21 @@ export const DashboardOverview: React.FC = () => {
 
               <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <span className="text-xs text-slate-500 font-medium">Need expedited TM-A filing?</span>
-                <button
-                  onClick={() => setLawBookedModal(true)}
-                  className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline"
-                >
-                  File with IP Attorney &rarr; Starting from ₹4,999
-                </button>
+                {user?.role === "Administrator" ? (
+                  <Link
+                    to="/admin/consultations"
+                    className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline"
+                  >
+                    View IP Filings in Admin &rarr;
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => setLawBookedModal(true)}
+                    className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline"
+                  >
+                    File with IP Attorney &rarr; Starting from ₹4,999
+                  </button>
+                )}
               </div>
             </div>
           </div>
