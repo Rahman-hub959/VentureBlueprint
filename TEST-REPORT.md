@@ -1,14 +1,14 @@
-# VentureBlueprint: Test Execution & Security Verification Report
+# CorpSetu: Test Execution & Security Verification Report
 **Date of Execution:** 17 November 2026  
 **Test Harness:** Pytest 9.2 (Backend) / Vite & TypeScript Compiler (Frontend)  
-**Target Environment:** Local Windows Workstation (`E:\VentureBlueprint Design System`)  
+**Target Environment:** Local Windows Workstation (`E:\CorpSetu Design System`)  
 **Overall Status:** PASSED (All 6 Backend Integration Suites Passed; Frontend Vite Build Passed)
 
 ---
 
 ## 1. Test Architecture Overview
 
-VentureBlueprint uses a multi-layered verification strategy combining statutory rule unit tests, end-to-end API integration tests, document rendering integrity verification, and static type analysis:
+CorpSetu uses a multi-layered verification strategy combining statutory rule unit tests, end-to-end API integration tests, document rendering integrity verification, and static type analysis:
 
 ```mermaid
 flowchart LR
@@ -40,7 +40,7 @@ flowchart LR
 ```text
 ============================= test session starts =============================
 platform win32 -- Python 3.14.7, pytest-9.2.0, pluggy-1.7.0
-rootdir: E:\VentureBlueprint Design System
+rootdir: E:\CorpSetu Design System
 configfile: pytest.ini
 testpaths: backend/tests
 plugins: anyio-4.16.0, asyncio-1.5.0
@@ -64,7 +64,7 @@ backend/tests/test_all_features.py::test_admin_permissions_and_health PASSED [10
 - **Objective:** Verify root discovery endpoint and platform jurisdiction metadata.
 - **Assertions:**
   - Status code is `200 OK`.
-  - `platform` equals `"VentureBlueprint"`.
+  - `platform` equals `"CorpSetu"`.
   - `jurisdiction` equals `"Republic of India"`.
 
 ### Test Suite 2: Authentication & Token Lifecycle (`test_auth_registration_and_login`)

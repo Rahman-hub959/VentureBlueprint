@@ -172,7 +172,7 @@ export function Navbar() {
         <span className="brand-mark" aria-hidden="true">
           <span />
         </span>
-        <span>VentureBlueprint</span>
+        <span>CorpSetu</span>
         <Badge>Design system</Badge>
       </div>
       <nav className="navbar__actions" aria-label="Account navigation">

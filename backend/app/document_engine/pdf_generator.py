@@ -851,7 +851,7 @@ def build_consultation_summary_pdf(output_path: Path, data: Dict[str, Any]) -> s
         [
             Paragraph("<b>CorpSetu Statutory Certification &amp; Authentication</b><br/><font size='7' color='#475569'>This document is generated digitally by the CorpSetu Corporate Advisory Engine upon submission of a formal consultation and service request. In accordance with the Information Technology Act, 2000 and applicable statutory frameworks, this electronic dossier is securely stored and verifiable under Reference ID " + cid + ".</font>",
                       ParagraphStyle("FootP", fontName="Helvetica", fontSize=7.5, leading=10.5, textColor=TEXT_MUTED)),
-            Paragraph("<font size='7.5'><b>CorpSetu Advisory Desk</b><br/>Law • CS • CA One Bridge<br/>Bengaluru · Mumbai · Delhi<br/><i>support@ventureblueprint.in</i></font>",
+            Paragraph("<font size='7.5'><b>CorpSetu Advisory Desk</b><br/>Law • CS • CA One Bridge<br/>Bengaluru · Mumbai · Delhi<br/><i>support@corpsetu.in</i></font>",
                       ParagraphStyle("FootDesk", fontName="Helvetica", fontSize=7.5, leading=10, textColor=CORPSETU_NAVY, alignment=2))
         ]
     ], colWidths=[5.0 * inch, 2.25 * inch])

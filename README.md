@@ -1,4 +1,4 @@
-# VentureBlueprint
+# CorpSetu
 ### AI-Independent Company Formation, Regulatory Validation & Professional Documentation Platform
 **Primary Jurisdiction:** Republic of India (Companies Act 2013, LLP Act 2008, Partnership Act 1932, CGST Act 2017, MSME Act 2006, DPDP Act 2023)  
 **Execution Architecture:** 100% Local / Zero Cloud AI Dependencies / Deterministic Statutory Logic
@@ -7,9 +7,9 @@
 
 ## 1. Executive Summary
 
-VentureBlueprint is a production-grade software platform engineered to guide entrepreneurs and founders through every phase of establishing a legally compliant business entity in India.
+CorpSetu is a production-grade software platform engineered to guide entrepreneurs and founders through every phase of establishing a legally compliant business entity in India.
 
-Unlike modern systems that rely on opaque cloud AI APIs (such as OpenAI, Anthropic, or Gemini) which pose confidentiality risks and produce hallucinated legal citations, VentureBlueprint operates on **100% deterministic, local Python business logic and structured statutory knowledge bases**. Every legal citation, compliance checklist item, role recommendation, and generated document is directly grounded in Indian legislation, Gazette notifications, and statutory rules.
+Unlike modern systems that rely on opaque cloud AI APIs (such as OpenAI, Anthropic, or Gemini) which pose confidentiality risks and produce hallucinated legal citations, CorpSetu operates on **100% deterministic, local Python business logic and structured statutory knowledge bases**. Every legal citation, compliance checklist item, role recommendation, and generated document is directly grounded in Indian legislation, Gazette notifications, and statutory rules.
 
 ---
 
@@ -51,8 +51,8 @@ Upon initial database seeding, two administrative and demonstration accounts are
 
 | Role | Email | Password | Permissions |
 |---|---|---|---|
-| **System Administrator** | `admin@ventureblueprint.in` | `Admin@Venture2026!` | Access to Admin Portal, Rule Approvals, User Status, Audit Logs |
-| **Lead Founder (Demo)** | `founder@ventureblueprint.in` | `Founder@Venture2026!` | Full project management, questionnaire wizard, document generation |
+| **System Administrator** | `admin@corpsetu.in` | `Admin@Venture2026!` | Access to Admin Portal, Rule Approvals, User Status, Audit Logs |
+| **Lead Founder (Demo)** | `founder@corpsetu.in` | `Founder@Venture2026!` | Full project management, questionnaire wizard, document generation |
 
 ---
 
@@ -84,7 +84,7 @@ This script automatically:
 ## 6. Directory Structure
 
 ```text
-VentureBlueprint/
+CorpSetu/
 ├── backend/
 │   ├── app/
 │   │   ├── api/             # FastAPI routers (auth, projects, validation, etc.)
@@ -121,4 +121,4 @@ VentureBlueprint/
 ## 7. Statutory Legal Disclaimer
 
 > [!IMPORTANT]
-> **VentureBlueprint is a software planning and documentation assistance platform.** It is designed to assist entrepreneurs in preparing their corporate documentation, understanding statutory requirements, and structuring company formation data under Indian law. VentureBlueprint is not a government agency, not affiliated with the Ministry of Corporate Affairs (MCA), and does not provide formal legal representation. All company registrations, SPICe+ filings, and official approvals must be formally submitted through official Government of India portals or finalized by qualified legal and accounting professionals (Advocates, Chartered Accountants, or Company Secretaries).
+> **CorpSetu is a software planning and documentation assistance platform.** It is designed to assist entrepreneurs in preparing their corporate documentation, understanding statutory requirements, and structuring company formation data under Indian law. CorpSetu is not a government agency, not affiliated with the Ministry of Corporate Affairs (MCA), and does not provide formal legal representation. All company registrations, SPICe+ filings, and official approvals must be formally submitted through official Government of India portals or finalized by qualified legal and accounting professionals (Advocates, Chartered Accountants, or Company Secretaries).

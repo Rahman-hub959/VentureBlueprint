@@ -8,13 +8,13 @@ export const AboutPage: React.FC = () => {
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-4">
         <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-widest bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
-          About VentureBlueprint
+          About CorpSetu
         </span>
         <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Democratizing Corporate Formation & Regulatory Clarity
         </h1>
         <p className="text-slate-800 dark:text-slate-200 text-base leading-relaxed font-medium">
-          VentureBlueprint is an independent, deterministic platform designed to guide Indian entrepreneurs through the intricacies of company formation, regulatory verification, and statutory documentation.
+          CorpSetu is an independent, deterministic platform designed to guide Indian entrepreneurs through the intricacies of company formation, regulatory verification, and statutory documentation.
         </p>
       </div>
 
@@ -53,12 +53,12 @@ export const AboutPage: React.FC = () => {
 
       {/* The Story & Objective */}
       <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm space-y-6 transition-colors">
-        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Why We Built VentureBlueprint</h2>
+        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Why We Built CorpSetu</h2>
         <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed font-medium">
           Starting a business in India offers immense potential, yet founders routinely encounter fragmented information, generic templates, and misleading legal advice. Critical statutory requirements—such as resident director mandates, Rule 8 name pre-screening, and post-incorporation capital deposit timelines—are frequently discovered late, resulting in penalties and delays.
         </p>
         <p className="text-slate-800 dark:text-slate-200 text-sm leading-relaxed font-medium">
-          VentureBlueprint bridges the gap between raw entrepreneurial ideas and official statutory requirements. By structuring questionnaire data into deterministic rule evaluations and local document compilers, we empower founders to walk into professional consultations with absolute clarity and complete documentation.
+          CorpSetu bridges the gap between raw entrepreneurial ideas and official statutory requirements. By structuring questionnaire data into deterministic rule evaluations and local document compilers, we empower founders to walk into professional consultations with absolute clarity and complete documentation.
         </p>
         <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-700 dark:text-slate-300 font-semibold">
           <span>Jurisdiction: Republic of India</span>

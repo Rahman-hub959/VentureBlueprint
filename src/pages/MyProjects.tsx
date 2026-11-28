@@ -10,7 +10,7 @@ import {
 import "../styles/MyProjects.css";
 
 /*
- * My Projects page for VentureBlueprint.
+ * My Projects page for CorpSetu.
  * Single-file implementation: types, sample projects, helpers, small components
  * and the page. Styles live in MyProjectsPage.css. Pass your real projects with
  * the `initialProjects` prop; the built-in projects are demonstration data.

@@ -15,7 +15,7 @@ export const PrivacyPolicyPage: React.FC = () => {
         <section className="space-y-2">
           <h2 className="text-lg font-extrabold text-slate-900 dark:text-white">1. Local Architecture & Zero Cloud Exposure</h2>
           <p className="font-medium">
-            VentureBlueprint is architected to operate fully locally on your development and hosting infrastructure. We do not transmit your proprietary business plans, cap table information, or founder personally identifiable information (PII) to third-party artificial intelligence providers (such as OpenAI, Google Gemini, Anthropic, or cloud model brokers).
+            CorpSetu is architected to operate fully locally on your development and hosting infrastructure. We do not transmit your proprietary business plans, cap table information, or founder personally identifiable information (PII) to third-party artificial intelligence providers (such as OpenAI, Google Gemini, Anthropic, or cloud model brokers).
           </p>
         </section>
 

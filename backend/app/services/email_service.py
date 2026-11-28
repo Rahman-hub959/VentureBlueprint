@@ -10,7 +10,7 @@ from email.utils import formataddr
 from typing import Dict, Any, Optional
 from app.config import settings
 
-logger = logging.getLogger("ventureblueprint.email")
+logger = logging.getLogger("corpsetu.email")
 
 # Persistent storage directory for all dispatched and logged emails
 STORAGE_SENT_EMAILS = Path(__file__).resolve().parent.parent.parent / "storage" / "sent_emails"
@@ -119,65 +119,65 @@ def _deliver_email(
 def send_welcome_email(recipient_email: str, recipient_name: str, phone: Optional[str] = None) -> Dict[str, Any]:
     """
     Dispatches a statutory onboarding confirmation email to newly registered users.
-    Contains 100-150 words of practical guidance on establishing their venture under Indian law.
+    Contains practical guidance on establishing their venture under Indian law with CorpSetu.
     """
     name = recipient_name.strip() or "Entrepreneur"
-    subject = "Welcome to VentureBlueprint – Your Corporate Setup & Compliance Journey Begins"
+    subject = "Welcome to CorpSetu – Your Corporate Setup & Compliance Journey Begins"
 
     body_text = f"""Dear {name},
 
-Thank you for signing in to VentureBlueprint, India's premier corporate establishment and statutory compliance operating system.
+Thank you for signing in to CorpSetu, India's premier corporate establishment and statutory compliance operating system (Law · CS · CA — One Bridge).
 
-Your account has been successfully registered. VentureBlueprint empowers you to navigate the complete lifecycle of Indian company formation with complete regulatory confidence. From real-time MCA Rule 8 and Trademark name screening to comprehensive 7-section venture questionnaires, legal structure evaluations (Private Limited vs. LLP vs. OPC), customized organizational role plans, and official SPICe+ compliant registration roadmaps, your setup process is fully guided.
+Your account has been successfully registered. CorpSetu empowers you to navigate the complete lifecycle of Indian company formation with complete regulatory confidence. From real-time MCA Rule 8 and Trademark name screening to comprehensive venture questionnaires, legal structure evaluations (Private Limited vs. LLP vs. OPC), customized organizational role plans, and official SPICe+ compliant registration roadmaps, your setup process is fully guided.
 
 To begin, visit your workspace Dashboard, create your startup project, and complete your venture dossier. Our deterministic regulatory engine will automatically evaluate your business model against the Companies Act, 2013, FEMA, and the DPDP Act, 2023.
 
 Welcome aboard, and best wishes on your entrepreneurial journey.
 
 Warm regards,
-The VentureBlueprint Team
+The CorpSetu Team
 {settings.PORTAL_URL}
 """
 
     body_html = f"""<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><title>Welcome to VentureBlueprint</title></head>
+<head><meta charset="utf-8"><title>Welcome to CorpSetu</title></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
   <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-    <div style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
-      <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">VentureBlueprint</h1>
-      <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Statutory Operating System for Indian Ventures</p>
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">CorpSetu</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">Law · CS · CA — One Bridge</p>
     </div>
     <div style="padding: 32px 24px;">
-      <h2 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 0;">Welcome, {name}!</h2>
+      <h2 style="font-size: 18px; font-weight: 700; color: #0B2559; margin-top: 0;">Welcome, {name}!</h2>
       <p style="font-size: 14px; line-height: 1.6; color: #334155;">
-        Thank you for signing in to <b>VentureBlueprint</b>, India's premier corporate establishment and statutory compliance operating system.
+        Thank you for signing in to <b>CorpSetu</b>, India's premier corporate establishment and statutory compliance operating system.
       </p>
       <p style="font-size: 14px; line-height: 1.6; color: #334155;">
-        Your account has been successfully registered. VentureBlueprint empowers you to navigate the complete lifecycle of Indian company formation with complete regulatory confidence. From real-time MCA Rule 8 and Trademark name screening to comprehensive 7-section venture questionnaires, legal structure evaluations (Private Limited vs. LLP vs. OPC), customized organizational role plans, and official SPICe+ compliant registration roadmaps, your setup process is fully guided.
+        Your account has been successfully registered. CorpSetu empowers you to navigate the complete lifecycle of Indian company formation with complete regulatory confidence. From real-time MCA Rule 8 and Trademark name screening to comprehensive 7-section venture questionnaires, legal structure evaluations (Private Limited vs. LLP vs. OPC), customized organizational role plans, and official SPICe+ compliant registration roadmaps, your setup process is fully guided.
       </p>
-      <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
-        <h3 style="margin: 0 0 6px; font-size: 13px; color: #065f46; font-weight: 700;">Next Steps to Setup Your Company:</h3>
-        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #047857; line-height: 1.5;">
+      <div style="background-color: #FEF3C7; border-left: 4px solid #C59B27; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0 0 6px; font-size: 13px; color: #92400E; font-weight: 700;">Next Steps to Setup Your Company:</h3>
+        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #78350F; line-height: 1.5;">
           <li><b>Create your first project</b> and validate your proposed company name in real-time.</li>
-          <li><b>Complete the 7-section questionnaire</b> with your founders, capital, and office location.</li>
+          <li><b>Complete the statutory questionnaire</b> with your founders, capital, and office location.</li>
           <li><b>Review statutory compliance</b> across Companies Act, FEMA, and DPDP Act provisions.</li>
-          <li><b>Download your official Company Setup Blueprint</b> in PDF and DOCX formats.</li>
+          <li><b>Download your official Company Setup Blueprint</b> compiled by our empanelled desk.</li>
         </ul>
       </div>
       <div style="text-align: center; margin: 30px 0;">
-        <a href="{settings.PORTAL_URL}/dashboard" style="background-color: #059669; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 700; display: inline-block;">
-          Open Your Venture Workspace &rarr;
+        <a href="{settings.PORTAL_URL}/dashboard" style="background-color: #0B2559; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 700; display: inline-block;">
+          Open Your CorpSetu Workspace &rarr;
         </a>
       </div>
       <p style="font-size: 13px; line-height: 1.6; color: #64748b; margin-bottom: 0;">
         Warm regards,<br>
-        <b>The VentureBlueprint Team</b><br>
-        <a href="{settings.PORTAL_URL}" style="color: #059669; text-decoration: none;">{settings.PORTAL_URL}</a>
+        <b>The CorpSetu Team</b><br>
+        <a href="{settings.PORTAL_URL}" style="color: #0B2559; text-decoration: none;">{settings.PORTAL_URL}</a>
       </p>
     </div>
     <div style="background: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">
-      This confirmation email was delivered to <b>{recipient_email}</b> following your registration on VentureBlueprint.
+      This confirmation email was delivered to <b>{recipient_email}</b> following your registration on CorpSetu.
     </div>
   </div>
 </body>
@@ -212,7 +212,7 @@ def send_blueprint_ready_email(
 
     body_text = f"""Dear {name},
 
-Great news! The official Company Setup Blueprint for '{project_name}' has been successfully compiled and validated by VentureBlueprint's statutory engine.
+Great news! The official Company Setup Blueprint for '{project_name}' has been successfully compiled and validated by CorpSetu's statutory engine.
 
 Your comprehensive regulatory dossier includes:
 1. Recommended Structure: {recommended_structure} (evaluated against Companies Act 2013 norms)
@@ -227,7 +227,7 @@ You can view, review, and download your official PDF and DOCX documents directly
 Next Step: We recommend sharing this verified Blueprint with your practicing CA/CS to initiate SPICe+ Part A name reservation on the MCA21 portal.
 
 Warm regards,
-The VentureBlueprint Team
+The CorpSetu Team
 {settings.PORTAL_URL}
 """
 
@@ -236,19 +236,19 @@ The VentureBlueprint Team
 <head><meta charset="utf-8"><title>Company Setup Blueprint Ready</title></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
   <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-    <div style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
-      <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">VentureBlueprint</h1>
-      <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9;">Official Company Setup Blueprint Ready</p>
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 32px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">CorpSetu</h1>
+      <p style="margin: 6px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">Official Company Setup Blueprint Ready</p>
     </div>
     <div style="padding: 32px 24px;">
-      <h2 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 0;">Congratulations, {name}!</h2>
+      <h2 style="font-size: 18px; font-weight: 700; color: #0B2559; margin-top: 0;">Congratulations, {name}!</h2>
       <p style="font-size: 14px; line-height: 1.6; color: #334155;">
         The official <b>Company Setup Blueprint</b> for <b>{project_name}</b> has been compiled and validated against the Companies Act 2013, MCA Rule 8, and state stamp duty guidelines.
       </p>
 
-      <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
-        <h3 style="margin: 0 0 6px; font-size: 13px; color: #065f46; font-weight: 700;">Key Blueprint Specifications:</h3>
-        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #047857; line-height: 1.5;">
+      <div style="background-color: #FEF3C7; border-left: 4px solid #C59B27; padding: 14px 16px; border-radius: 8px; margin: 20px 0;">
+        <h3 style="margin: 0 0 6px; font-size: 13px; color: #92400E; font-weight: 700;">Key Blueprint Specifications:</h3>
+        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #78350F; line-height: 1.5;">
           <li><b>Recommended Structure:</b> {recommended_structure}</li>
           <li><b>Statutory Filing Form:</b> MCA SPICe+ (INC-32) & Linked e-MOA/e-AOA</li>
           <li><b>Auditor Appointment:</b> Form ADT-1 mandatory within 30 days</li>
@@ -257,7 +257,7 @@ The VentureBlueprint Team
       </div>
 
       <div style="text-align: center; margin: 30px 0;">
-        <a href="{doc_link}" style="background-color: #059669; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 700; display: inline-block;">
+        <a href="{doc_link}" style="background-color: #0B2559; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 700; display: inline-block;">
           Download Blueprint Documents (PDF &amp; DOCX) &rarr;
         </a>
       </div>
@@ -265,7 +265,7 @@ The VentureBlueprint Team
       <p style="font-size: 13px; line-height: 1.6; color: #64748b; margin-bottom: 0;">
         Next Step: Provide this blueprint to your company secretary or Chartered Accountant to execute the MCA SPICe+ Part A name reservation.<br><br>
         Warm regards,<br>
-        <b>The VentureBlueprint Team</b>
+        <b>The CorpSetu Team</b>
       </p>
     </div>
     <div style="background: #f1f5f9; padding: 16px 24px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0;">

@@ -58,7 +58,7 @@ export const FeaturesPage: React.FC = () => {
           Engineered for Enterprise-Grade Precision
         </h1>
         <p className="text-slate-800 dark:text-slate-200 text-base leading-relaxed font-medium">
-          Explore the purpose-built modules that power VentureBlueprint's AI-independent company formation and compliance platform.
+          Explore the purpose-built modules that power CorpSetu's AI-independent company formation and compliance platform.
         </p>
       </div>
 

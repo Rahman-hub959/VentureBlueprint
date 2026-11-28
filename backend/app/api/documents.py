@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
 
-logger = logging.getLogger("ventureblueprint.documents")
+logger = logging.getLogger("corpsetu.documents")
 from fastapi import APIRouter, Depends, HTTPException, status, Header, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session

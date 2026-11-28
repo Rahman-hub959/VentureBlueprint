@@ -31,7 +31,7 @@ def seed_database():
             roles_map[r_name] = role
 
         # 2. Seed Default Admin User
-        admin_email = "admin@ventureblueprint.in"
+        admin_email = "admin@corpsetu.in"
         admin = db.query(User).filter(User.email == admin_email).first()
         if not admin:
             admin = User(
@@ -44,7 +44,7 @@ def seed_database():
             db.add(admin)
 
         # 3. Seed Default Demo Founder User
-        founder_email = "founder@ventureblueprint.in"
+        founder_email = "founder@corpsetu.in"
         founder = db.query(User).filter(User.email == founder_email).first()
         if not founder:
             founder = User(

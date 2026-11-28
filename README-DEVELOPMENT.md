@@ -1,6 +1,6 @@
-# VentureBlueprint: Developer & Engineering Guide
+# CorpSetu: Developer & Engineering Guide
 
-This guide provides instructions for setting up, running, testing, and extending the VentureBlueprint codebase on a local developer workstation.
+This guide provides instructions for setting up, running, testing, and extending the CorpSetu codebase on a local developer workstation.
 
 ---
 
@@ -19,7 +19,7 @@ This guide provides instructions for setting up, running, testing, and extending
 
 1. Open a terminal and navigate to the `backend/` directory:
    ```bash
-   cd "e:\VentureBlueprint Design System\backend"
+   cd "e:\CorpSetu Design System\backend"
    ```
 
 2. Create a dedicated Python virtual environment:
@@ -41,7 +41,7 @@ This guide provides instructions for setting up, running, testing, and extending
    ```bash
    python -m app.seed
    ```
-   *This command creates the SQLite database `backend/ventureblueprint.db`, sets up tables, seeds 17 business domains, loads statutory sources (MCA, CBIC, DPIIT, MSME, MeitY), populates regulatory rules, and provisions the default administrator and founder accounts.*
+   *This command creates the SQLite database `backend/corpsetu.db`, sets up tables, seeds 17 business domains, loads statutory sources (MCA, CBIC, DPIIT, MSME, MeitY), populates regulatory rules, and provisions the default administrator and founder accounts.*
 
 5. Start the FastAPI ASGI server with auto-reload:
    ```bash
@@ -56,7 +56,7 @@ This guide provides instructions for setting up, running, testing, and extending
 
 1. Open a second terminal and navigate to the project root:
    ```bash
-   cd "e:\VentureBlueprint Design System"
+   cd "e:\CorpSetu Design System"
    ```
 
 2. Install Node dependencies:
@@ -80,7 +80,7 @@ This guide provides instructions for setting up, running, testing, and extending
 
 ## 3. Running the Automated Test Suite
 
-VentureBlueprint includes end-to-end integration and unit tests covering authentication, deterministic statutory rules, project validation, document compilation, and administrative privileges.
+CorpSetu includes end-to-end integration and unit tests covering authentication, deterministic statutory rules, project validation, document compilation, and administrative privileges.
 
 ### Running Pytest:
 From the workspace root directory:
@@ -106,7 +106,7 @@ All 6 test suites execute in under 2 seconds and verify that all REST endpoints,
 
 ### 4.1 Strict Zero External AI Constraint
 - **Rule:** Never introduce imports, API keys, or network clients for OpenAI, Gemini, Claude, Ollama, or third-party AI document services.
-- **Reasoning:** VentureBlueprint guarantees deterministic, verifiable regulatory compliance without hallucination or confidential founder data leakage.
+- **Reasoning:** CorpSetu guarantees deterministic, verifiable regulatory compliance without hallucination or confidential founder data leakage.
 - **Implementation:** All recommendations must use rule-based algorithmic decision matrices, regex analyzers, and database-driven regulatory models.
 
 ### 4.2 Backend Conventions
@@ -129,7 +129,7 @@ All 6 test suites execute in under 2 seconds and verify that all REST endpoints,
 ## 5. Adding New Statutory Rules
 
 To add a new regulatory rule or statutory threshold to the knowledge base:
-1. Log in to the application as Administrator (`admin@ventureblueprint.in` / `Admin@Venture2026!`).
+1. Log in to the application as Administrator (`admin@corpsetu.in` / `Admin@Venture2026!`).
 2. Navigate to the **Admin Portal** (`/admin`).
 3. Click **Add New Regulatory Rule**.
 4. Complete the required statutory metadata:

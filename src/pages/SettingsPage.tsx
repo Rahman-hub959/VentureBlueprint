@@ -57,7 +57,7 @@ const THEMES: { id: Theme; label: string; note: string }[] = [
   { id: 'system', label: 'System', note: 'Match your device' },
 ];
 const NOTIFICATION_ROWS: { key: keyof Notifications; title: string; note: string }[] = [
-  { key: 'email', title: 'Email notifications', note: 'Allow VentureBlueprint to send email to your account address.' },
+  { key: 'email', title: 'Email notifications', note: 'Allow CorpSetu to send email to your account address.' },
   { key: 'projectUpdates', title: 'Project updates', note: 'Edits, comments and progress on your projects.' },
   { key: 'complianceReminders', title: 'Compliance reminders', note: 'Deadlines and renewals from your compliance checklist.' },
   { key: 'blueprintUpdates', title: 'Blueprint generation updates', note: 'Tell me when a blueprint finishes generating.' },
@@ -528,7 +528,7 @@ export default function SettingsPage() {
             )}
 
             {section === 'profile' && (
-              <Card title="My profile" hint="This is how you appear across VentureBlueprint."
+              <Card title="My profile" hint="This is how you appear across CorpSetu."
                 action={!editingProfile ? <button type="button" className="st-btn st-btn--secondary st-btn--sm" onClick={() => setEditingProfile(true)}>Edit Profile</button> : <span className="st-badge st-badge--warning">Editing</span>}>
                 <div className="st-photo">
                   <Avatar name={profile.fullName} src={profile.avatar} size="lg" />
@@ -569,7 +569,7 @@ export default function SettingsPage() {
             )}
 
             {section === 'preferences' && (
-              <Card title="Account preferences" hint="Choose how VentureBlueprint looks and formats information for you.">
+              <Card title="Account preferences" hint="Choose how CorpSetu looks and formats information for you.">
                 <div className="st-fields">
                   <Field id="st-lang" label="Preferred language"><Select id="st-lang" value={preferences.language} options={LANGUAGES} onChange={(v) => update('preferences', { language: v })} /></Field>
                   <Field id="st-tz" label="Time zone"><Select id="st-tz" value={preferences.timeZone} options={TIME_ZONES} onChange={(v) => update('preferences', { timeZone: v })} /></Field>
@@ -586,13 +586,13 @@ export default function SettingsPage() {
                       </label>
                     ))}
                   </div>
-                  <p className="st-hint">Choose a theme and select Save Changes to apply it across VentureBlueprint.</p>
+                  <p className="st-hint">Choose a theme and select Save Changes to apply it across CorpSetu.</p>
                 </fieldset>
               </Card>
             )}
 
             {section === 'notifications' && (
-              <Card title="Notifications" hint="Choose what VentureBlueprint emails you about.">
+              <Card title="Notifications" hint="Choose what CorpSetu emails you about.">
                 <div className="st-togglelist">
                   {NOTIFICATION_ROWS.map((r) => (
                     <ToggleRow key={r.key} id={`st-n-${r.key}`} title={r.title} note={r.note} checked={notifications[r.key]}
@@ -643,7 +643,7 @@ export default function SettingsPage() {
                 <Card title="Download my data" hint="Get a copy of your settings and saved business information as a JSON file.">
                   <button type="button" className="st-btn st-btn--secondary" onClick={downloadData}>Download my data</button>
                 </Card>
-                <Card title="Manage saved business information" hint="Information VentureBlueprint has saved in this browser.">
+                <Card title="Manage saved business information" hint="Information CorpSetu has saved in this browser.">
                   <ul className="st-sessions" key={dataTick}>
                     {DATASETS.map((s) => {
                       const raw = readLocal(s.key);

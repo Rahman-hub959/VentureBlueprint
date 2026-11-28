@@ -1,6 +1,6 @@
-# VentureBlueprint: Production Deployment & Containerization Guide
+# CorpSetu: Production Deployment & Containerization Guide
 
-This guide describes how to deploy VentureBlueprint to production using Docker, Docker Compose, PostgreSQL, and Nginx.
+This guide describes how to deploy CorpSetu to production using Docker, Docker Compose, PostgreSQL, and Nginx.
 
 ---
 
@@ -49,22 +49,22 @@ Create a `.env` file in the project root directory:
 # Application Settings
 ENVIRONMENT=production
 DEBUG=false
-APP_NAME=VentureBlueprint
+APP_NAME=CorpSetu
 SECRET_KEY=generate_a_cryptographically_secure_64_character_hex_key_here
 ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
 # PostgreSQL Production Database
-DATABASE_URL=postgresql://venture_user:ProductionSecurePass2026!@postgres:5432/ventureblueprint_db
+DATABASE_URL=postgresql://venture_user:ProductionSecurePass2026!@postgres:5432/corpsetu_db
 POSTGRES_USER=venture_user
 POSTGRES_PASSWORD=ProductionSecurePass2026!
-POSTGRES_DB=ventureblueprint_db
+POSTGRES_DB=corpsetu_db
 
 # Sandboxed Document Storage
 STORAGE_DIR=/app/storage
 MAX_UPLOAD_SIZE_MB=25
 
 # CORS Allowed Origins
-CORS_ORIGINS=["https://ventureblueprint.yourdomain.com"]
+CORS_ORIGINS=["https://corpsetu.yourdomain.com"]
 ```
 
 ---
@@ -78,7 +78,7 @@ docker compose up --build -d
 ```
 
 ### What this command executes:
-1. Provisions the `postgres` container and initializes the `ventureblueprint_db` database on a private Docker bridge network.
+1. Provisions the `postgres` container and initializes the `corpsetu_db` database on a private Docker bridge network.
 2. Builds the `backend` Docker image from `deployment/Dockerfile.backend`, runs database migrations, seeds regulatory rules, and starts the FastAPI Uvicorn ASGI cluster.
 3. Builds the `frontend` production bundle via multi-stage Vite build and boots Nginx Alpine to serve static assets and proxy API traffic.
 4. Mounts persistent volumes for both PostgreSQL data and generated documents.
@@ -91,7 +91,7 @@ docker compose up --build -d
 ```bash
 docker compose ps
 ```
-All containers (`ventureblueprint-frontend`, `ventureblueprint-backend`, `ventureblueprint-postgres`) should report status `Up`.
+All containers (`corpsetu-frontend`, `corpsetu-backend`, `corpsetu-postgres`) should report status `Up`.
 
 ### 5.2 Health Check Endpoint
 Query the automated system health check endpoint:
@@ -121,7 +121,7 @@ docker compose logs -f backend
 
 ## 6. SSL / TLS Certificate Setup (HTTPS)
 
-For production deployment with a custom domain (e.g., `ventureblueprint.yourdomain.com`), configure Let's Encrypt using Certbot on the host:
+For production deployment with a custom domain (e.g., `corpsetu.yourdomain.com`), configure Let's Encrypt using Certbot on the host:
 
 1. Install Certbot:
    ```bash
@@ -130,7 +130,7 @@ For production deployment with a custom domain (e.g., `ventureblueprint.yourdoma
 
 2. Generate certificates:
    ```bash
-   sudo certbot --nginx -d ventureblueprint.yourdomain.com
+   sudo certbot --nginx -d corpsetu.yourdomain.com
    ```
 
 3. Ensure Nginx configuration redirects all HTTP port 80 traffic to HTTPS port 443 with strong ciphers (`TLSv1.2 TLSv1.3`).
@@ -142,7 +142,7 @@ For production deployment with a custom domain (e.g., `ventureblueprint.yourdoma
 ### 7.1 Automated Database Backup (pg_dump)
 Execute a full logical backup of the PostgreSQL database:
 ```bash
-docker compose exec postgres pg_dump -U venture_user -d ventureblueprint_db -F c -b -v -f /tmp/venture_backup_$(date +%Y%m%d_%H%M%S).dump
+docker compose exec postgres pg_dump -U venture_user -d corpsetu_db -F c -b -v -f /tmp/venture_backup_$(date +%Y%m%d_%H%M%S).dump
 docker cp $(docker compose ps -q postgres):/tmp/. ./backups/
 ```
 
@@ -158,7 +158,7 @@ tar -czvf ./backups/documents_backup_$(date +%Y%m%d_%H%M%S).tar.gz ./storage/
 docker compose stop backend
 
 # Restore database
-docker compose exec -T postgres pg_restore -U venture_user -d ventureblueprint_db --clean /tmp/backup_file.dump
+docker compose exec -T postgres pg_restore -U venture_user -d corpsetu_db --clean /tmp/backup_file.dump
 
 # Restart backend
 docker compose start backend

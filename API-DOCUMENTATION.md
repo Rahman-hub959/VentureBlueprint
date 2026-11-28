@@ -1,4 +1,4 @@
-# VentureBlueprint: REST API Specification
+# CorpSetu: REST API Specification
 **Base URL:** `http://localhost:8000/api/v1`  
 **Authentication Scheme:** Bearer Token (Stateless JSON Web Token / HMAC-SHA256)  
 **Standard Content-Type:** `application/json` (except document download endpoints which return `application/pdf` or `application/vnd.openxmlformats-officedocument.wordprocessingml.document`)
@@ -13,7 +13,7 @@ Creates a new entrepreneur or professional user account.
 - **Request Body:**
   ```json
   {
-    "email": "entrepreneur@ventureblueprint.in",
+    "email": "entrepreneur@corpsetu.in",
     "password": "SecurePassword123!",
     "full_name": "Rohan Deshmukh",
     "phone_number": "+91 9876543210"
@@ -23,7 +23,7 @@ Creates a new entrepreneur or professional user account.
   ```json
   {
     "id": "usr_9b1deb4d3b7d4ebbb",
-    "email": "entrepreneur@ventureblueprint.in",
+    "email": "entrepreneur@corpsetu.in",
     "full_name": "Rohan Deshmukh",
     "phone_number": "+91 9876543210",
     "is_active": true,
@@ -40,7 +40,7 @@ Authenticates user credentials using Argon2id and generates a JWT bearer token.
 - **Request Body:**
   ```json
   {
-    "email": "entrepreneur@ventureblueprint.in",
+    "email": "entrepreneur@corpsetu.in",
     "password": "SecurePassword123!"
   }
   ```
@@ -52,7 +52,7 @@ Authenticates user credentials using Argon2id and generates a JWT bearer token.
     "expires_in_minutes": 1440,
     "user": {
       "id": "usr_9b1deb4d3b7d4ebbb",
-      "email": "entrepreneur@ventureblueprint.in",
+      "email": "entrepreneur@corpsetu.in",
       "full_name": "Rohan Deshmukh",
       "role": "Founder"
     }

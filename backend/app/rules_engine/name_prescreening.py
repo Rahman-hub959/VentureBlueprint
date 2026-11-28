@@ -110,7 +110,7 @@ def check_live_realtime_entity(name: str) -> Dict[str, Any]:
         # 1. Wikidata Corporate Knowledge Graph query
         try:
             url = f"https://www.wikidata.org/w/api.php?action=wbsearchentities&search={urllib.parse.quote(q)}&language=en&format=json"
-            req = urllib.request.Request(url, headers={"User-Agent": "VentureBlueprint/1.0"})
+            req = urllib.request.Request(url, headers={"User-Agent": "CorpSetu/1.0"})
             with urllib.request.urlopen(req, timeout=2.5) as res:
                 data = json.loads(res.read().decode())
                 results = data.get("search", [])
@@ -134,7 +134,7 @@ def check_live_realtime_entity(name: str) -> Dict[str, Any]:
         try:
             wiki_slug = q.replace(" ", "_")
             wiki_url = f"https://en.wikipedia.org/api/rest_v1/page/summary/{urllib.parse.quote(wiki_slug)}"
-            req = urllib.request.Request(wiki_url, headers={"User-Agent": "VentureBlueprint/1.0"})
+            req = urllib.request.Request(wiki_url, headers={"User-Agent": "CorpSetu/1.0"})
             with urllib.request.urlopen(req, timeout=2.0) as res:
                 data = json.loads(res.read().decode())
                 desc = (data.get("description") or "").lower()
@@ -414,7 +414,7 @@ def assess_company_name(
         if not has_suffix:
             result.warnings.append(
                 f"For a {legal_structure}, the proposed name should formally conclude with '{expected_suffixes[0].title()}'. "
-                f"VentureBlueprint will append this suffix during official incorporation drafting."
+                f"CorpSetu will append this suffix during official incorporation drafting."
             )
             result.recommendations.append(f"Suggested legal name: '{cleaned} {expected_suffixes[0].title()}'")
             result.checks.append({"check": "Structure Suffix Compatibility", "status": "Warning", "detail": f"Missing official suffix '{expected_suffixes[0].title()}' (will be auto-appended)."})
@@ -512,7 +512,7 @@ def assess_company_name(
         if not has_suffix:
             result.warnings.append(
                 f"For a {legal_structure}, the proposed name should formally conclude with '{expected_suffixes[0].title()}'. "
-                f"VentureBlueprint will append this suffix during official incorporation drafting."
+                f"CorpSetu will append this suffix during official incorporation drafting."
             )
             result.recommendations.append(f"Suggested legal name: '{cleaned} {expected_suffixes[0].title()}'")
             result.checks.append({"check": "Structure Suffix Compatibility", "status": "Warning", "detail": f"Missing official suffix '{expected_suffixes[0].title()}' (will be auto-appended)."})

@@ -46,7 +46,7 @@ export const HowItWorksPage: React.FC = () => {
           From First Thought to Statutory Blueprint
         </h1>
         <p className="text-slate-800 dark:text-slate-200 text-base leading-relaxed font-medium">
-          See how VentureBlueprint transforms disconnected thoughts into an integrated, compliant corporate foundation in 6 clear stages.
+          See how CorpSetu transforms disconnected thoughts into an integrated, compliant corporate foundation in 6 clear stages.
         </p>
       </div>
 

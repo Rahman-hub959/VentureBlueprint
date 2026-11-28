@@ -1,1 +1,1 @@
-# VentureBlueprint Services Package
+# CorpSetu Services Package

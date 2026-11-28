@@ -137,7 +137,7 @@ def create_consultation(
         db.commit()
     except Exception as pdf_err:
         import logging
-        logging.getLogger("ventureblueprint.consultations").error(f"Failed to generate structured PDF: {pdf_err}")
+        logging.getLogger("corpsetu.consultations").error(f"Failed to generate structured PDF: {pdf_err}")
 
     # 2. Dispatch Confirmation Email with mandatory 24-48 hr notice & PDF link
     try:

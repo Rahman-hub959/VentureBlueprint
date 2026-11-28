@@ -211,7 +211,7 @@ export const DocumentsPage: React.FC = () => {
       scope: "Rule traceability matrix, content separations, and version history.",
       page: "Page 14",
       details: "Full statutory audit trail citing Companies Act 2013 sections, official MCA notifications, and the deterministic rule engine version used.",
-      statutoryBasis: "VentureBlueprint Rule Engine v1.1 Audit Trail"
+      statutoryBasis: "CorpSetu Rule Engine v1.1 Audit Trail"
     },
     {
       num: 19,

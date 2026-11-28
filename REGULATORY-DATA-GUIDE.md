@@ -1,4 +1,4 @@
-# VentureBlueprint: Indian Regulatory Framework & Data Curation Guide
+# CorpSetu: Indian Regulatory Framework & Data Curation Guide
 **Governing Territory:** Republic of India  
 **Applicable Legal Regimes:** Corporate Law (MCA), Direct & Indirect Taxation (CBDT/CBIC), Industry Incentives (DPIIT/MSME), Labour Statutes, and Data Governance (MeitY)  
 **Maintenance Model:** 100% Deterministic Local Rule Tables & Admin Approval Workflow
@@ -111,7 +111,7 @@ Enacted as Act No. 22 of 2023, governing the processing of digital personal data
 
 ## 3. Regulatory Rule Lifecycle & Curation Workflow
 
-To ensure regulatory information remains accurate without requiring source code modifications, VentureBlueprint implements a database-driven Rule Approval Workflow:
+To ensure regulatory information remains accurate without requiring source code modifications, CorpSetu implements a database-driven Rule Approval Workflow:
 
 ```mermaid
 stateDiagram-v2

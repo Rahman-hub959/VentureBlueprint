@@ -6,9 +6,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 STORAGE_DEFAULT = BASE_DIR.parent / "storage"
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "VentureBlueprint"
+    PROJECT_NAME: str = "CorpSetu"
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "ventureblueprint-super-secret-key-change-in-production-2026")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "corpsetu-super-secret-key-change-in-production-2026")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # Database: Supports PostgreSQL or local SQLite fallback
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
-        f"sqlite:///{BASE_DIR / 'ventureblueprint.db'}"
+        f"sqlite:///{BASE_DIR / 'corpsetu.db'}"
     )
     
     @property
@@ -37,8 +37,8 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
     SMTP_TLS: bool = os.getenv("SMTP_TLS", "true").lower() in ("true", "1", "yes")
     SMTP_SSL: bool = os.getenv("SMTP_SSL", "false").lower() in ("true", "1", "yes")
-    SMTP_FROM: str = os.getenv("SMTP_FROM", "no-reply@ventureblueprint.in")
-    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "VentureBlueprint Compliance Team")
+    SMTP_FROM: str = os.getenv("SMTP_FROM", "no-reply@corpsetu.in")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "CorpSetu Corporate Advisory Suite")
     PORTAL_URL: str = os.getenv("PORTAL_URL", "http://localhost:5173")
 
     class Config:

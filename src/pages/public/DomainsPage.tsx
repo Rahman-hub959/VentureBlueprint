@@ -31,7 +31,7 @@ export const DomainsPage: React.FC = () => {
           Supported Business Domains
         </h1>
         <p className="text-slate-800 dark:text-slate-200 text-base leading-relaxed font-medium">
-          VentureBlueprint dynamically tailors regulatory assessments, statutory licencing, and role recommendations across 17 distinct industry domains.
+          CorpSetu dynamically tailors regulatory assessments, statutory licencing, and role recommendations across 17 distinct industry domains.
         </p>
       </div>
 

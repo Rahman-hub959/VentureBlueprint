@@ -220,7 +220,7 @@ export default function EntrepreneurDashboard({
       {navOpen && <button type="button" className="vbd-scrim" aria-label="Close navigation" onClick={() => setNavOpen(false)} />}
       <aside className={`vbd-side${navOpen ? ' is-open' : ''}`} aria-label="Workspace">
         <div className="vbd-side-head">
-          <a className="vbd-brand" href="/" onClick={e => e.preventDefault()}><span className="vbd-mark" aria-hidden="true" />VentureBlueprint</a>
+          <a className="vbd-brand" href="/" onClick={e => e.preventDefault()}><span className="vbd-mark" aria-hidden="true" />CorpSetu</a>
           <button type="button" className="vbd-iconbtn vbd-close" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button>
         </div>
         <nav aria-label="Primary">

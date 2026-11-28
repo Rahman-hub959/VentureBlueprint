@@ -23,7 +23,7 @@ export const ContactPage: React.FC = () => {
         </span>
         <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">Contact & Support</h1>
         <p className="text-slate-800 dark:text-slate-200 text-sm max-w-lg mx-auto font-medium">
-          Need technical assistance with your local deployment or have questions about VentureBlueprint? Reach out to our team.
+          Need technical assistance with your local deployment or have questions about CorpSetu? Reach out to our team.
         </p>
       </div>
 
@@ -31,7 +31,7 @@ export const ContactPage: React.FC = () => {
         <div className="glass-card p-6 space-y-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm">
           <Mail className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
           <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">Email Inquiries</h4>
-          <p className="text-xs text-slate-800 dark:text-slate-200 font-medium">support@ventureblueprint.in</p>
+          <p className="text-xs text-slate-800 dark:text-slate-200 font-medium">support@corpsetu.in</p>
           <span className="text-[10px] text-slate-700 dark:text-slate-300 block font-semibold">Response within 24 business hours</span>
         </div>
 

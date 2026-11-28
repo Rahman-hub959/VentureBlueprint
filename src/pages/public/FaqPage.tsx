@@ -7,16 +7,16 @@ export const FaqPage: React.FC = () => {
 
   const faqs = [
     {
-      q: "What is VentureBlueprint?",
-      a: "VentureBlueprint is a deterministic company formation, regulatory validation, and professional documentation platform designed for Indian businesses. It helps entrepreneurs understand how to establish a business based on their domain, proposed name, ownership structure, location, founders, and capital requirements."
+      q: "What is CorpSetu?",
+      a: "CorpSetu is a deterministic company formation, regulatory validation, and professional documentation platform designed for Indian businesses. It helps entrepreneurs understand how to establish a business based on their domain, proposed name, ownership structure, location, founders, and capital requirements."
     },
     {
-      q: "Does VentureBlueprint rely on cloud AI services like OpenAI, Gemini, or Claude?",
-      a: "No. VentureBlueprint is strictly AI-independent. It does not introduce dependencies on any external AI APIs or cloud LLM services. All recommendations, MCA Rule 8 checks, and document generation workflows execute locally using deterministic Python business logic and verified regulatory reference tables."
+      q: "Does CorpSetu rely on cloud AI services like OpenAI, Gemini, or Claude?",
+      a: "No. CorpSetu is strictly AI-independent. It does not introduce dependencies on any external AI APIs or cloud LLM services. All recommendations, MCA Rule 8 checks, and document generation workflows execute locally using deterministic Python business logic and verified regulatory reference tables."
     },
     {
-      q: "Does VentureBlueprint guarantee official government registration or legal approval?",
-      a: "No. VentureBlueprint provides structured business planning, statutory pre-screening, and professional documentation. We do not claim official government approval or guarantee registration. Final filings must be submitted through official government portals (e.g. MCA SPICe+, GST portal) or completed in collaboration with practicing Chartered Accountants (CAs) or Company Secretaries (CSs)."
+      q: "Does CorpSetu guarantee official government registration or legal approval?",
+      a: "No. CorpSetu provides structured business planning, statutory pre-screening, and professional documentation. We do not claim official government approval or guarantee registration. Final filings must be submitted through official government portals (e.g. MCA SPICe+, GST portal) or completed in collaboration with practicing Chartered Accountants (CAs) or Company Secretaries (CSs)."
     },
     {
       q: "What document formats are generated?",
@@ -28,7 +28,7 @@ export const FaqPage: React.FC = () => {
     },
     {
       q: "Can I update my inputs and regenerate documents?",
-      a: "Yes. You can edit your company details and regenerate any of the 8 reports at any time. VentureBlueprint automatically increments document versions and preserves the full version history without silently overwriting older reports."
+      a: "Yes. You can edit your company details and regenerate any of the 8 reports at any time. CorpSetu automatically increments document versions and preserves the full version history without silently overwriting older reports."
     }
   ];
 
@@ -42,7 +42,7 @@ export const FaqPage: React.FC = () => {
           Questions, Answered Clearly
         </h1>
         <p className="text-slate-800 dark:text-slate-200 text-base leading-relaxed max-w-xl mx-auto font-medium">
-          Understand how VentureBlueprint works, our local privacy architecture, and our regulatory verification methodology.
+          Understand how CorpSetu works, our local privacy architecture, and our regulatory verification methodology.
         </p>
       </div>
 

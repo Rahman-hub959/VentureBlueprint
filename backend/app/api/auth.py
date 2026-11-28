@@ -100,7 +100,7 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         db.add(email_audit)
         db.commit()
     except Exception as email_err:
-        logging.getLogger("ventureblueprint.auth").error(f"Failed to dispatch welcome email: {email_err}")
+        logging.getLogger("corpsetu.auth").error(f"Failed to dispatch welcome email: {email_err}")
 
     return {
         "access_token": access_token,
@@ -157,7 +157,7 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
         from app.services.email_service import send_login_notification_email
         send_login_notification_email(user.email, user.full_name)
     except Exception as email_err:
-        logging.getLogger("ventureblueprint.auth").error(f"Login notification email failed: {email_err}")
+        logging.getLogger("corpsetu.auth").error(f"Login notification email failed: {email_err}")
 
     return {
         "access_token": access_token,

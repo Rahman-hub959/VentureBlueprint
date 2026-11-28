@@ -60,7 +60,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("VentureBlueprint App Caught Error:", error, errorInfo);
+    console.error("CorpSetu App Caught Error:", error, errorInfo);
   }
 
   render() {

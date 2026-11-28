@@ -1,4 +1,4 @@
-# VentureBlueprint: Database Architecture & Schema Specification
+# CorpSetu: Database Architecture & Schema Specification
 **Database Engine:** PostgreSQL 15+ (Production) / SQLite 3.38+ (Offline Local Development)  
 **ORM Framework:** SQLAlchemy 2.0 (Declarative Base with Typed Mappings)  
 **Naming Conventions:** Snake_case table and column names; explicit foreign key constraints with indexed relationships.

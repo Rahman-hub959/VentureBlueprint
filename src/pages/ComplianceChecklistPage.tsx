@@ -11,7 +11,7 @@ import {
 import '../styles/ComplianceChecklistPage.css';
 
 /*
- * Compliance Checklist page for VentureBlueprint.
+ * Compliance Checklist page for CorpSetu.
  * Single-file implementation: types and sample data, state hook, report
  * builder, small components, and the page itself. Styles live in
  * ComplianceChecklistPage.css. Sample requirement content is not legal advice.

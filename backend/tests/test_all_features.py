@@ -15,12 +15,12 @@ def test_root_endpoint():
     response = client.get("/")
     assert response.status_code == 200
     data = response.json()
-    assert data["platform"] == "VentureBlueprint"
+    assert data["platform"] == "CorpSetu"
     assert data["jurisdiction"] == "Republic of India"
 
 def test_auth_registration_and_login():
     reg_payload = {
-        "email": "testfounder@ventureblueprint.in",
+        "email": "testfounder@corpsetu.in",
         "password": "SecurePassword123!",
         "full_name": "Test Founder",
         "phone_number": "+91 9988776655"
@@ -31,20 +31,20 @@ def test_auth_registration_and_login():
     
     # Login
     login_payload = {
-        "email": "testfounder@ventureblueprint.in",
+        "email": "testfounder@corpsetu.in",
         "password": "SecurePassword123!"
     }
     login_res = client.post("/api/v1/auth/login", json=login_payload)
     assert login_res.status_code == 200
     login_data = login_res.json()
     assert "access_token" in login_data
-    assert login_data["user"]["email"] == "testfounder@ventureblueprint.in"
+    assert login_data["user"]["email"] == "testfounder@corpsetu.in"
 
     # Protected me endpoint
     headers = {"Authorization": f"Bearer {login_data['access_token']}"}
     me_res = client.get("/api/v1/auth/me", headers=headers)
     assert me_res.status_code == 200
-    assert me_res.json()["email"] == "testfounder@ventureblueprint.in"
+    assert me_res.json()["email"] == "testfounder@corpsetu.in"
 
 def test_mca_name_prescreening():
     # Valid name
@@ -94,7 +94,7 @@ def test_structure_recommendation():
 def test_project_crud_and_validation():
     # Login as demo founder
     login_res = client.post("/api/v1/auth/login", json={
-        "email": "founder@ventureblueprint.in",
+        "email": "founder@corpsetu.in",
         "password": "Founder@Venture2026!"
     })
     assert login_res.status_code == 200
@@ -139,7 +139,7 @@ def test_project_crud_and_validation():
     # Login as Admin Desk for statutory compilation
     admin_login = client.post(
         "/api/v1/auth/login",
-        json={"email": "admin@ventureblueprint.in", "password": "Admin@Venture2026!"}
+        json={"email": "admin@corpsetu.in", "password": "Admin@Venture2026!"}
     )
     admin_headers = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}
 
@@ -169,7 +169,7 @@ def test_project_crud_and_validation():
 def test_admin_permissions_and_health():
     # Login as Admin
     login_res = client.post("/api/v1/auth/login", json={
-        "email": "admin@ventureblueprint.in",
+        "email": "admin@corpsetu.in",
         "password": "Admin@Venture2026!"
     })
     assert login_res.status_code == 200
@@ -215,7 +215,7 @@ def test_consultations_lifecycle():
 
     # 3. Create consultation as authenticated user
     login_res = client.post("/api/v1/auth/login", json={
-        "email": "testfounder@ventureblueprint.in",
+        "email": "testfounder@corpsetu.in",
         "password": "SecurePassword123!"
     })
     token = login_res.json()["access_token"]
@@ -228,7 +228,7 @@ def test_consultations_lifecycle():
     }, headers=headers)
     assert auth_consult.status_code == 201
     auth_data = auth_consult.json()
-    assert auth_data["email"] == "testfounder@ventureblueprint.in"
+    assert auth_data["email"] == "testfounder@corpsetu.in"
     assert "Rajesh Varma" in auth_data["assigned_expert"]
 
     # 4. List user's consultations
@@ -247,7 +247,7 @@ def test_complaints_crud():
     # 1. Create complaint (Grievance)
     payload = {
         "company_name": "TestCorp LLP",
-        "email": "testfounder@ventureblueprint.in",
+        "email": "testfounder@corpsetu.in",
         "phone_number": "+91 9988776655",
         "pillar": "CS",
         "category": "MCA SPICe+ Resubmission Query",

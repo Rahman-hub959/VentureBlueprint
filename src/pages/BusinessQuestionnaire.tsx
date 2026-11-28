@@ -317,7 +317,7 @@ export default function BusinessQuestionnaire({ onComplete, homeHref = '/' }: Bu
   return (
     <div className="vbq">
       <header className="vbq-nav">
-        <a className="vbq-brand" href={homeHref}><span className="vbq-mark" aria-hidden="true" />VentureBlueprint</a>
+        <a className="vbq-brand" href={homeHref}><span className="vbq-mark" aria-hidden="true" />CorpSetu</a>
         <a className="vbq-navlink" href={homeHref}>Back to home</a>
       </header>
 

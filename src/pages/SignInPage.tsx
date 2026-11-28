@@ -37,7 +37,7 @@ export default function SignInPage({
       <nav className="signin-navbar">
         <button className="signin-brand" onClick={onBack} type="button">
           <span className="signin-brand-icon">V</span>
-          <span>VentureBlueprint</span>
+          <span>CorpSetu</span>
         </button>
 
         <button className="signin-back" onClick={onBack} type="button">
@@ -187,7 +187,7 @@ export default function SignInPage({
 
             {onCreateAccount && (
               <p className="signin-register">
-                New to VentureBlueprint?{' '}
+                New to CorpSetu?{' '}
                 <button
                   type="button"
                   className="signin-text-button"
@@ -206,7 +206,7 @@ export default function SignInPage({
       </section>
 
       <footer className="signin-footer">
-        <span>© {new Date().getFullYear()} VentureBlueprint</span>
+        <span>© {new Date().getFullYear()} CorpSetu</span>
         <span>Plan with clarity. Build with confidence.</span>
       </footer>
     </main>

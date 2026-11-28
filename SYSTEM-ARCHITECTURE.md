@@ -1,4 +1,4 @@
-# VentureBlueprint: System Architecture & Design Specification
+# CorpSetu: System Architecture & Design Specification
 **Platform:** AI-Independent Company Formation, Regulatory Validation & Professional Documentation Platform  
 **Primary Jurisdiction:** Republic of India (Companies Act 2013, LLP Act 2008, Partnership Act 1932, CGST Act 2017, MSME Act 2006, DPDP Act 2023)  
 **Execution Environment:** 100% Local / Self-Contained / Zero Cloud AI Dependencies
@@ -7,7 +7,7 @@
 
 ## 1. Architectural Philosophy & Core Principles
 
-VentureBlueprint is architected as an enterprise-grade, deterministic regulatory guidance and documentation engine. Unlike modern applications that rely on opaque, non-deterministic large language models (LLMs) with high hallucination risks, VentureBlueprint operates on **pure, verifiable, statutory business logic and local computational rules**.
+CorpSetu is architected as an enterprise-grade, deterministic regulatory guidance and documentation engine. Unlike modern applications that rely on opaque, non-deterministic large language models (LLMs) with high hallucination risks, CorpSetu operates on **pure, verifiable, statutory business logic and local computational rules**.
 
 ### Core Tenets:
 1. **Zero External AI / Deterministic Predictability:** No API calls to external cloud AI providers (OpenAI, Anthropic, Gemini, Ollama, etc.). Every recommendation, compliance flag, and document clause is derived from statutory rules codified in code and database schemas.

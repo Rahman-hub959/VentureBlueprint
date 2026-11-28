@@ -11,7 +11,7 @@ def test_document_generation_and_download_flow():
     # 1. Login as founder
     login_res = client.post(
         "/api/v1/auth/login",
-        json={"email": "founder@ventureblueprint.in", "password": "Founder@Venture2026!"}
+        json={"email": "founder@corpsetu.in", "password": "Founder@Venture2026!"}
     )
     assert login_res.status_code == 200
     token = login_res.json()["access_token"]
@@ -64,7 +64,7 @@ def test_document_generation_and_download_flow():
     # 4. Generate DOC-A (Company Formation Blueprint) PDF via Admin Desk
     admin_login = client.post(
         "/api/v1/auth/login",
-        json={"email": "admin@ventureblueprint.in", "password": "Admin@Venture2026!"}
+        json={"email": "admin@corpsetu.in", "password": "Admin@Venture2026!"}
     )
     assert admin_login.status_code == 200
     admin_headers = {"Authorization": f"Bearer {admin_login.json()['access_token']}"}

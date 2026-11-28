@@ -32,7 +32,7 @@ def build_report_data(doc_type: str, project_data: Dict[str, Any]) -> Dict[str, 
         promoter_email = current_user.get("email", "")
     else:
         promoter_name = "Lead Promoter"
-        promoter_email = "promoter@ventureblueprint.in"
+        promoter_email = "promoter@corpsetu.in"
 
     # Address & location
     reg_office = profile.get("registered_office_address")
