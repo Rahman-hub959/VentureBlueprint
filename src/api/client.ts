@@ -62,12 +62,62 @@ export const authApi = {
 };
 
 // Projects API
+export interface ProjectItem {
+  id: string;
+  name: string;
+  domain: string;
+  preferred_structure?: string;
+  status: string;
+  completion_percentage: number;
+  current_step?: string;
+  accent_color?: string;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+  business_profile?: {
+    business_description?: string;
+    products_and_services?: string;
+    target_audience?: string;
+    business_stage?: string;
+    business_model?: string;
+    state?: string;
+    city?: string;
+    country?: string;
+    proposed_authorized_capital?: number;
+    proposed_paid_up_capital?: number;
+  };
+  founders?: {
+    full_name: string;
+    email?: string;
+    phone?: string;
+    proposed_shareholding_percentage?: number;
+    is_director?: boolean;
+    executive_role?: string;
+    din_number?: string;
+    pan_number?: string;
+  }[];
+  directors?: any[];
+  user_id?: string;
+  owner_name?: string;
+  owner_email?: string;
+  owner_phone?: string;
+  documents_count?: number;
+  generated_documents?: {
+    id: string;
+    title: string;
+    document_type: string;
+    file_format: string;
+    status: string;
+    generated_at?: string;
+  }[];
+}
+
 export const projectsApi = {
   list: (status?: string, search?: string) => {
     const params = new URLSearchParams();
     if (status) params.append("status", status);
     if (search) params.append("search", search);
-    return apiRequest<any[]>(`/projects?${params.toString()}`);
+    return apiRequest<ProjectItem[]>(`/projects?${params.toString()}`);
   },
   create: (data: { name: string; domain: string; preferred_structure?: string; accent_color?: string }) =>
     apiRequest<any>("/projects", { method: "POST", body: JSON.stringify(data) }),

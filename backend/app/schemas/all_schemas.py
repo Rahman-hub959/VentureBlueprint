@@ -114,6 +114,7 @@ class ProjectResponse(BaseModel):
     owner_email: Optional[str] = None
     owner_phone: Optional[str] = None
     documents_count: Optional[int] = 0
+    generated_documents: Optional[List[Dict[str, Any]]] = []
 
 # ─── VALIDATION SCHEMAS ───
 class NameValidationRequest(BaseModel):

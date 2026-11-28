@@ -26,15 +26,22 @@ import {
   Calendar,
   Layers,
   Sparkles,
-  ArrowRight
+  ArrowRight,
+  FolderKanban,
+  BadgeCheck,
+  MapPin,
+  Briefcase,
+  Coins
 } from "lucide-react";
 import {
   adminApi,
   consultationsApi,
   complaintsApi,
+  projectsApi,
   ConsultationItem,
   ComplaintItem,
-  ClientServiceDossier
+  ClientServiceDossier,
+  ProjectItem
 } from "../../api/client";
 import { useToast } from "../../context/ToastContext";
 
@@ -42,6 +49,8 @@ export const AdminPortalPage: React.FC = () => {
   const { showToast } = useToast();
   const [stats, setStats] = useState<any | null>(null);
   const [users, setUsers] = useState<any[]>([]);
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [serviceDossiers, setServiceDossiers] = useState<ClientServiceDossier[]>([]);
   const [selectedDossier, setSelectedDossier] = useState<ClientServiceDossier | null>(null);
   const [consultations, setConsultations] = useState<ConsultationItem[]>([]);
@@ -50,9 +59,14 @@ export const AdminPortalPage: React.FC = () => {
   const [health, setHealth] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Tabs: tracker is the default main feature tab
-  const [activeTab, setActiveTab] = useState<"tracker" | "overview" | "consultations" | "users" | "grievances" | "audit" | "health">("tracker");
+  // Tabs: projects is now prominent alongside tracker
+  const [activeTab, setActiveTab] = useState<"projects" | "tracker" | "overview" | "consultations" | "users" | "grievances" | "audit" | "health">("projects");
   
+  // Filters
+  const [projectSearch, setProjectSearch] = useState<string>("");
+  const [projectStatusFilter, setProjectStatusFilter] = useState<string>("ALL");
+  const [projectStructureFilter, setProjectStructureFilter] = useState<string>("ALL");
+
   const [serviceFilter, setServiceFilter] = useState<string>("ALL");
   const [trackerSearch, setTrackerSearch] = useState<string>("");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -60,10 +74,11 @@ export const AdminPortalPage: React.FC = () => {
   const loadAdminData = async () => {
     try {
       setLoading(true);
-      const [statsData, usersData, trackerData, consultsData, complaintsData, auditData, healthData] = await Promise.all([
+      const [statsData, usersData, trackerData, projectsData, consultsData, complaintsData, auditData, healthData] = await Promise.all([
         adminApi.getStats().catch(() => null),
         adminApi.getUsers().catch(() => []),
         adminApi.getServiceTracker().catch(() => []),
+        projectsApi.list().catch(() => []),
         consultationsApi.list().catch(() => []),
         complaintsApi.list().catch(() => []),
         adminApi.getAuditLogs().catch(() => []),
@@ -72,6 +87,7 @@ export const AdminPortalPage: React.FC = () => {
       setStats(statsData);
       setUsers(usersData || []);
       setServiceDossiers(trackerData || []);
+      setProjects(projectsData || []);
       setConsultations(consultsData || []);
       setComplaints(complaintsData || []);
       setAuditLogs(auditData || []);
@@ -111,6 +127,25 @@ export const AdminPortalPage: React.FC = () => {
     }
   };
 
+  // Filtered client projects
+  const filteredProjects = projects.filter((p) => {
+    if (projectStatusFilter === "READY" && p.completion_percentage !== 100) return false;
+    if (projectStatusFilter === "DRAFT" && p.completion_percentage === 100) return false;
+    if (projectStatusFilter === "WITH_DOCS" && (!p.documents_count || p.documents_count === 0)) return false;
+    if (projectStructureFilter !== "ALL" && p.preferred_structure !== projectStructureFilter) return false;
+
+    if (projectSearch.trim()) {
+      const q = projectSearch.toLowerCase();
+      const matchName = p.name?.toLowerCase().includes(q);
+      const matchOwner = p.owner_name?.toLowerCase().includes(q);
+      const matchEmail = p.owner_email?.toLowerCase().includes(q);
+      const matchPhone = p.owner_phone?.toLowerCase().includes(q);
+      const matchDomain = p.domain?.toLowerCase().includes(q);
+      return matchName || matchOwner || matchEmail || matchPhone || matchDomain;
+    }
+    return true;
+  });
+
   // Filtered service dossiers
   const filteredDossiers = serviceDossiers.filter((d) => {
     if (serviceFilter !== "ALL" && !d.active_pillars.includes(serviceFilter as any)) {
@@ -130,6 +165,11 @@ export const AdminPortalPage: React.FC = () => {
   const pendingConsultationsCount = consultations.filter((c) => c.status === "Requested").length;
   const consultedCount = consultations.filter((c) => c.status === "Consulted").length;
 
+  const totalProjectsCount = projects.length;
+  const readyProjectsCount = projects.filter((p) => p.completion_percentage === 100).length;
+  const withDocsCount = projects.filter((p) => (p.documents_count || 0) > 0).length;
+  const inDraftCount = projects.filter((p) => p.completion_percentage < 100).length;
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto py-4 px-2 sm:px-4">
       {/* Top Header */}
@@ -143,7 +183,7 @@ export const AdminPortalPage: React.FC = () => {
             Client Services &amp; Platform Operations Desk
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-            Monitor real-time client adoption across CA, CS, and LAW services. Inspect desired company names, generated documents, and triage inquiries.
+            Monitor all <strong>{totalProjectsCount} client company blueprints</strong> saved in the database, inspect statutory documents, and track adoption across CA, CS &amp; Legal services.
           </p>
         </div>
 
@@ -168,6 +208,7 @@ export const AdminPortalPage: React.FC = () => {
       {/* Clean Business Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
         {[
+          { id: "projects", label: `Client Projects (${projects.length})` },
           { id: "tracker", label: `Client Services Tracker (${serviceDossiers.length})` },
           { id: "overview", label: "Operations Overview" },
           { id: "consultations", label: `Consultations (${consultations.length})` },
@@ -191,7 +232,418 @@ export const AdminPortalPage: React.FC = () => {
       </div>
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB: CLIENT SERVICES TRACKER (CA / CS / LAW)                  */}
+      {/* TAB 1: CLIENT PROJECTS DIRECTORY (ALL 59+ IN DATABASE)         */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {activeTab === "projects" && (
+        <div className="space-y-6">
+          {/* Projects KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="spatial-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Total Database Blueprints</span>
+              <div className="text-3xl font-extrabold text-[#0B2559] dark:text-white mt-1">{totalProjectsCount}</div>
+              <p className="text-[11px] text-slate-500 font-semibold mt-1">Created by registered entrepreneurs</p>
+            </div>
+
+            <div className="spatial-card p-5 rounded-2xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/20 dark:bg-emerald-950/20">
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider block">Blueprint Ready (100%)</span>
+              <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">{readyProjectsCount}</div>
+              <p className="text-[11px] text-emerald-700 dark:text-emerald-300 font-semibold mt-1">Completed intake questionnaire</p>
+            </div>
+
+            <div className="spatial-card p-5 rounded-2xl border border-blue-200 dark:border-blue-900/60 bg-blue-50/20 dark:bg-blue-950/20">
+              <span className="text-xs font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider block flex items-center gap-1">
+                <FileCheck className="w-3.5 h-3.5" />
+                <span>With Generated Documents</span>
+              </span>
+              <div className="text-3xl font-extrabold text-blue-600 dark:text-blue-400 mt-1">{withDocsCount}</div>
+              <p className="text-[11px] text-blue-700 dark:text-blue-300 font-semibold mt-1">MoA / AoA finalized</p>
+            </div>
+
+            <div className="spatial-card p-5 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/20 dark:bg-amber-950/20">
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">In Drafting / Intake</span>
+              <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">{inDraftCount}</div>
+              <p className="text-[11px] text-amber-700 dark:text-amber-300 font-semibold mt-1">Incomplete intake (&lt;100%)</p>
+            </div>
+          </div>
+
+          {/* Filters and Search Bar */}
+          <div className="spatial-surface p-4 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* Status Filter Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto">
+              {[
+                { key: "ALL", label: `All Projects (${projects.length})` },
+                { key: "READY", label: `Blueprint Ready (${readyProjectsCount})` },
+                { key: "WITH_DOCS", label: `With Documents (${withDocsCount})` },
+                { key: "DRAFT", label: `Drafts (${inDraftCount})` },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setProjectStatusFilter(tab.key)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    projectStatusFilter === tab.key
+                      ? "bg-[#0B2559] text-white shadow-xs"
+                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Structure Filter Dropdown & Search Input */}
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <select
+                value={projectStructureFilter}
+                onChange={(e) => setProjectStructureFilter(e.target.value)}
+                className="text-xs font-bold px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 outline-none"
+              >
+                <option value="ALL">All Legal Structures</option>
+                <option value="Private Limited Company">Private Limited Company</option>
+                <option value="Limited Liability Partnership (LLP)">Limited Liability Partnership (LLP)</option>
+                <option value="One Person Company (OPC)">One Person Company (OPC)</option>
+                <option value="Sole Proprietorship">Sole Proprietorship</option>
+              </select>
+
+              <div className="relative flex-1 md:w-64">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={projectSearch}
+                  onChange={(e) => setProjectSearch(e.target.value)}
+                  placeholder="Search by company, client, email..."
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white outline-none focus:border-[#C59B27]"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Client Projects Table */}
+          <div className="spatial-card rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h3 className="text-lg font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
+                  <FolderKanban className="w-5 h-5 text-[#C59B27]" />
+                  <span>All Client Company Formation Blueprints ({filteredProjects.length})</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Every company creation record in the database with client contact details, preferred structure, and generated documents.
+                </p>
+              </div>
+            </div>
+
+            {filteredProjects.length === 0 ? (
+              <div className="text-center py-12 text-slate-500 text-xs font-semibold">
+                No company projects match your filter criteria.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-slate-800 dark:text-slate-200">
+                  <thead className="bg-slate-50 dark:bg-slate-800/80 uppercase text-[11px] font-extrabold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+                    <tr>
+                      <th className="py-3 px-4">Company Name &amp; Domain</th>
+                      <th className="py-3 px-4">Legal Structure</th>
+                      <th className="py-3 px-4">Client / Founder Contact</th>
+                      <th className="py-3 px-4">Intake Progress</th>
+                      <th className="py-3 px-4">Statutory Documents</th>
+                      <th className="py-3 px-4">Created Date</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {filteredProjects.map((p) => {
+                      const hasDocs = (p.documents_count || 0) > 0;
+                      const isReady = p.completion_percentage === 100;
+
+                      return (
+                        <tr key={p.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                          {/* Company Name */}
+                          <td className="py-3.5 px-4">
+                            <div className="font-extrabold text-slate-900 dark:text-white text-sm">
+                              {p.name}
+                            </div>
+                            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                              {p.domain}
+                            </span>
+                          </td>
+
+                          {/* Structure */}
+                          <td className="py-3.5 px-4">
+                            <span className="font-mono text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
+                              {p.preferred_structure || "Private Limited"}
+                            </span>
+                          </td>
+
+                          {/* Client Contact */}
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-slate-900 dark:text-white">
+                              {p.owner_name || "Entrepreneur"}
+                            </div>
+                            {p.owner_phone && (
+                              <div className="text-[11px] text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1 mt-0.5">
+                                <Phone className="w-3 h-3 text-emerald-600" />
+                                <a href={`tel:${p.owner_phone}`} className="hover:underline">
+                                  {p.owner_phone}
+                                </a>
+                              </div>
+                            )}
+                            <div className="text-[10px] text-slate-400 truncate max-w-[170px]">
+                              {p.owner_email}
+                            </div>
+                          </td>
+
+                          {/* Progress */}
+                          <td className="py-3.5 px-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-20 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                <div
+                                  className={`h-full rounded-full ${
+                                    isReady ? "bg-emerald-500" : "bg-amber-500"
+                                  }`}
+                                  style={{ width: `${p.completion_percentage}%` }}
+                                />
+                              </div>
+                              <span className="font-bold text-[11px]">{p.completion_percentage}%</span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 block mt-0.5 font-medium">
+                              {isReady ? "Blueprint Ready" : "Intake Drafting"}
+                            </span>
+                          </td>
+
+                          {/* Documents */}
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                                hasDocs
+                                  ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300"
+                                  : "bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300"
+                              }`}
+                            >
+                              {hasDocs ? (
+                                <>
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                  <span>Generated ({p.documents_count})</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Clock className="w-3 h-3 text-amber-600" />
+                                  <span>Pending Intake</span>
+                                </>
+                              )}
+                            </span>
+                          </td>
+
+                          {/* Created Date */}
+                          <td className="py-3.5 px-4 text-slate-500 text-[11px] font-mono">
+                            {new Date(p.created_at).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric"
+                            })}
+                          </td>
+
+                          {/* Actions */}
+                          <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => setSelectedProject(p)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#0B2559] hover:bg-[#071838] text-white text-xs font-extrabold shadow-sm transition-all cursor-pointer"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-[#C59B27]" />
+                                <span>View Details</span>
+                              </button>
+                              <Link
+                                to={`/projects/${p.id}/questionnaire`}
+                                title="Open Blueprint Questionnaire"
+                                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </Link>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* PROJECT DOSSIER VIEW DETAILS MODAL                            */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {selectedProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in">
+          <div className="spatial-surface rounded-3xl p-6 sm:p-8 max-w-3xl w-full border border-slate-200/90 dark:border-slate-800 shadow-2xl space-y-6 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setSelectedProject(null)}
+              className="absolute top-5 right-5 p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Project Header */}
+            <div className="space-y-2 pb-4 border-b border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono font-bold text-[#C59B27] uppercase tracking-wider">
+                  Company Blueprint Record: {selectedProject.id}
+                </span>
+                <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300">
+                  {selectedProject.status}
+                </span>
+              </div>
+              <h2 className="text-2xl font-extrabold text-[#0B2559] dark:text-white">
+                {selectedProject.name}
+              </h2>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-300 pt-1">
+                <span className="font-mono font-bold bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700">
+                  {selectedProject.preferred_structure || "Private Limited Company"}
+                </span>
+                <span>Domain: <strong>{selectedProject.domain}</strong></span>
+                <span>Completion: <strong>{selectedProject.completion_percentage}%</strong></span>
+              </div>
+            </div>
+
+            {/* Client / Founder Snapshot */}
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+              <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                Client / Company Founder Details
+              </span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="font-extrabold text-slate-900 dark:text-white text-sm">
+                  {selectedProject.owner_name || "Entrepreneur"}
+                </div>
+                <div className="flex items-center gap-3">
+                  {selectedProject.owner_phone && (
+                    <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                      <a href={`tel:${selectedProject.owner_phone}`} className="hover:underline">
+                        {selectedProject.owner_phone}
+                      </a>
+                    </span>
+                  )}
+                  <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1">
+                    <Mail className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{selectedProject.owner_email}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Business Profile & Objects */}
+            <div className="spatial-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
+              <h4 className="text-sm font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-emerald-600" />
+                <span>Business Activity &amp; Capital Structure</span>
+              </h4>
+
+              <div className="space-y-1.5">
+                <span className="font-bold text-slate-700 dark:text-slate-300">Business Description:</span>
+                <p className="text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 leading-relaxed">
+                  {selectedProject.business_profile?.business_description || "Intake in progress. Detailed main business objects to be drafted in MoA Clause 3(a)."}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Proposed Capital</span>
+                  <div className="font-bold text-slate-900 dark:text-white">
+                    Authorized: ₹{(selectedProject.business_profile?.proposed_authorized_capital || 100000).toLocaleString("en-IN")}
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Paid-up: ₹{(selectedProject.business_profile?.proposed_paid_up_capital || 100000).toLocaleString("en-IN")}
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-1">
+                  <span className="text-[10px] text-slate-400 font-bold uppercase block">Business Stage &amp; Model</span>
+                  <div className="font-bold text-slate-900 dark:text-white">
+                    Stage: {selectedProject.business_profile?.business_stage || "Idea / Pre-incorporation"}
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Model: {selectedProject.business_profile?.business_model || "B2B / Technology Service"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Statutory Generated Documents */}
+            <div className="spatial-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3 text-xs">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
+                  <FileCheck className="w-4 h-4 text-blue-600" />
+                  <span>Statutory Documentation &amp; Formation Blueprints</span>
+                </h4>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
+                  {selectedProject.documents_count || 0} Document(s)
+                </span>
+              </div>
+
+              {(selectedProject.generated_documents && selectedProject.generated_documents.length > 0) ? (
+                <div className="space-y-2">
+                  {selectedProject.generated_documents.map((doc) => (
+                    <div key={doc.id} className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                      <div>
+                        <span className="font-extrabold text-slate-900 dark:text-white block">{doc.title}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">
+                          Format: {doc.file_format?.toUpperCase()} · Status: {doc.status}
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200">
+                        Ready
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3.5 rounded-xl bg-amber-50/80 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-amber-900 dark:text-amber-300">
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                    <span>No Documents Generated Yet</span>
+                  </div>
+                  <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                    The client has initialized this company blueprint but has not finalized the questionnaire intake to trigger automated MoA/AoA document generation.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <Link
+                  to={`/projects/${selectedProject.id}/questionnaire`}
+                  className="corpsetu-btn-navy text-xs py-2.5 px-4 font-bold inline-flex items-center gap-1.5"
+                >
+                  <span>Open Full Questionnaire Dossier &rarr;</span>
+                </Link>
+                {selectedProject.owner_phone && (
+                  <a
+                    href={`tel:${selectedProject.owner_phone}`}
+                    className="glass-button-secondary text-xs py-2.5 px-4 font-bold inline-flex items-center gap-1.5"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>Call Client</span>
+                  </a>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedProject(null)}
+                className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl"
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* TAB 2: CLIENT SERVICES TRACKER (CA / CS / LAW)                */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "tracker" && (
         <div className="space-y-6">
@@ -279,7 +731,6 @@ export const AdminPortalPage: React.FC = () => {
 
                       return (
                         <tr key={client.user_id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                          {/* Name */}
                           <td className="py-3.5 px-4">
                             <div className="font-extrabold text-slate-900 dark:text-white text-sm">
                               {client.full_name}
@@ -289,12 +740,10 @@ export const AdminPortalPage: React.FC = () => {
                             </div>
                           </td>
 
-                          {/* Email */}
                           <td className="py-3.5 px-4 font-medium text-slate-700 dark:text-slate-300">
                             {client.email}
                           </td>
 
-                          {/* Phone Number */}
                           <td className="py-3.5 px-4">
                             <span className="font-bold text-emerald-700 dark:text-emerald-400 inline-flex items-center gap-1">
                               <Phone className="w-3 h-3 text-emerald-600" />
@@ -304,7 +753,6 @@ export const AdminPortalPage: React.FC = () => {
                             </span>
                           </td>
 
-                          {/* Active Service Badges */}
                           <td className="py-3.5 px-4">
                             <div className="flex items-center gap-1 flex-wrap">
                               {client.active_pillars.map((pillar) => (
@@ -332,7 +780,6 @@ export const AdminPortalPage: React.FC = () => {
                             </div>
                           </td>
 
-                          {/* Desired Company Name */}
                           <td className="py-3.5 px-4 max-w-[200px]">
                             {client.primary_company_name ? (
                               <div>
@@ -350,7 +797,6 @@ export const AdminPortalPage: React.FC = () => {
                             )}
                           </td>
 
-                          {/* Document Status */}
                           <td className="py-3.5 px-4">
                             <span
                               className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
@@ -373,7 +819,6 @@ export const AdminPortalPage: React.FC = () => {
                             </span>
                           </td>
 
-                          {/* View Details Button */}
                           <td className="py-3.5 px-4 text-right whitespace-nowrap">
                             <button
                               onClick={() => setSelectedDossier(client)}
@@ -634,7 +1079,7 @@ export const AdminPortalPage: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB: OPERATIONS OVERVIEW                                      */}
+      {/* TAB 3: OPERATIONS OVERVIEW                                    */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "overview" && (
         <div className="space-y-6">
@@ -648,8 +1093,8 @@ export const AdminPortalPage: React.FC = () => {
 
             <div className="spatial-card p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Company Blueprints</span>
-              <div className="text-3xl font-extrabold text-[#0B2559] dark:text-white mt-1">{stats?.total_projects || 0}</div>
-              <p className="text-[11px] text-slate-500 font-semibold mt-1">Active startup incorporation records</p>
+              <div className="text-3xl font-extrabold text-[#0B2559] dark:text-white mt-1">{totalProjectsCount}</div>
+              <p className="text-[11px] text-slate-500 font-semibold mt-1">Saved in database</p>
             </div>
 
             <div className="spatial-card p-5 rounded-2xl border border-amber-200 dark:border-amber-900/60 bg-amber-50/20 dark:bg-amber-950/20">
@@ -665,6 +1110,82 @@ export const AdminPortalPage: React.FC = () => {
               </span>
               <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">{consultedCount}</div>
               <p className="text-[11px] text-emerald-700 dark:text-emerald-300 font-semibold mt-1">Successfully approached &amp; advised</p>
+            </div>
+          </div>
+
+          {/* Latest Client Projects Preview */}
+          <div className="spatial-card rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h3 className="text-lg font-extrabold text-[#0B2559] dark:text-white flex items-center gap-2">
+                  <FolderKanban className="w-5 h-5 text-[#C59B27]" />
+                  <span>Recent Client Projects in Database</span>
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Total <strong>{totalProjectsCount} company blueprints</strong> saved in the database.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setActiveTab("projects")}
+                className="text-xs font-bold text-[#0B2559] dark:text-[#E5B842] hover:underline flex items-center gap-1"
+              >
+                <span>View All ({projects.length}) &rarr;</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-800 dark:text-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-800/80 uppercase text-[11px] font-extrabold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    <th className="py-3 px-4">Company Name</th>
+                    <th className="py-3 px-4">Legal Structure</th>
+                    <th className="py-3 px-4">Client Contact</th>
+                    <th className="py-3 px-4">Intake Progress</th>
+                    <th className="py-3 px-4">Documents</th>
+                    <th className="py-3 px-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {projects.slice(0, 5).map((p) => (
+                    <tr key={p.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                      <td className="py-3 px-4">
+                        <span className="font-extrabold text-slate-900 dark:text-white block">{p.name}</span>
+                        <span className="text-[10px] text-emerald-600">{p.domain}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                          {p.preferred_structure || "Pvt Ltd"}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-slate-900 dark:text-white">{p.owner_name}</div>
+                        <div className="text-[10px] text-slate-400">{p.owner_email}</div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`font-bold ${p.completion_percentage === 100 ? "text-emerald-600" : "text-amber-600"}`}>
+                          {p.completion_percentage}%
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                          (p.documents_count || 0) > 0 ? "bg-emerald-50 text-emerald-800 border-emerald-300" : "bg-amber-50 text-amber-800 border-amber-300"
+                        }`}>
+                          {(p.documents_count || 0) > 0 ? `✓ Generated (${p.documents_count})` : "Pending"}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          onClick={() => setSelectedProject(p)}
+                          className="px-2.5 py-1 rounded-lg bg-[#0B2559] text-white text-xs font-bold"
+                        >
+                          View Details
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -811,7 +1332,7 @@ export const AdminPortalPage: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB: CONSULTATIONS FULL VIEW                                  */}
+      {/* TAB 4: CONSULTATIONS FULL VIEW                                */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "consultations" && (
         <div className="space-y-4">
@@ -898,7 +1419,7 @@ export const AdminPortalPage: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB: USER DIRECTORY                                           */}
+      {/* TAB 5: USER DIRECTORY                                         */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "users" && (
         <div className="spatial-card rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-6">
@@ -956,7 +1477,7 @@ export const AdminPortalPage: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB: GRIEVANCES & SUPPORT                                     */}
+      {/* TAB 6: GRIEVANCES & SUPPORT                                   */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "grievances" && (
         <div className="spatial-card rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden p-6 space-y-4">
@@ -1023,7 +1544,7 @@ export const AdminPortalPage: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB: AUDIT TRAIL                                              */}
+      {/* TAB 7: AUDIT TRAIL                                            */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "audit" && (
         <div className="spatial-card p-6 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
@@ -1051,7 +1572,7 @@ export const AdminPortalPage: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB: SYSTEM HEALTH                                            */}
+      {/* TAB 8: SYSTEM HEALTH                                          */}
       {/* ───────────────────────────────────────────────────────────── */}
       {activeTab === "health" && (
         <div className="spatial-card p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">

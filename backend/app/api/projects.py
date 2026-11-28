@@ -58,6 +58,17 @@ def list_projects(
     results = []
     for p in projects:
         owner = p.user
+        doc_items = [
+            {
+                "id": d.id,
+                "title": d.title,
+                "document_type": d.document_type,
+                "file_format": d.file_format,
+                "status": d.status,
+                "generated_at": d.generated_at.isoformat() if d.generated_at else None
+            }
+            for d in (p.generated_documents or [])
+        ]
         results.append({
             "id": p.id,
             "name": p.name,
@@ -78,7 +89,8 @@ def list_projects(
             "owner_name": owner.full_name if owner else "Entrepreneur",
             "owner_email": owner.email if owner else None,
             "owner_phone": owner.phone_number if owner else None,
-            "documents_count": len(p.generated_documents) if p.generated_documents else 0
+            "documents_count": len(doc_items),
+            "generated_documents": doc_items
         })
     return results
 
