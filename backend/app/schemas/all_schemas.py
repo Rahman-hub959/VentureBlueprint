@@ -2,11 +2,20 @@ from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 # ─── AUTH SCHEMAS ───
+class SendOtpRequest(BaseModel):
+    phone_number: str
+    email: Optional[EmailStr] = None
+
+class VerifyOtpRequest(BaseModel):
+    phone_number: str
+    otp: str = Field(min_length=6, max_length=6)
+
 class UserRegister(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8)
     full_name: str = Field(min_length=2)
     phone_number: Optional[str] = None
+    otp: Optional[str] = None
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -23,6 +32,7 @@ class UserResponse(BaseModel):
     email: str
     full_name: str
     phone_number: Optional[str] = None
+    is_phone_verified: bool = False
     role: Optional[str] = "Entrepreneur"
     is_active: bool = True
     preferences: Dict[str, Any] = {}

@@ -5,10 +5,12 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
+from app.config import settings
 from app.models.user import User, Role, UserSession
 from app.models.audit import AuditLog
 from app.services.email_service import send_welcome_email
 from app.services.notification_service import notify_admin
+from app.services.otp_service import generate_and_send_otp, verify_otp, normalize_phone_number
 from app.security import (
     get_password_hash,
     verify_password,
@@ -17,6 +19,8 @@ from app.security import (
     decode_token
 )
 from app.schemas.all_schemas import (
+    SendOtpRequest,
+    VerifyOtpRequest,
     UserRegister,
     UserLogin,
     Token,
@@ -28,6 +32,60 @@ from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
+@router.post("/send-signup-otp")
+def send_signup_otp(req: SendOtpRequest, db: Session = Depends(get_db)):
+    """
+    Validates phone number and email uniqueness, generates a 6-digit OTP,
+    and dispatches it via SMS / dev sandbox.
+    """
+    # 1. Validate phone number format
+    try:
+        norm_phone = normalize_phone_number(req.phone_number)
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+
+    # 2. Check if email already registered
+    if req.email:
+        existing_email = db.query(User).filter(User.email == str(req.email).lower().strip()).first()
+        if existing_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="An account with this email address already exists. Please Sign In."
+            )
+
+    # 3. Check if phone number already registered with an active user
+    existing_phone = db.query(User).filter(
+        (User.phone_number == norm_phone) | (User.phone_number == req.phone_number.strip())
+    ).first()
+    if existing_phone:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This mobile number is already registered with an account. Please Sign In."
+        )
+
+    # 4. Generate & dispatch OTP
+    try:
+        res = generate_and_send_otp(req.phone_number, str(req.email) if req.email else "")
+        return res
+    except ValueError as ve:
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=str(ve))
+    except Exception as ex:
+        logging.getLogger("corpsetu.auth").error(f"Failed to generate OTP: {ex}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send verification code. Please try again."
+        )
+
+@router.post("/verify-signup-otp")
+def verify_signup_otp_endpoint(req: VerifyOtpRequest):
+    """
+    Validates the 6-digit mobile OTP before account submission.
+    """
+    valid, msg = verify_otp(req.phone_number, req.otp)
+    if not valid:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=msg)
+    return {"status": "success", "message": msg}
+
 @router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
 def register(user_in: UserRegister, db: Session = Depends(get_db)):
     # Check existing user
@@ -38,6 +96,37 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
             detail="A user with this email address already exists"
         )
     
+    # Phone number & OTP validation
+    is_phone_verified = False
+    norm_phone = None
+    if user_in.phone_number:
+        try:
+            norm_phone = normalize_phone_number(user_in.phone_number)
+        except ValueError as ve:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(ve))
+        
+        # Check duplicate phone
+        existing_phone = db.query(User).filter(
+            (User.phone_number == norm_phone) | (User.phone_number == user_in.phone_number.strip())
+        ).first()
+        if existing_phone:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This mobile number is already registered with another account."
+            )
+        
+        # Verify OTP
+        if user_in.otp:
+            valid, msg = verify_otp(norm_phone, user_in.otp)
+            if not valid:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=msg)
+            is_phone_verified = True
+        elif getattr(settings, "ENVIRONMENT", "development").lower() == "production":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mobile number OTP verification is required to complete registration."
+            )
+
     # Get or create Entrepreneur role
     role = db.query(Role).filter(Role.name == "Entrepreneur").first()
     if not role:
@@ -49,7 +138,8 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
         email=user_in.email.lower(),
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
-        phone_number=user_in.phone_number,
+        phone_number=norm_phone or user_in.phone_number,
+        is_phone_verified=is_phone_verified,
         role_id=role.id,
         is_active=True
     )
@@ -110,6 +200,8 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
             "id": user.id,
             "email": user.email,
             "full_name": user.full_name,
+            "phone_number": user.phone_number,
+            "is_phone_verified": getattr(user, "is_phone_verified", False),
             "role": role.name
         }
     }
@@ -167,6 +259,8 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
             "id": user.id,
             "email": user.email,
             "full_name": user.full_name,
+            "phone_number": user.phone_number,
+            "is_phone_verified": getattr(user, "is_phone_verified", False),
             "role": role_name
         }
     }
@@ -178,6 +272,7 @@ def get_me(current_user: User = Depends(get_current_user)):
         "email": current_user.email,
         "full_name": current_user.full_name,
         "phone_number": current_user.phone_number,
+        "is_phone_verified": getattr(current_user, "is_phone_verified", False),
         "role": current_user.role.name if current_user.role else "Entrepreneur",
         "is_active": current_user.is_active,
         "preferences": current_user.preferences or {}

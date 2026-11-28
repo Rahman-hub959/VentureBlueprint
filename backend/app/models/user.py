@@ -27,6 +27,7 @@ class User(Base):
     role_id = Column(String, ForeignKey("roles.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=True)
+    is_phone_verified = Column(Boolean, default=False)
     last_login_at = Column(DateTime, nullable=True)
     last_active_at = Column(DateTime, nullable=True)
     preferences = Column(JSON, default=dict)

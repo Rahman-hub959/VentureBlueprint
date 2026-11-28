@@ -7,6 +7,7 @@ export interface User {
   full_name: string;
   role: string;
   phone_number?: string;
+  is_phone_verified?: boolean;
   preferences?: Record<string, any>;
 }
 
@@ -17,7 +18,7 @@ interface AuthContextType {
   isAdmin: boolean;
   loading: boolean;
   login: (credentials: { email: string; password: string }) => Promise<void>;
-  register: (payload: { email: string; password: string; full_name: string; phone_number?: string }) => Promise<void>;
+  register: (payload: { email: string; password: string; full_name: string; phone_number?: string; otp?: string }) => Promise<void>;
   logout: () => void;
 }
 
@@ -63,7 +64,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(res.user);
   };
 
-  const register = async (payload: { email: string; password: string; full_name: string; phone_number?: string }) => {
+  const register = async (payload: { email: string; password: string; full_name: string; phone_number?: string; otp?: string }) => {
     const res = await authApi.register(payload);
     localStorage.setItem("vb_token", res.access_token);
     setToken(res.access_token);

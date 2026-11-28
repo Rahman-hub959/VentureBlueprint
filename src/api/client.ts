@@ -53,7 +53,24 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify(credentials),
     }),
-  register: (payload: { email: string; password: string; full_name: string; phone_number?: string }) =>
+  sendSignupOtp: (payload: { phone_number: string; email?: string }) =>
+    apiRequest<{
+      status: string;
+      message: string;
+      phone_number: string;
+      masked_phone: string;
+      expires_in_seconds: number;
+      dev_otp?: string;
+    }>("/auth/send-signup-otp", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  verifySignupOtp: (payload: { phone_number: string; otp: string }) =>
+    apiRequest<{ status: string; message: string }>("/auth/verify-signup-otp", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+  register: (payload: { email: string; password: string; full_name: string; phone_number?: string; otp?: string }) =>
     apiRequest<{ access_token: string; refresh_token: string; user: any }>("/auth/register", {
       method: "POST",
       body: JSON.stringify(payload),
