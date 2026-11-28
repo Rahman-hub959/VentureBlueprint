@@ -9,6 +9,8 @@ from app.models.user import User, Role
 from app.models.project import StartupProject
 from app.models.document import GeneratedDocument
 from app.models.regulation import RegulatoryRule, RegulatoryRuleVersion, RegulatoryReview
+from app.models.consultation import Consultation
+from app.models.complaint import Complaint
 from app.models.audit import AuditLog
 from app.api.deps import get_current_admin_user
 from app.config import settings
@@ -23,6 +25,17 @@ def get_admin_stats(
     total_users = db.query(User).count()
     total_projects = db.query(StartupProject).count()
     total_documents = db.query(GeneratedDocument).count()
+    
+    total_consultations = db.query(Consultation).count()
+    pending_consultations = db.query(Consultation).filter(Consultation.status == "Requested").count()
+    consulted_count = db.query(Consultation).filter(
+        Consultation.status.in_(["Consulted", "Consulted & Accepted"])
+    ).count()
+    not_accepted_count = db.query(Consultation).filter(
+        Consultation.status.in_(["Not Accepted", "Consulted & Not Accepted"])
+    ).count()
+    
+    total_complaints = db.query(Complaint).count()
     active_rules = db.query(RegulatoryRule).filter(RegulatoryRule.status == "Published").count()
     draft_rules = db.query(RegulatoryRule).filter(RegulatoryRule.status != "Published").count()
 
@@ -30,6 +43,11 @@ def get_admin_stats(
         "total_users": total_users,
         "total_projects": total_projects,
         "total_documents": total_documents,
+        "total_consultations": total_consultations,
+        "pending_consultations": pending_consultations,
+        "consulted_count": consulted_count,
+        "not_accepted_count": not_accepted_count,
+        "total_complaints": total_complaints,
         "active_regulatory_rules": active_rules,
         "pending_review_rules": draft_rules,
         "storage_directory": str(settings.STORAGE_DIR),

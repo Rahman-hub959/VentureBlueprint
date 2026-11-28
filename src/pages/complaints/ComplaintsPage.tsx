@@ -43,45 +43,7 @@ export const ComplaintsPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const initialSeedTickets: GrievanceTicket[] = [
-    {
-      id: "CS-GRV-2026-8912",
-      companyName: "Lumora Technologies Pvt Ltd",
-      pillar: "CS",
-      category: "MCA SPICe+ Name Approval Resubmission",
-      priority: "Critical",
-      status: "In Review by Expert",
-      assignedExpert: "CS Priyanjali Sen (Senior Secretarial Lead)",
-      createdAt: "Today, 10:15 AM",
-      description: "Received an MCA resubmission notice requesting clarification on main business objects in MoA Clause 3(a). Need revised drafting within 15 days.",
-      resolutionNote: "Revised MoA Clause 3(a) drafted according to NIC Code 62013 and resubmitted on MCA portal.",
-    },
-    {
-      id: "CS-GRV-2026-8740",
-      companyName: "Kaveri Cold Brew Pvt Ltd",
-      pillar: "CA",
-      category: "GSTR-3B Input Tax Credit Reconciliation Mismatch",
-      priority: "High",
-      status: "Action In Progress",
-      assignedExpert: "CA Aniket Kulkarni (Tax Partner)",
-      createdAt: "Yesterday, 04:30 PM",
-      description: "Vendor invoice not reflecting in GSTR-2B for September 2026. Need reconciliation and communication with vendor accountant before filing.",
-    },
-    {
-      id: "CS-GRV-2026-8511",
-      companyName: "Zenith CleanTech LLP",
-      pillar: "LAW",
-      category: "Co-Founder Agreement Vesting Schedule Revision",
-      priority: "Standard",
-      status: "Resolved",
-      assignedExpert: "Adv. Rajesh Varma (Corporate Counsel)",
-      createdAt: "18 Nov 2026",
-      description: "Add 1-year cliff and 48-month accelerated vesting clause in case of Series A acquisition.",
-      resolutionNote: "Tri-party amended Founder Agreement executed on stamp paper and notarized. Case closed successfully.",
-    },
-  ];
-
-  const [tickets, setTickets] = useState<GrievanceTicket[]>(initialSeedTickets);
+  const [tickets, setTickets] = useState<GrievanceTicket[]>([]);
 
   useEffect(() => {
     async function fetchComplaints() {
@@ -105,14 +67,13 @@ export const ComplaintsPage: React.FC = () => {
             description: r.description,
             resolutionNote: r.resolution_note,
           }));
-
-          // Merge any remote ones with seeds avoiding duplicate IDs
-          const existingIds = new Set(mapped.map((m) => m.id));
-          const extraSeeds = initialSeedTickets.filter((s) => !existingIds.has(s.id));
-          setTickets([...mapped, ...extraSeeds]);
+          setTickets(mapped);
+        } else {
+          setTickets([]);
         }
       } catch (err) {
-        console.warn("Could not load complaints from API, using cached view", err);
+        console.warn("Could not load complaints from API", err);
+        setTickets([]);
       } finally {
         setLoading(false);
       }

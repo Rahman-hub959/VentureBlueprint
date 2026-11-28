@@ -221,6 +221,34 @@ def update_consultation_status(
         consultation.meeting_platform = payload.meeting_platform
 
     consultation.updated_at = datetime.now(timezone.utc)
+
+    # Notify client if linked to a user
+    target_user_id = consultation.user_id
+    if not target_user_id and consultation.email:
+        user_match = db.query(User).filter(User.email == consultation.email).first()
+        if user_match:
+            target_user_id = user_match.id
+
+    if target_user_id:
+        if consultation.status in ["Consulted", "Consulted & Accepted"]:
+            msg = f"Your consultation regarding '{consultation.topic}' has been marked as Consulted by our advisory team."
+            cat = "success"
+        elif consultation.status in ["Not Accepted", "Consulted & Not Accepted"]:
+            msg = f"Your consultation regarding '{consultation.topic}' has concluded and the request is marked as Not Accepted / Closed."
+            cat = "warning"
+        else:
+            msg = f"Your consultation status has been updated to '{consultation.status}'."
+            cat = "info"
+
+        notif = Notification(
+            user_id=target_user_id,
+            title=f"Consultation Status: {consultation.status}",
+            message=msg,
+            category=cat,
+            link="/consultations"
+        )
+        db.add(notif)
+
     db.commit()
     db.refresh(consultation)
     return consultation

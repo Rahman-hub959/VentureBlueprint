@@ -204,7 +204,7 @@ export interface ConsultationItem {
   topic: string;
   preferred_date?: string;
   preferred_time_slot?: string;
-  status: "Requested" | "Scheduled" | "In Progress" | "Completed" | "Cancelled";
+  status: "Requested" | "Scheduled" | "In Progress" | "Consulted" | "Not Accepted" | "Completed" | "Cancelled" | string;
   assigned_expert?: string;
   expert_role?: string;
   notes?: string;

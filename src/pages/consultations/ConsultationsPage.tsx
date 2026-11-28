@@ -133,8 +133,8 @@ export const ConsultationsPage: React.FC = () => {
 
   // Filter consultations
   const filteredList = consultations.filter((c) => {
-    if (activeTab === "ACTIVE" && ["Completed", "Cancelled"].includes(c.status)) return false;
-    if (activeTab === "COMPLETED" && !["Completed", "Cancelled"].includes(c.status)) return false;
+    if (activeTab === "ACTIVE" && ["Consulted", "Not Accepted", "Completed", "Cancelled"].includes(c.status)) return false;
+    if (activeTab === "COMPLETED" && !["Consulted", "Not Accepted", "Completed", "Cancelled"].includes(c.status)) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -252,11 +252,11 @@ export const ConsultationsPage: React.FC = () => {
             { key: "ALL", label: `All Consultations (${consultations.length})` },
             {
               key: "ACTIVE",
-              label: `Active (${consultations.filter((c) => !["Completed", "Cancelled"].includes(c.status)).length})`,
+              label: `Active / Pending (${consultations.filter((c) => !["Consulted", "Not Accepted", "Completed", "Cancelled"].includes(c.status)).length})`,
             },
             {
               key: "COMPLETED",
-              label: `Completed / Past (${consultations.filter((c) => ["Completed", "Cancelled"].includes(c.status)).length})`,
+              label: `Consulted / Closed (${consultations.filter((c) => ["Consulted", "Not Accepted", "Completed", "Cancelled"].includes(c.status)).length})`,
             },
           ].map((tab) => (
             <button
@@ -314,6 +314,8 @@ export const ConsultationsPage: React.FC = () => {
         <div className="space-y-4">
           {filteredList.map((item) => {
             const isRequested = item.status === "Requested";
+            const isConsulted = item.status === "Consulted";
+            const isNotAccepted = item.status === "Not Accepted";
             const isCompleted = item.status === "Completed";
             const isCancelled = item.status === "Cancelled";
 
@@ -366,23 +368,29 @@ export const ConsultationsPage: React.FC = () => {
                       })}
                     </span>
                     <span
-                      className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 ${
-                        isCompleted
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                      className={`text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1.5 border ${
+                        isConsulted || isCompleted
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800"
+                          : isNotAccepted
+                          ? "bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800"
                           : isCancelled
-                          ? "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400"
-                          : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+                          ? "bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700"
+                          : "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800"
                       }`}
                     >
-                      {isCompleted ? (
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                      ) : isCancelled ? (
-                        <X className="w-3.5 h-3.5" />
+                      {isConsulted || isCompleted ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      ) : isNotAccepted || isCancelled ? (
+                        <X className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                       ) : (
                         <Clock className="w-3.5 h-3.5 animate-spin" />
                       )}
                       <span>
-                        {isRequested
+                        {isConsulted
+                          ? "Consulted · Advisory Delivered"
+                          : isNotAccepted
+                          ? "Consulted · Not Proceeding"
+                          : isRequested
                           ? "Requested · Team Contacting You"
                           : item.status}
                       </span>
@@ -408,15 +416,29 @@ export const ConsultationsPage: React.FC = () => {
                       </p>
                     )}
 
-                    {/* Reassurance Message */}
-                    {!isCompleted && !isCancelled && (
+                    {/* Reassurance or Resolution Message */}
+                    {isConsulted ? (
+                      <div className="p-3 rounded-xl bg-emerald-50/80 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-[11px] text-emerald-900 dark:text-emerald-300 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        <span>
+                          <strong>Consultation Completed:</strong> Our specialist has contacted and consulted with you regarding this inquiry.
+                        </span>
+                      </div>
+                    ) : isNotAccepted ? (
+                      <div className="p-3 rounded-xl bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-[11px] text-rose-900 dark:text-rose-300 flex items-center gap-2">
+                        <X className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                        <span>
+                          <strong>File Closed:</strong> Consultation concluded (proposal not accepted or declined). You may book a new consultation anytime.
+                        </span>
+                      </div>
+                    ) : !isCompleted && !isCancelled ? (
                       <div className="p-3 rounded-xl bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-800/60 text-[11px] text-amber-900 dark:text-amber-300 flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-[#C59B27] flex-shrink-0" />
                         <span>
                           <strong>Status:</strong> In a short period of time our team will contact you via phone (<strong>{item.phone_number}</strong>) and email to discuss your consultation details.
                         </span>
                       </div>
-                    )}
+                    ) : null}
                   </div>
 
                   {/* Expert & Booking Slot Box */}
