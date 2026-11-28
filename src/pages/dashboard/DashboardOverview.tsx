@@ -410,7 +410,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
 
               <div className="text-xs font-extrabold text-[#C59B27]">
-                Starting from ₹1,499
+                Statutory MCA &amp; ROC Desk
               </div>
 
               <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pt-1">
@@ -489,7 +489,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
 
               <div className="text-xs font-extrabold text-[#C59B27]">
-                Starting from ₹499/mo
+                Corporate Tax &amp; GST Advisory
               </div>
 
               <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pt-1">
@@ -568,7 +568,7 @@ export const DashboardOverview: React.FC = () => {
               </div>
 
               <div className="text-xs font-extrabold text-[#C59B27]">
-                Starting from ₹999
+                Corporate Law &amp; IP Protection
               </div>
 
               <ul className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 font-medium pt-1">
@@ -1070,7 +1070,7 @@ export const DashboardOverview: React.FC = () => {
                 onClick={() => { setCaConsultTopic("General CA Tax Strategy"); setCaBookedModal(true); }}
                 className="corpsetu-btn-gold px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
               >
-                Consult Empanelled CA · Starting from ₹499
+                Consult Empanelled CA · Advisory Review
               </button>
             )}
           </div>
@@ -1225,7 +1225,7 @@ export const DashboardOverview: React.FC = () => {
                     onClick={() => { setCaConsultTopic("Statutory Audit under Section 139"); setCaBookedModal(true); }}
                     className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline"
                   >
-                    Book CA Review &rarr; Starting from ₹2,499
+                    Book CA Review &rarr; Advisory Desk
                   </button>
                 )}
               </div>
@@ -1266,7 +1266,7 @@ export const DashboardOverview: React.FC = () => {
                 onClick={() => setLawBookedModal(true)}
                 className="corpsetu-btn-navy px-4 py-2.5 text-xs font-bold whitespace-nowrap self-start md:self-auto"
               >
-                Consult High Court Advocate · Starting from ₹999
+                Consult High Court Advocate · Advisory Call
               </button>
             )}
           </div>
@@ -1399,7 +1399,7 @@ export const DashboardOverview: React.FC = () => {
                       className="corpsetu-btn-navy px-4 py-2 text-xs font-bold inline-flex items-center gap-1.5"
                     >
                       <FileText className="w-3.5 h-3.5" />
-                      <span>Generate Agreement · Starting from ₹999</span>
+                      <span>Generate Statutory Agreement</span>
                     </button>
                   </div>
                 </div>
@@ -1504,7 +1504,7 @@ export const DashboardOverview: React.FC = () => {
                     onClick={() => setLawBookedModal(true)}
                     className="text-xs font-bold text-blue-700 dark:text-blue-400 hover:underline"
                   >
-                    File with IP Attorney &rarr; Starting from ₹4,999
+                    File with IP Attorney &rarr; Legal Advisory
                   </button>
                 )}
               </div>
@@ -1526,7 +1526,7 @@ export const DashboardOverview: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Empanelled CA Session</h3>
-                  <span className="text-xs text-slate-500">Chartered Accountant Consultation · Starting from ₹499</span>
+                  <span className="text-xs text-slate-500">Chartered Accountant Consultation · Senior Desk</span>
                 </div>
               </div>
               <button
@@ -1602,7 +1602,7 @@ export const DashboardOverview: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">Corporate Counsel Session</h3>
-                  <span className="text-xs text-slate-500">High Court Advocate Consultation · Starting from ₹999</span>
+                  <span className="text-xs text-slate-500">High Court Advocate Consultation · Senior Legal Desk</span>
                 </div>
               </div>
               <button

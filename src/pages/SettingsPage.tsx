@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { projectsApi } from '../api/client';
+import { projectsApi, adminApi, PlatformSettings } from '../api/client';
 import '../styles/SettingsPage.css';
 
 /* ---------- Types ---------- */
-type SectionId = 'profile' | 'business' | 'preferences' | 'notifications' | 'security' | 'privacy';
+type SectionId = 'controls' | 'profile' | 'business' | 'preferences' | 'notifications' | 'security' | 'privacy';
 type Theme = 'light' | 'dark' | 'system';
 
 interface Profile { fullName: string; email: string; phone: string; jobTitle: string; role: string; avatar: string | null }
@@ -36,6 +36,12 @@ const SECTIONS: { id: SectionId; label: string; hint: string }[] = [
   { id: 'notifications', label: 'Notifications', hint: 'What we email you about' },
   { id: 'security', label: 'Security', hint: 'Password, 2FA and sessions' },
   { id: 'privacy', label: 'Data & Privacy', hint: 'Your data and account' },
+];
+const ADMIN_SECTIONS: { id: SectionId; label: string; hint: string }[] = [
+  { id: 'controls', label: 'Website Controls', hint: 'Support phone, email, office & hours' },
+  { id: 'profile', label: 'Admin Profile', hint: 'Name, contact & role' },
+  { id: 'preferences', label: 'Display & Theme', hint: 'Theme, language & time zone' },
+  { id: 'security', label: 'Security & 2FA', hint: 'Password, 2FA & active sessions' },
 ];
 const ROLES = ['Founder', 'Co-founder', 'Operations lead', 'Marketing lead', 'Finance lead', 'Advisor'];
 const DOMAINS = ['Food & Beverage', 'Retail & E-commerce', 'Technology & SaaS', 'Health & Wellness', 'Education', 'Professional Services', 'Manufacturing', 'Travel & Hospitality', 'Agriculture', 'Creative & Media'];
@@ -225,9 +231,11 @@ function PasswordDialog({ onClose, onDone }: { onClose: () => void; onDone: () =
 export default function SettingsPage() {
   const { user } = useAuth();
   const { theme: currentAppTheme, setTheme: setAppTheme } = useTheme();
+  const isAdmin = user?.role === 'Administrator';
+  const effectiveSections = isAdmin ? ADMIN_SECTIONS : SECTIONS;
   const [saved, setSaved] = useState<SettingsData>(load);
   const [draft, setDraft] = useState<SettingsData>(load);
-  const [section, setSection] = useState<SectionId>('profile');
+  const [section, setSection] = useState<SectionId>(isAdmin ? 'controls' : 'profile');
   const [editingProfile, setEditingProfile] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [dialog, setDialog] = useState<DialogState | null>(null);
@@ -235,6 +243,43 @@ export default function SettingsPage() {
   const [dataTick, setDataTick] = useState(0);
   const timer = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // Website & Platform Controls (Option 3 for Administrator)
+  const [controlsDraft, setControlsDraft] = useState<PlatformSettings>({
+    platform_name: "CorpSetu",
+    tagline: "Law · CS · CA — One Bridge",
+    support_phone: "+91 98765 43210",
+    support_email: "advisory@corpsetu.com",
+    support_hours: "Mon - Sat: 9:00 AM - 7:00 PM IST",
+    office_address: "Floor 4, CorpSetu Hub, Financial District, Hyderabad, Telangana 500032",
+    announcement_banner: "Empanelled Senior Corporate Advisory & Multi-Disciplinary Practice Suite",
+    consultation_turnaround: "Within 24 Hours",
+  });
+  const [savingControls, setSavingControls] = useState(false);
+
+  useEffect(() => {
+    if (isAdmin) {
+      setSection('controls');
+      adminApi.getPlatformSettings().then((res) => {
+        if (res) {
+          setControlsDraft(res);
+        }
+      }).catch(() => {});
+    }
+  }, [isAdmin]);
+
+  const saveControls = async () => {
+    try {
+      setSavingControls(true);
+      const res = await adminApi.updatePlatformSettings(controlsDraft);
+      setControlsDraft(res);
+      notify("Website controls updated! Changes applied across the platform.");
+    } catch {
+      notify("Failed to update website controls.");
+    } finally {
+      setSavingControls(false);
+    }
+  };
 
   // Synchronize dynamic authenticated user credentials
   useEffect(() => {
@@ -302,7 +347,10 @@ export default function SettingsPage() {
   }, [user, currentAppTheme]);
 
   const dirty = useMemo(() => JSON.stringify(draft) !== JSON.stringify(saved), [draft, saved]);
-  const sectionDirty = (id: SectionId) => JSON.stringify(draft[id]) !== JSON.stringify(saved[id]);
+  const sectionDirty = (id: SectionId) =>
+    id === 'controls'
+      ? false
+      : JSON.stringify(draft[id as keyof SettingsData]) !== JSON.stringify(saved[id as keyof SettingsData]);
   const { profile, business, preferences, notifications, privacy, security } = draft;
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
@@ -401,11 +449,11 @@ export default function SettingsPage() {
     reader.readAsDataURL(file);
   };
   const onTabKey = (e: KeyboardEvent<HTMLDivElement>) => {
-    const i = SECTIONS.findIndex((s) => s.id === section);
-    const step = ['ArrowDown', 'ArrowRight'].includes(e.key) ? 1 : ['ArrowUp', 'ArrowLeft'].includes(e.key) ? -1 : e.key === 'Home' ? -i : e.key === 'End' ? SECTIONS.length - 1 - i : 0;
+    const i = effectiveSections.findIndex((s) => s.id === section);
+    const step = ['ArrowDown', 'ArrowRight'].includes(e.key) ? 1 : ['ArrowUp', 'ArrowLeft'].includes(e.key) ? -1 : e.key === 'Home' ? -i : e.key === 'End' ? effectiveSections.length - 1 - i : 0;
     if (!step) return;
     e.preventDefault();
-    const next = SECTIONS[(i + step + SECTIONS.length) % SECTIONS.length];
+    const next = effectiveSections[(i + step + effectiveSections.length) % effectiveSections.length];
     if (next) { requestSection(next.id); document.getElementById(`st-tab-${next.id}`)?.focus(); }
   };
 
@@ -438,7 +486,7 @@ export default function SettingsPage() {
 
       <div className="st-layout">
         <div className="st-nav" role="tablist" aria-orientation="vertical" aria-label="Settings sections" onKeyDown={onTabKey}>
-          {SECTIONS.map((s) => (
+          {effectiveSections.map((s) => (
             <button key={s.id} id={`st-tab-${s.id}`} type="button" role="tab" aria-selected={section === s.id} aria-controls={`st-panel-${s.id}`} tabIndex={section === s.id ? 0 : -1}
               className={cx('st-nav__item', section === s.id && 'is-active')} onClick={() => requestSection(s.id)}>
               <span className="st-nav__label">{s.label}{sectionDirty(s.id) && <i className="st-nav__dirty" title="Unsaved changes" />}</span>
@@ -449,6 +497,36 @@ export default function SettingsPage() {
 
         <main className="st-main">
           <div id={`st-panel-${section}`} role="tabpanel" aria-labelledby={`st-tab-${section}`} className="st-panel">
+            {section === 'controls' && (
+              <Card title="Website & Platform Controls" hint="Configure platform contact numbers, office address, and working hours. Updates reflect across the entire portal instantly.">
+                <div className="st-fields">
+                  <Field id="st-ctrl-phone" label="Official Support Phone Number" hint="Direct call number shown to users across the website">
+                    <input id="st-ctrl-phone" className="st-input" value={controlsDraft.support_phone} onChange={(e) => setControlsDraft({ ...controlsDraft, support_phone: e.target.value })} />
+                  </Field>
+                  <Field id="st-ctrl-email" label="Official Advisory Support Email">
+                    <input id="st-ctrl-email" type="email" className="st-input" value={controlsDraft.support_email} onChange={(e) => setControlsDraft({ ...controlsDraft, support_email: e.target.value })} />
+                  </Field>
+                  <Field id="st-ctrl-hours" label="Advisory Desk Operating Hours">
+                    <input id="st-ctrl-hours" className="st-input" value={controlsDraft.support_hours} onChange={(e) => setControlsDraft({ ...controlsDraft, support_hours: e.target.value })} />
+                  </Field>
+                  <Field id="st-ctrl-turnaround" label="Consultation Response SLA">
+                    <input id="st-ctrl-turnaround" className="st-input" value={controlsDraft.consultation_turnaround} onChange={(e) => setControlsDraft({ ...controlsDraft, consultation_turnaround: e.target.value })} />
+                  </Field>
+                  <Field id="st-ctrl-address" label="Corporate Headquarters Address" wide>
+                    <textarea id="st-ctrl-address" className="st-input" rows={2} value={controlsDraft.office_address} onChange={(e) => setControlsDraft({ ...controlsDraft, office_address: e.target.value })} />
+                  </Field>
+                  <Field id="st-ctrl-banner" label="Platform Announcement Banner" wide>
+                    <input id="st-ctrl-banner" className="st-input" value={controlsDraft.announcement_banner} onChange={(e) => setControlsDraft({ ...controlsDraft, announcement_banner: e.target.value })} />
+                  </Field>
+                </div>
+                <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button type="button" className="st-btn" disabled={savingControls} onClick={saveControls}>
+                    {savingControls ? "Saving Controls..." : "Save Website Controls"}
+                  </button>
+                </div>
+              </Card>
+            )}
+
             {section === 'profile' && (
               <Card title="My profile" hint="This is how you appear across VentureBlueprint."
                 action={!editingProfile ? <button type="button" className="st-btn st-btn--secondary st-btn--sm" onClick={() => setEditingProfile(true)}>Edit Profile</button> : <span className="st-badge st-badge--warning">Editing</span>}>

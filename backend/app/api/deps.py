@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -29,6 +30,17 @@ def get_current_user(
     user = db.query(User).filter(User.id == user_id).first()
     if user is None or not user.is_active:
         raise credentials_exception
+
+    # Track live active user presence (throttled to avoid redundant commits)
+    now = datetime.now(timezone.utc)
+    user_last = user.last_active_at
+    if user_last is None or (now - (user_last.replace(tzinfo=timezone.utc) if user_last.tzinfo is None else user_last)).total_seconds() > 60:
+        user.last_active_at = now
+        try:
+            db.commit()
+        except Exception:
+            db.rollback()
+
     return user
 
 def get_optional_current_user(

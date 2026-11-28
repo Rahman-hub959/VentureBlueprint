@@ -176,3 +176,71 @@ class DocumentResponse(BaseModel):
     status: str
     generated_at: Any
     download_url: str
+
+# ─── CLIENT ENQUIRY SCHEMAS ───
+class ClientEnquiryCreate(BaseModel):
+    full_name: str
+    email: EmailStr
+    phone_number: str
+    company_name: Optional[str] = None
+    service_pillar: str = "GENERAL"  # CS, CA, LAW, GENERAL
+    topic: str
+    message: Optional[str] = None
+    source: str = "website_lead"
+
+class ClientEnquiryResponse(BaseModel):
+    id: str
+    user_id: Optional[str] = None
+    full_name: str
+    email: str
+    phone_number: str
+    company_name: Optional[str] = None
+    service_pillar: str
+    topic: str
+    message: Optional[str] = None
+    source: str
+    status: str
+    admin_notes: Optional[str] = None
+    created_at: Any
+    updated_at: Any
+
+    class Config:
+        from_attributes = True
+
+class ClientEnquiryStatusUpdate(BaseModel):
+    status: Optional[str] = None
+    admin_notes: Optional[str] = None
+
+# ─── PLATFORM SETTINGS SCHEMAS ───
+class PlatformSettingsSchema(BaseModel):
+    platform_name: str = "CorpSetu"
+    tagline: str = "Law · CS · CA — One Bridge"
+    support_phone: str = "+91 98765 43210"
+    support_email: str = "advisory@corpsetu.com"
+    support_hours: str = "Mon - Sat: 9:00 AM - 7:00 PM IST"
+    office_address: str = "Floor 4, CorpSetu Hub, Financial District, Hyderabad, Telangana 500032"
+    announcement_banner: str = "Empanelled Senior Corporate Advisory & Multi-Disciplinary Practice Suite"
+    consultation_turnaround: str = "Within 24 Hours"
+
+# ─── USER ACTIVITY TRACKING SCHEMAS ───
+class UserActivityItem(BaseModel):
+    id: str
+    full_name: str
+    email: str
+    phone_number: Optional[str] = None
+    role: str
+    is_active: bool
+    is_online: bool
+    activity_state: str  # online, recently_active, inactive
+    last_login_at: Optional[Any] = None
+    last_active_at: Optional[Any] = None
+    created_at: Any
+    projects_count: int = 0
+    consultations_count: int = 0
+
+class UserActivityOverview(BaseModel):
+    total_users: int
+    online_count: int
+    recently_active_count: int
+    inactive_count: int
+    users: List[UserActivityItem]

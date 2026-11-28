@@ -259,6 +259,21 @@ def update_consultation_status(
         )
         db.add(notif)
 
+    # Dispatch email update to client's registered email
+    if consultation.email:
+        try:
+            from app.services.email_service import send_consultation_status_update_email
+            send_consultation_status_update_email(
+                recipient_email=consultation.email,
+                recipient_name=consultation.full_name,
+                reference_id=consultation.id,
+                status=consultation.status,
+                topic=consultation.topic,
+                expert_name=consultation.assigned_expert
+            )
+        except Exception:
+            pass
+
     db.commit()
     db.refresh(consultation)
     return consultation

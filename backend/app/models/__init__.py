@@ -27,6 +27,8 @@ from app.models.document import DocumentTemplate, GeneratedDocument, DocumentVer
 from app.models.audit import AuditLog
 from app.models.consultation import Consultation
 from app.models.complaint import Complaint
+from app.models.enquiry import ClientEnquiry
+from app.models.platform_setting import PlatformSetting
 
 __all__ = [
     "Base",
@@ -37,6 +39,8 @@ __all__ = [
     "SupportTicket",
     "Consultation",
     "Complaint",
+    "ClientEnquiry",
+    "PlatformSetting",
     "BusinessDomain",
     "BusinessActivity",
     "StartupProject",

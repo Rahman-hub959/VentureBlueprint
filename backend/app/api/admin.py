@@ -11,9 +11,18 @@ from app.models.document import GeneratedDocument
 from app.models.regulation import RegulatoryRule, RegulatoryRuleVersion, RegulatoryReview
 from app.models.consultation import Consultation
 from app.models.complaint import Complaint
+from app.models.enquiry import ClientEnquiry
+from app.models.platform_setting import PlatformSetting
 from app.models.audit import AuditLog
 from app.api.deps import get_current_admin_user
 from app.config import settings
+from app.schemas.all_schemas import (
+    PlatformSettingsSchema,
+    ClientEnquiryResponse,
+    ClientEnquiryStatusUpdate,
+    UserActivityOverview,
+    UserActivityItem
+)
 
 router = APIRouter(prefix="/admin", tags=["Administrator Portal"])
 
@@ -327,3 +336,177 @@ def health_check(db: Session = Depends(get_db)):
         },
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
+
+# ─── PLATFORM SETTINGS (WEBSITE CONTROLS) ───
+DEFAULT_PLATFORM_SETTINGS = {
+    "platform_name": "CorpSetu",
+    "tagline": "Law · CS · CA — One Bridge",
+    "support_phone": "+91 98765 43210",
+    "support_email": "advisory@corpsetu.com",
+    "support_hours": "Mon - Sat: 9:00 AM - 7:00 PM IST",
+    "office_address": "Floor 4, CorpSetu Hub, Financial District, Hyderabad, Telangana 500032",
+    "announcement_banner": "Empanelled Senior Corporate Advisory & Multi-Disciplinary Practice Suite",
+    "consultation_turnaround": "Within 24 Hours",
+}
+
+@router.get("/platform-settings", response_model=PlatformSettingsSchema)
+def get_admin_platform_settings(
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    row = db.query(PlatformSetting).filter(PlatformSetting.key == "general").first()
+    if row and isinstance(row.value, dict):
+        merged = {**DEFAULT_PLATFORM_SETTINGS, **row.value}
+        return PlatformSettingsSchema(**merged)
+    return PlatformSettingsSchema(**DEFAULT_PLATFORM_SETTINGS)
+
+@router.put("/platform-settings", response_model=PlatformSettingsSchema)
+def update_admin_platform_settings(
+    payload: PlatformSettingsSchema,
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    row = db.query(PlatformSetting).filter(PlatformSetting.key == "general").first()
+    if not row:
+        row = PlatformSetting(
+            key="general",
+            value=payload.dict(),
+            description="Global platform settings and website contact controls",
+            updated_by=admin.email
+        )
+        db.add(row)
+    else:
+        row.value = payload.dict()
+        row.updated_at = datetime.now(timezone.utc)
+        row.updated_by = admin.email
+
+    audit = AuditLog(
+        user_id=admin.id,
+        action="PLATFORM_SETTINGS_UPDATED",
+        entity_type="platform_settings",
+        entity_id="general",
+        details=payload.dict()
+    )
+    db.add(audit)
+    db.commit()
+    return payload
+
+# ─── USER ACTIVITY TRACKING (ONLINE / RECENT / INACTIVE) ───
+@router.get("/user-activity", response_model=UserActivityOverview)
+def get_user_activity_overview(
+    search: Optional[str] = None,
+    filter_status: Optional[str] = None,  # all, online, recently_active, inactive
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    now = datetime.now(timezone.utc)
+    users = db.query(User).order_by(desc(User.created_at)).all()
+
+    items = []
+    online_count = 0
+    recently_active_count = 0
+    inactive_count = 0
+
+    for u in users:
+        # Determine activity state
+        # Online: active within last 30 minutes
+        # Recently Active: active within last 7 days
+        # Inactive: not active within last 7 days or never active
+        last_dt = u.last_active_at or u.last_login_at or u.created_at
+        if last_dt and last_dt.tzinfo is None:
+            last_dt = last_dt.replace(tzinfo=timezone.utc)
+
+        diff_seconds = (now - last_dt).total_seconds() if last_dt else 99999999
+
+        if diff_seconds <= 1800:  # 30 mins
+            activity_state = "online"
+            is_online = True
+            online_count += 1
+        elif diff_seconds <= 7 * 86400:  # 7 days
+            activity_state = "recently_active"
+            is_online = False
+            recently_active_count += 1
+        else:
+            activity_state = "inactive"
+            is_online = False
+            inactive_count += 1
+
+        # Search filter
+        if search:
+            s = search.lower()
+            if s not in u.full_name.lower() and s not in u.email.lower() and (not u.phone_number or s not in u.phone_number):
+                continue
+
+        # Status filter
+        if filter_status and filter_status != "all":
+            if filter_status == "online" and activity_state != "online":
+                continue
+            if filter_status == "recently_active" and activity_state != "recently_active":
+                continue
+            if filter_status == "inactive" and activity_state != "inactive":
+                continue
+
+        role_name = u.role.name if u.role else "Entrepreneur"
+        items.append(
+            UserActivityItem(
+                id=u.id,
+                full_name=u.full_name,
+                email=u.email,
+                phone_number=u.phone_number,
+                role=role_name,
+                is_active=bool(u.is_active),
+                is_online=is_online,
+                activity_state=activity_state,
+                last_login_at=u.last_login_at,
+                last_active_at=u.last_active_at,
+                created_at=u.created_at,
+                projects_count=len(u.projects) if u.projects else 0,
+                consultations_count=db.query(Consultation).filter(
+                    (Consultation.user_id == u.id) | (Consultation.email == u.email)
+                ).count()
+            )
+        )
+
+    return UserActivityOverview(
+        total_users=len(users),
+        online_count=online_count,
+        recently_active_count=recently_active_count,
+        inactive_count=inactive_count,
+        users=items
+    )
+
+# ─── CLIENT ENQUIRIES / LEADS MANAGEMENT ───
+@router.get("/enquiries", response_model=List[ClientEnquiryResponse])
+def list_client_enquiries(
+    pillar: Optional[str] = None,
+    status_filter: Optional[str] = None,
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(ClientEnquiry).order_by(desc(ClientEnquiry.created_at))
+    if pillar and pillar != "ALL":
+        query = query.filter(ClientEnquiry.service_pillar == pillar.upper())
+    if status_filter and status_filter != "ALL":
+        query = query.filter(ClientEnquiry.status == status_filter)
+    return query.all()
+
+@router.patch("/enquiries/{enquiry_id}", response_model=ClientEnquiryResponse)
+def update_client_enquiry_status(
+    enquiry_id: str,
+    payload: ClientEnquiryStatusUpdate,
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    enquiry = db.query(ClientEnquiry).filter(ClientEnquiry.id == enquiry_id).first()
+    if not enquiry:
+        raise HTTPException(status_code=404, detail="Enquiry not found")
+
+    if payload.status:
+        enquiry.status = payload.status
+    if payload.admin_notes is not None:
+        enquiry.admin_notes = payload.admin_notes
+    enquiry.updated_at = datetime.now(timezone.utc)
+
+    db.commit()
+    db.refresh(enquiry)
+    return enquiry

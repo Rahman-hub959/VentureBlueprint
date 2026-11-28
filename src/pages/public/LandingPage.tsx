@@ -204,7 +204,7 @@ export const LandingPage: React.FC = () => {
                   onClick={() => handleOpenSearchConsultation(searchQuery)}
                   className="corpsetu-btn-gold text-xs py-2.5 px-5 w-full sm:w-auto whitespace-nowrap"
                 >
-                  Check Price Instantly
+                  Explore Advisory Scope
                 </button>
               </div>
 
@@ -212,10 +212,10 @@ export const LandingPage: React.FC = () => {
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400 pt-1">
                 <span className="font-bold text-slate-900 dark:text-white">Popular:</span>
                 {[
-                  { label: "Pvt Ltd Starting from ₹6,999", query: "Private Limited Company Registration" },
-                  { label: "GST Starting from ₹499/mo", query: "GST Registration & Monthly Return Filing" },
-                  { label: "Trademark Starting from ₹4,999", query: "Trademark Brand Protection (1 Class)" },
-                  { label: "ROC Annual Starting from ₹1,499", query: "ROC Annual Filings (AOC-4, MGT-7)" },
+                  { label: "Private Limited Incorporation", query: "Private Limited Company Registration" },
+                  { label: "GST Registration & Returns", query: "GST Registration & Monthly Return Filing" },
+                  { label: "Trademark Brand Protection", query: "Trademark Brand Protection (1 Class)" },
+                  { label: "ROC Annual Filings", query: "ROC Annual Filings (AOC-4, MGT-7)" },
                 ].map((pill, idx) => (
                   <button
                     key={idx}
@@ -421,7 +421,7 @@ export const LandingPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Three Cards with Spatial Elevation and "Starting from ₹..." Format */}
+          {/* Three Cards with Spatial Elevation and Direct Service Desks */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
             {/* Card 1: Corporate Law */}
             <div className="spatial-card p-8 space-y-6 flex flex-col justify-between">
@@ -435,7 +435,7 @@ export const LandingPage: React.FC = () => {
                     Company registration, contracts, founder agreements, regulatory & compliance advisory.
                   </p>
                 </div>
-                <div className="text-sm font-bold text-[#C59B27]">Starting from ₹999</div>
+                <div className="text-sm font-bold text-[#C59B27]">Contracts, IP &amp; Legal Protection</div>
 
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <li className="flex items-center gap-2">
@@ -484,7 +484,7 @@ export const LandingPage: React.FC = () => {
                     ROC filings, board meetings, secretarial compliance, MCA SPICe+ dossiers.
                   </p>
                 </div>
-                <div className="text-sm font-bold text-[#C59B27]">Starting from ₹1,499</div>
+                <div className="text-sm font-bold text-[#C59B27]">MCA Filings &amp; SPICe+ Blueprint</div>
 
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <li className="flex items-center gap-2">
@@ -527,7 +527,7 @@ export const LandingPage: React.FC = () => {
                     GST filing, taxation, financial reporting, bookkeeping and audit assistance.
                   </p>
                 </div>
-                <div className="text-sm font-bold text-[#C59B27]">Starting from ₹499/mo</div>
+                <div className="text-sm font-bold text-[#C59B27]">Corporate Tax &amp; GST Compliance</div>
 
                 <ul className="space-y-2 text-xs text-slate-600 dark:text-slate-300 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <li className="flex items-center gap-2">
@@ -606,11 +606,11 @@ export const LandingPage: React.FC = () => {
           ========================================================================= */}
       <section id="pricing" className="py-12 md:py-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <InteractiveFeeEstimator
-          onSelectPlan={(summary, pillar, fee) => {
+          onSelectPlan={(summary, pillar) => {
             setConsultData((prev) => ({
               ...prev,
               serviceType: pillar,
-              notes: `Selected Configuration: ${summary} (Est. starting ₹${fee.toLocaleString("en-IN")})`,
+              notes: `Selected Scope: ${summary}`,
             }));
             setConsultationModalOpen(true);
           }}
@@ -1017,7 +1017,7 @@ export const LandingPage: React.FC = () => {
                   disabled={submittingConsult}
                   className="w-full corpsetu-btn-gold text-xs py-3 justify-center shadow-md font-bold disabled:opacity-60"
                 >
-                  {submittingConsult ? "Saving Request to Database..." : "Confirm Free Consultation Call"}
+                  {submittingConsult ? "Saving Request to Database..." : "Confirm Consultation Request"}
                 </button>
               </form>
             )}

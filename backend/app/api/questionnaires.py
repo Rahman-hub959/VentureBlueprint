@@ -217,4 +217,46 @@ def save_project_answers(
     db.add(qr)
     db.commit()
 
+    # Alert administrators and send email confirmation to user
+    owner = project.user
+    if owner and owner.email:
+        try:
+            from app.services.email_service import send_cs_questionnaire_submission_email
+            from app.services.notification_service import notify_admin
+
+            profile_dict = {
+                "state": profile.state if profile else "Not specified",
+                "city": profile.city if profile else "Not specified",
+                "proposed_authorized_capital": profile.proposed_authorized_capital if profile else 100000,
+                "proposed_paid_up_capital": profile.proposed_paid_up_capital if profile else 100000,
+                "business_description": profile.business_description if profile else "",
+            }
+            founders_dict_list = [
+                {
+                    "full_name": f.full_name,
+                    "executive_role": f.executive_role,
+                    "proposed_shareholding_percentage": f.proposed_shareholding_percentage
+                }
+                for f in project.founders
+            ]
+            send_cs_questionnaire_submission_email(
+                recipient_email=owner.email,
+                recipient_name=owner.full_name,
+                project_name=project.name,
+                company_structure=project.preferred_structure or "Private Limited Company",
+                domain=project.domain or "Corporate Services",
+                profile_data=profile_dict,
+                founders_list=founders_dict_list
+            )
+
+            notify_admin(
+                db=db,
+                title=f"CS Intake Submitted: {project.name}",
+                message=f"User {owner.full_name} ({owner.email}, {owner.phone_number or 'No phone'}) submitted CS questionnaire for '{project.name}' ({project.preferred_structure}).",
+                category="admin_alert",
+                link="/admin"
+            )
+        except Exception as exc:
+            pass
+
     return {"message": "Answers saved successfully", "project_id": project.id, "step": data.step_id}

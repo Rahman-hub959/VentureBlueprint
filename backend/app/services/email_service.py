@@ -427,3 +427,279 @@ Law · CS · CA — One Bridge
             "topic": topic
         }
     )
+
+
+def send_login_notification_email(
+    recipient_email: str,
+    recipient_name: str,
+    login_time: Optional[str] = None,
+    device_info: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Dispatches an official security notice to user's registered email when a login occurs.
+    """
+    name = recipient_name.strip() or "Client"
+    time_str = login_time or datetime.now(timezone.utc).strftime("%d %b %Y, %I:%M %p UTC")
+    dev_str = device_info or "Web Browser / Desktop Session"
+    subject = f"Security Alert: Successful Login to CorpSetu ({time_str})"
+
+    body_text = f"""Dear {name},
+
+This is an automated notification that your CorpSetu account was successfully logged in.
+
+Login Details:
+- Account Email: {recipient_email}
+- Timestamp: {time_str}
+- Session Device: {dev_str}
+- Status: Authenticated Session Active
+
+If this was you, no action is required. If you did not initiate this login, please contact our security desk immediately at {settings.PORTAL_URL}/complaints.
+
+Warm regards,
+CorpSetu Security & Identity Team
+Law · CS · CA — One Bridge
+{settings.PORTAL_URL}
+"""
+
+    body_html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Successful Login Notice</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 28px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 22px; font-weight: 800;">CorpSetu</h1>
+      <p style="margin: 4px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">Law · CS · CA — One Bridge</p>
+    </div>
+    <div style="padding: 28px 24px;">
+      <h2 style="font-size: 18px; font-weight: 800; color: #0B2559; margin-top: 0;">Successful Sign-In Detected</h2>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Hello <b>{name}</b>, your account was successfully accessed on <b>{time_str}</b>.
+      </p>
+      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; margin: 18px 0; font-size: 13px;">
+        <p style="margin: 4px 0;"><b>Device:</b> {dev_str}</p>
+        <p style="margin: 4px 0;"><b>Registered Email:</b> {recipient_email}</p>
+        <p style="margin: 4px 0;"><b>Security Status:</b> <span style="color: #059669; font-weight: 700;">Active Authenticated Session</span></p>
+      </div>
+      <p style="font-size: 12px; color: #64748B;">
+        If you did not make this request, please contact our support desk immediately.
+      </p>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    return _deliver_email(
+        to_email=recipient_email,
+        to_name=name,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        action_type="user_login_notice",
+        extra_meta={"login_time": time_str}
+    )
+
+
+def send_cs_questionnaire_submission_email(
+    recipient_email: str,
+    recipient_name: str,
+    project_name: str,
+    company_structure: str,
+    domain: str,
+    profile_data: Dict[str, Any],
+    founders_list: List[Dict[str, Any]]
+) -> Dict[str, Any]:
+    """
+    Dispatches an official company incorporation & CS intake summary email to the user
+    containing all the parameters and founder records they entered in the questionnaire.
+    """
+    name = recipient_name.strip() or "Client"
+    subject = f"CS Incorporation Dossier Received: {project_name} ({company_structure})"
+
+    state = profile_data.get("state", "Not specified")
+    city = profile_data.get("city", "Not specified")
+    auth_cap = profile_data.get("proposed_authorized_capital", 100000)
+    paid_cap = profile_data.get("proposed_paid_up_capital", 100000)
+    desc = profile_data.get("business_description", "Early-stage corporate establishment")
+
+    founders_text = ""
+    founders_html_rows = ""
+    for idx, f in enumerate(founders_list, 1):
+        f_name = f.get("full_name", "Director")
+        f_share = f.get("proposed_shareholding_percentage", 50.0)
+        f_role = f.get("executive_role", "Director")
+        founders_text += f"\n  {idx}. {f_name} — {f_role} ({f_share}% Equity)"
+        founders_html_rows += f"""<tr>
+          <td style="padding: 6px 12px; border: 1px solid #E2E8F0; font-weight: 600;">{f_name}</td>
+          <td style="padding: 6px 12px; border: 1px solid #E2E8F0;">{f_role}</td>
+          <td style="padding: 6px 12px; border: 1px solid #E2E8F0; text-align: right; font-weight: 700; color: #047857;">{f_share}%</td>
+        </tr>"""
+
+    body_text = f"""Dear {name},
+
+Thank you for completing your Company Secretarial (CS) & Incorporation Intake on CorpSetu.
+
+Below is the official summary of the company parameters you submitted for '{project_name}':
+
+1. Company Identity:
+   - Proposed Name: {project_name}
+   - Preferred Structure: {company_structure}
+   - Industry Domain: {domain}
+   - Registered State & City: {state}, {city}
+
+2. Capital Structure:
+   - Proposed Authorized Capital: ₹{int(auth_cap):,}
+   - Proposed Paid-up Capital: ₹{int(paid_cap):,}
+
+3. Founding Team & Shareholding:{founders_text or '  Standard Founding Structure'}
+
+4. Business Scope:
+   {desc}
+
+Next Steps:
+Our Company Secretarial desk will review your details against MCA SPICe+ guidelines and verify your proposed name availability. You can view, track, and generate statutory documents anytime on your workspace:
+{settings.PORTAL_URL}/projects
+
+Warm regards,
+CorpSetu Company Secretarial Practice Lead
+Law · CS · CA — One Bridge
+{settings.PORTAL_URL}
+"""
+
+    body_html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>CS Incorporation Intake Summary</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 30px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 24px; font-weight: 800;">CorpSetu</h1>
+      <p style="margin: 4px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">CS Incorporation &amp; Statutory Filing Desk</p>
+    </div>
+    <div style="padding: 28px 24px;">
+      <div style="display: inline-block; background-color: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 20px; padding: 4px 14px; margin-bottom: 14px;">
+        <span style="color: #065F46; font-size: 12px; font-weight: 700;">✓ CS Questionnaire Recorded Successfully</span>
+      </div>
+      <h2 style="font-size: 18px; font-weight: 800; color: #0B2559; margin-top: 0;">Incorporation Dossier: {project_name}</h2>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Hello <b>{name}</b>, your company formation parameters have been recorded in the CorpSetu database. Below is your official submission summary:
+      </p>
+
+      <div style="background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; margin: 18px 0; font-size: 13px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 5px 0; color: #64748B; width: 160px; font-weight: 600;">Proposed Entity:</td><td style="padding: 5px 0; font-weight: 800; color: #0B2559;">{project_name}</td></tr>
+          <tr><td style="padding: 5px 0; color: #64748B; font-weight: 600;">Legal Structure:</td><td style="padding: 5px 0; font-weight: 700; color: #047857;">{company_structure}</td></tr>
+          <tr><td style="padding: 5px 0; color: #64748B; font-weight: 600;">Industry Domain:</td><td style="padding: 5px 0;">{domain}</td></tr>
+          <tr><td style="padding: 5px 0; color: #64748B; font-weight: 600;">ROC Jurisdiction:</td><td style="padding: 5px 0;">{state}, {city}</td></tr>
+          <tr><td style="padding: 5px 0; color: #64748B; font-weight: 600;">Authorized Capital:</td><td style="padding: 5px 0; font-weight: 700;">₹{int(auth_cap):,}</td></tr>
+          <tr><td style="padding: 5px 0; color: #64748B; font-weight: 600;">Paid-up Capital:</td><td style="padding: 5px 0; font-weight: 700;">₹{int(paid_cap):,}</td></tr>
+        </table>
+      </div>
+
+      <h3 style="font-size: 14px; font-weight: 700; color: #0B2559; margin: 16px 0 8px;">Founders &amp; Proposed Shareholding:</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px;">
+        <thead>
+          <tr style="background: #F1F5F9; color: #475569; text-align: left;">
+            <th style="padding: 8px 12px; border: 1px solid #E2E8F0;">Name</th>
+            <th style="padding: 8px 12px; border: 1px solid #E2E8F0;">Executive Role</th>
+            <th style="padding: 8px 12px; border: 1px solid #E2E8F0; text-align: right;">Equity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {founders_html_rows or '<tr><td colspan="3" style="padding: 8px; border: 1px solid #E2E8F0;">Standard Founding Structure</td></tr>'}
+        </tbody>
+      </table>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="{settings.PORTAL_URL}/projects" style="background-color: #0B2559; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; display: inline-block;">
+          Open Your Project Workspace &rarr;
+        </a>
+      </div>
+
+      <p style="font-size: 13px; line-height: 1.6; color: #64748B;">
+        Warm regards,<br>
+        <b>CorpSetu Company Secretarial Practice Lead</b><br>
+        <a href="{settings.PORTAL_URL}" style="color: #0B2559; text-decoration: none;">www.corpsetu.com</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    return _deliver_email(
+        to_email=recipient_email,
+        to_name=name,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        action_type="cs_questionnaire_submission",
+        extra_meta={"project_name": project_name, "structure": company_structure}
+    )
+
+
+def send_consultation_status_update_email(
+    recipient_email: str,
+    recipient_name: str,
+    reference_id: str,
+    status: str,
+    topic: str,
+    expert_name: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Dispatches a real-time email notification when the admin updates a consultation status
+    (e.g. Consulted or Not Accepted).
+    """
+    name = recipient_name.strip() or "Client"
+    subject = f"Consultation Status Update: {reference_id} · {status}"
+
+    body_text = f"""Dear {name},
+
+This is an update regarding your CorpSetu consultation request (Reference ID: {reference_id}):
+- Subject: {topic}
+- Updated Status: {status}
+- Advisory Lead: {expert_name or 'CorpSetu Senior Partner Desk'}
+
+You can track your consultation and notes anytime on your dashboard:
+{settings.PORTAL_URL}/consultations
+
+Warm regards,
+CorpSetu Advisory & Dispatch Team
+Law · CS · CA — One Bridge
+{settings.PORTAL_URL}
+"""
+
+    body_html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Consultation Status Update</title></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px 12px; color: #1e293b;">
+  <div style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="background: linear-gradient(135deg, #0B2559 0%, #17387A 100%); padding: 28px 24px; text-align: center; color: #ffffff;">
+      <h1 style="margin: 0; font-size: 22px; font-weight: 800;">CorpSetu</h1>
+      <p style="margin: 4px 0 0; font-size: 13px; color: #C59B27; font-weight: 600;">Law · CS · CA — One Bridge</p>
+    </div>
+    <div style="padding: 28px 24px;">
+      <h2 style="font-size: 18px; font-weight: 800; color: #0B2559; margin-top: 0;">Consultation Update: {status}</h2>
+      <p style="font-size: 14px; line-height: 1.6; color: #334155;">
+        Hello <b>{name}</b>, your consultation request <b>{reference_id}</b> has been updated to <b>{status}</b>.
+      </p>
+      <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; margin: 18px 0; font-size: 13px;">
+        <p style="margin: 4px 0;"><b>Topic:</b> {topic}</p>
+        <p style="margin: 4px 0;"><b>Current Status:</b> <span style="font-weight: 700; color: #047857;">{status}</span></p>
+      </div>
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="{settings.PORTAL_URL}/consultations" style="background-color: #0B2559; color: #ffffff; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-size: 13px; font-weight: 700; display: inline-block;">
+          View Consultation Details &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    return _deliver_email(
+        to_email=recipient_email,
+        to_name=name,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        action_type="consultation_status_update",
+        extra_meta={"reference_id": reference_id, "status": status}
+    )

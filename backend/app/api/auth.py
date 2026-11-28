@@ -131,6 +131,9 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
 
     role_name = user.role.name if user.role else "Entrepreneur"
 
+    user.last_login_at = datetime.now(timezone.utc)
+    user.last_active_at = datetime.now(timezone.utc)
+
     audit = AuditLog(
         user_id=user.id,
         action="USER_LOGIN",
@@ -139,6 +142,13 @@ def login(login_in: UserLogin, db: Session = Depends(get_db)):
     )
     db.add(audit)
     db.commit()
+
+    # Dispatch official login security email to user's registered mail
+    try:
+        from app.services.email_service import send_login_notification_email
+        send_login_notification_email(user.email, user.full_name)
+    except Exception:
+        pass
 
     return {
         "access_token": access_token,

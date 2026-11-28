@@ -11,6 +11,7 @@ import {
   CalendarCheck,
   Building,
   Phone,
+  PhoneCall,
   Mail,
   ThumbsUp,
   ThumbsDown,
@@ -31,7 +32,12 @@ import {
   BadgeCheck,
   MapPin,
   Briefcase,
-  Coins
+  Coins,
+  Radio,
+  Sliders,
+  UserCheck,
+  UserX,
+  Globe
 } from "lucide-react";
 import {
   adminApi,
@@ -41,7 +47,10 @@ import {
   ConsultationItem,
   ComplaintItem,
   ClientServiceDossier,
-  ProjectItem
+  ProjectItem,
+  ClientEnquiryItem,
+  UserActivityOverview,
+  PlatformSettings
 } from "../../api/client";
 import { useToast } from "../../context/ToastContext";
 
@@ -54,13 +63,31 @@ export const AdminPortalPage: React.FC = () => {
   const [serviceDossiers, setServiceDossiers] = useState<ClientServiceDossier[]>([]);
   const [selectedDossier, setSelectedDossier] = useState<ClientServiceDossier | null>(null);
   const [consultations, setConsultations] = useState<ConsultationItem[]>([]);
+  const [enquiries, setEnquiries] = useState<ClientEnquiryItem[]>([]);
+  const [activityOverview, setActivityOverview] = useState<UserActivityOverview | null>(null);
+  const [activityFilter, setActivityFilter] = useState<string>("all");
+  const [activitySearch, setActivitySearch] = useState<string>("");
+  const [platformSettings, setPlatformSettings] = useState<PlatformSettings>({
+    platform_name: "CorpSetu",
+    tagline: "Law · CS · CA — One Bridge",
+    support_phone: "+91 98765 43210",
+    support_email: "advisory@corpsetu.com",
+    support_hours: "Mon - Sat: 9:00 AM - 7:00 PM IST",
+    office_address: "Floor 4, CorpSetu Hub, Financial District, Hyderabad, Telangana 500032",
+    announcement_banner: "Empanelled Senior Corporate Advisory & Multi-Disciplinary Practice Suite",
+    consultation_turnaround: "Within 24 Hours",
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [enquiryStatusFilter, setEnquiryStatusFilter] = useState("ALL");
+  const [enquiryPillarFilter, setEnquiryPillarFilter] = useState("ALL");
+  const [enquirySearch, setEnquirySearch] = useState("");
   const [complaints, setComplaints] = useState<ComplaintItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [health, setHealth] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Tabs: projects is now prominent alongside tracker
-  const [activeTab, setActiveTab] = useState<"projects" | "tracker" | "overview" | "consultations" | "users" | "grievances" | "audit" | "health">("projects");
+  // Tabs: projects, tracker, enquiries, activity, controls, consultations, overview, grievances, audit
+  const [activeTab, setActiveTab] = useState<"projects" | "tracker" | "enquiries" | "activity" | "controls" | "consultations" | "overview" | "grievances" | "audit" | "health">("projects");
   
   // Filters
   const [projectSearch, setProjectSearch] = useState<string>("");
@@ -74,12 +101,15 @@ export const AdminPortalPage: React.FC = () => {
   const loadAdminData = async () => {
     try {
       setLoading(true);
-      const [statsData, usersData, trackerData, projectsData, consultsData, complaintsData, auditData, healthData] = await Promise.all([
+      const [statsData, usersData, trackerData, projectsData, consultsData, enquiriesData, activityData, settingsData, complaintsData, auditData, healthData] = await Promise.all([
         adminApi.getStats().catch(() => null),
         adminApi.getUsers().catch(() => []),
         adminApi.getServiceTracker().catch(() => []),
         projectsApi.list().catch(() => []),
         consultationsApi.list().catch(() => []),
+        adminApi.getEnquiries().catch(() => []),
+        adminApi.getUserActivity().catch(() => null),
+        adminApi.getPlatformSettings().catch(() => null),
         complaintsApi.list().catch(() => []),
         adminApi.getAuditLogs().catch(() => []),
         adminApi.getHealth().catch(() => null)
@@ -89,6 +119,9 @@ export const AdminPortalPage: React.FC = () => {
       setServiceDossiers(trackerData || []);
       setProjects(projectsData || []);
       setConsultations(consultsData || []);
+      setEnquiries(enquiriesData || []);
+      setActivityOverview(activityData);
+      if (settingsData) setPlatformSettings(settingsData);
       setComplaints(complaintsData || []);
       setAuditLogs(auditData || []);
       setHealth(healthData);
@@ -124,6 +157,30 @@ export const AdminPortalPage: React.FC = () => {
       showToast(err?.message || "Failed to update consultation status", "warning");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleUpdateEnquiryStatus = async (id: string, newStatus: string) => {
+    try {
+      const updated = await adminApi.updateEnquiryStatus(id, { status: newStatus });
+      setEnquiries((prev) => prev.map((e) => (e.id === updated.id ? { ...e, ...updated } : e)));
+      showToast(`Enquiry ${id} updated to '${newStatus}'`, "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to update enquiry status", "warning");
+    }
+  };
+
+  const handleSavePlatformSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSavingSettings(true);
+      const updated = await adminApi.updatePlatformSettings(platformSettings);
+      setPlatformSettings(updated);
+      showToast("Platform & Website Controls saved successfully! Changes are live across the site.", "success");
+    } catch (err: any) {
+      showToast(err?.message || "Failed to save platform controls", "warning");
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -210,12 +267,13 @@ export const AdminPortalPage: React.FC = () => {
         {[
           { id: "projects", label: `Client Projects (${projects.length})` },
           { id: "tracker", label: `Client Services Tracker (${serviceDossiers.length})` },
-          { id: "overview", label: "Operations Overview" },
+          { id: "enquiries", label: `Enquiries & Leads (${enquiries.length})` },
+          { id: "activity", label: `Active Users (${activityOverview?.online_count ?? 0} Online)` },
+          { id: "controls", label: "Website Controls" },
           { id: "consultations", label: `Consultations (${consultations.length})` },
-          { id: "users", label: `User Directory (${users.length})` },
+          { id: "overview", label: "Operations Overview" },
           { id: "grievances", label: `Grievances (${complaints.length})` },
           { id: "audit", label: "Audit Logs" },
-          { id: "health", label: "System Health" }
         ].map((tab) => (
           <button
             key={tab.id}
@@ -1246,11 +1304,17 @@ export const AdminPortalPage: React.FC = () => {
                           </td>
                           <td className="py-3 px-4">
                             <div className="font-extrabold text-slate-900 dark:text-white">{item.full_name}</div>
-                            <div className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-1 font-semibold">
-                              <Phone className="w-3 h-3 text-emerald-600" />
-                              <a href={`tel:${item.phone_number}`} className="hover:underline">{item.phone_number}</a>
+                            <div className="mt-1">
+                              <a
+                                href={`tel:${item.phone_number}`}
+                                title={`Click to direct call ${item.phone_number}`}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-[11px] shadow-xs transition-all cursor-pointer"
+                              >
+                                <PhoneCall className="w-3 h-3 text-white" />
+                                <span>{item.phone_number}</span>
+                              </a>
                             </div>
-                            <div className="text-[10px] text-slate-400 truncate max-w-[150px]">{item.email}</div>
+                            <div className="text-[10px] text-slate-400 truncate max-w-[150px] mt-1">{item.email}</div>
                           </td>
                           <td className="py-3 px-4 max-w-[200px]">
                             <div className="font-bold text-slate-900 dark:text-white truncate">{item.topic}</div>
@@ -1289,6 +1353,16 @@ export const AdminPortalPage: React.FC = () => {
                           </td>
                           <td className="py-3 px-4 text-right whitespace-nowrap">
                             <div className="flex items-center justify-end gap-1.5">
+                              {/* 📞 Green Direct Call Button */}
+                              <a
+                                href={`tel:${item.phone_number}`}
+                                title={`Direct Call: ${item.phone_number}`}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer"
+                              >
+                                <PhoneCall className="w-3 h-3 text-white" />
+                                <span>Call</span>
+                              </a>
+
                               <button
                                 type="button"
                                 onClick={() => handleQuickStatus(item.id, "Consulted")}
@@ -1419,61 +1493,485 @@ export const AdminPortalPage: React.FC = () => {
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}
-      {/* TAB 5: USER DIRECTORY                                         */}
+      {/* TAB: CLIENT ENQUIRIES & LEADS                                 */}
       {/* ───────────────────────────────────────────────────────────── */}
-      {activeTab === "users" && (
-        <div className="spatial-card rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-6">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-800 dark:text-slate-200">
-              <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase text-slate-700 dark:text-slate-300 font-extrabold text-[11px] border-b border-slate-200 dark:border-slate-800">
-                <tr>
-                  <th className="py-3 px-4">User</th>
-                  <th className="py-3 px-4">Phone Number</th>
-                  <th className="py-3 px-4">Assigned Role</th>
-                  <th className="py-3 px-4">Account Status</th>
-                  <th className="py-3 px-4">Projects</th>
-                  <th className="py-3 px-4">Registration Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="py-3 px-4">
-                      <div className="font-extrabold text-slate-900 dark:text-white">{u.full_name}</div>
-                      <div className="text-[11px] text-slate-600 dark:text-slate-400 font-medium">{u.email}</div>
-                    </td>
-                    <td className="py-3 px-4 font-bold text-emerald-700 dark:text-emerald-400">
-                      {u.phone_number || "Not Provided"}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
-                        u.role === "Administrator"
-                          ? "bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-200"
-                          : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200"
-                      }`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="text-emerald-700 dark:text-emerald-400 font-extrabold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Active</span>
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-white">{u.project_count}</td>
-                    <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-medium">
-                      {new Date(u.created_at).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric"
-                      })}
-                    </td>
+      {activeTab === "enquiries" && (
+        <div className="space-y-6">
+          {/* Enquiries KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
+              <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Enquiries</span>
+              <div className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">{enquiries.length}</div>
+              <span className="text-[11px] text-slate-400 font-medium">All logged leads</span>
+            </div>
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
+              <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">New / Uncontacted</span>
+              <div className="text-2xl font-extrabold text-emerald-600 mt-1">
+                {enquiries.filter(e => e.status === "New").length}
+              </div>
+              <span className="text-[11px] text-emerald-700/80 font-medium">Awaiting callback</span>
+            </div>
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">In Discussion</span>
+              <div className="text-2xl font-extrabold text-blue-600 mt-1">
+                {enquiries.filter(e => e.status === "Contacted").length}
+              </div>
+              <span className="text-[11px] text-blue-700/80 font-medium">Active conversations</span>
+            </div>
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
+              <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Converted</span>
+              <div className="text-2xl font-extrabold text-amber-600 mt-1">
+                {enquiries.filter(e => e.status === "Converted").length}
+              </div>
+              <span className="text-[11px] text-amber-700/80 font-medium">Client onboarded</span>
+            </div>
+          </div>
+
+          {/* Search & Filter Bar */}
+          <div className="spatial-card p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search leads by name, email, phone..."
+                value={enquirySearch}
+                onChange={(e) => setEnquirySearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl glass-input"
+              />
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <select
+                value={enquiryPillarFilter}
+                onChange={(e) => setEnquiryPillarFilter(e.target.value)}
+                className="text-xs rounded-xl glass-input py-2 px-3 font-semibold"
+              >
+                <option value="ALL">All Practices</option>
+                <option value="CS">CS / Incorporation</option>
+                <option value="CA">CA / Tax</option>
+                <option value="LAW">Corporate Law</option>
+                <option value="GENERAL">General</option>
+              </select>
+              <select
+                value={enquiryStatusFilter}
+                onChange={(e) => setEnquiryStatusFilter(e.target.value)}
+                className="text-xs rounded-xl glass-input py-2 px-3 font-semibold"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="New">New</option>
+                <option value="Contacted">Contacted</option>
+                <option value="Converted">Converted</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Enquiries Table */}
+          <div className="spatial-card rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-6">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-800 dark:text-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase text-slate-700 dark:text-slate-300 font-extrabold text-[11px] border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="py-3 px-4">Lead ID &amp; Practice</th>
+                    <th className="py-3 px-4">Client Details</th>
+                    <th className="py-3 px-4">Topic / Requirements</th>
+                    <th className="py-3 px-4">Received On</th>
+                    <th className="py-3 px-4">Lead Status</th>
+                    <th className="py-3 px-4 text-right">Direct Call Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {enquiries
+                    .filter((e) => {
+                      if (enquiryPillarFilter !== "ALL" && e.service_pillar !== enquiryPillarFilter) return false;
+                      if (enquiryStatusFilter !== "ALL" && e.status !== enquiryStatusFilter) return false;
+                      if (enquirySearch.trim()) {
+                        const s = enquirySearch.toLowerCase();
+                        return (
+                          e.full_name?.toLowerCase().includes(s) ||
+                          e.email?.toLowerCase().includes(s) ||
+                          e.phone_number?.includes(s) ||
+                          e.topic?.toLowerCase().includes(s)
+                        );
+                      }
+                      return true;
+                    })
+                    .map((enq) => (
+                      <tr key={enq.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3 px-4">
+                          <span className="font-mono font-extrabold text-[#0B2559] dark:text-white block">{enq.id}</span>
+                          <span className="text-[10px] font-extrabold text-[#C59B27]">{enq.service_pillar} Practice</span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="font-extrabold text-slate-900 dark:text-white">{enq.full_name}</div>
+                          {enq.company_name && (
+                            <div className="text-[11px] text-slate-500 font-semibold">{enq.company_name}</div>
+                          )}
+                          <div className="mt-1">
+                            <a
+                              href={`tel:${enq.phone_number}`}
+                              title={`Direct Call: ${enq.phone_number}`}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-[11px] shadow-xs cursor-pointer"
+                            >
+                              <PhoneCall className="w-3 h-3 text-white" />
+                              <span>{enq.phone_number}</span>
+                            </a>
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1 truncate max-w-[150px]">{enq.email}</div>
+                        </td>
+                        <td className="py-3 px-4 max-w-[240px]">
+                          <div className="font-bold text-slate-900 dark:text-white">{enq.topic}</div>
+                          {enq.message && (
+                            <p className="text-[11px] text-slate-500 line-clamp-2 mt-0.5">{enq.message}</p>
+                          )}
+                        </td>
+                        <td className="py-3 px-4 font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                          {new Date(enq.created_at).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                        <td className="py-3 px-4">
+                          <select
+                            value={enq.status}
+                            onChange={(e) => handleUpdateEnquiryStatus(enq.id, e.target.value)}
+                            className="text-xs font-bold rounded-xl py-1 px-2.5 glass-input cursor-pointer"
+                          >
+                            <option value="New">🟢 New</option>
+                            <option value="Contacted">🟡 Contacted</option>
+                            <option value="Converted">🔵 Converted</option>
+                            <option value="Closed">⚪ Closed</option>
+                          </select>
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <a
+                            href={`tel:${enq.phone_number}`}
+                            title={`Make a direct call to ${enq.full_name}: ${enq.phone_number}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-extrabold shadow-sm hover:shadow transition-all cursor-pointer"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5 text-white animate-pulse" />
+                            <span>Call Now</span>
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* TAB: ACTIVE & INACTIVE USER TRACKER                           */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {activeTab === "activity" && (
+        <div className="space-y-6">
+          {/* Active / Inactive KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between border-emerald-500/30">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">Online / Active Now</span>
+                <Radio className="w-4 h-4 text-emerald-500 animate-ping" />
+              </div>
+              <div className="text-3xl font-extrabold text-emerald-600 mt-2">
+                {activityOverview?.online_count ?? 0}
+              </div>
+              <span className="text-[11px] text-slate-500">Active within past 30 mins</span>
+            </div>
+
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">Recently Active</span>
+                <UserCheck className="w-4 h-4 text-amber-500" />
+              </div>
+              <div className="text-3xl font-extrabold text-amber-600 mt-2">
+                {activityOverview?.recently_active_count ?? 0}
+              </div>
+              <span className="text-[11px] text-slate-500">Active within last 7 days</span>
+            </div>
+
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Inactive / Dormant</span>
+                <UserX className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="text-3xl font-extrabold text-slate-700 dark:text-slate-300 mt-2">
+                {activityOverview?.inactive_count ?? 0}
+              </div>
+              <span className="text-[11px] text-slate-500">No activity in over 7 days</span>
+            </div>
+
+            <div className="spatial-card p-5 rounded-2xl flex flex-col justify-between">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#0B2559] dark:text-white uppercase tracking-wider">Total Registered</span>
+                <Users className="w-4 h-4 text-[#C59B27]" />
+              </div>
+              <div className="text-3xl font-extrabold text-[#0B2559] dark:text-white mt-2">
+                {activityOverview?.total_users ?? users.length}
+              </div>
+              <span className="text-[11px] text-slate-500">Verified platform accounts</span>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div className="spatial-card p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="relative w-full sm:w-80">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search user by name, email, phone..."
+                value={activitySearch}
+                onChange={(e) => setActivitySearch(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl glass-input"
+              />
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto">
+              {[
+                { id: "all", label: "All Users" },
+                { id: "online", label: `🟢 Online (${activityOverview?.online_count ?? 0})` },
+                { id: "recently_active", label: `🟡 Recent (${activityOverview?.recently_active_count ?? 0})` },
+                { id: "inactive", label: `⚪ Inactive (${activityOverview?.inactive_count ?? 0})` },
+              ].map((btn) => (
+                <button
+                  key={btn.id}
+                  onClick={() => setActivityFilter(btn.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap cursor-pointer transition-all ${
+                    activityFilter === btn.id
+                      ? "bg-[#0B2559] text-white shadow-xs"
+                      : "spatial-surface hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Activity Users Table */}
+          <div className="spatial-card rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden p-6">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-slate-800 dark:text-slate-200">
+                <thead className="bg-slate-50 dark:bg-slate-800/60 uppercase text-slate-700 dark:text-slate-300 font-extrabold text-[11px] border-b border-slate-200 dark:border-slate-800">
+                  <tr>
+                    <th className="py-3 px-4">Live Presence</th>
+                    <th className="py-3 px-4">User Details</th>
+                    <th className="py-3 px-4">Contact Phone &amp; Direct Call</th>
+                    <th className="py-3 px-4">Role</th>
+                    <th className="py-3 px-4">Projects / Consultations</th>
+                    <th className="py-3 px-4">Last Activity</th>
+                    <th className="py-3 px-4">Registered Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {(activityOverview?.users || []).filter((u) => {
+                    if (activityFilter === "online" && u.activity_state !== "online") return false;
+                    if (activityFilter === "recently_active" && u.activity_state !== "recently_active") return false;
+                    if (activityFilter === "inactive" && u.activity_state !== "inactive") return false;
+                    if (activitySearch.trim()) {
+                      const s = activitySearch.toLowerCase();
+                      return u.full_name?.toLowerCase().includes(s) || u.email?.toLowerCase().includes(s) || (u.phone_number && u.phone_number.includes(s));
+                    }
+                    return true;
+                  }).map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3 px-4">
+                        {u.activity_state === "online" ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>Online Now</span>
+                          </span>
+                        ) : u.activity_state === "recently_active" ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950 dark:text-amber-300">
+                            <span className="w-2 h-2 rounded-full bg-amber-500" />
+                            <span>Recently Active</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:text-slate-400">
+                            <span className="w-2 h-2 rounded-full bg-slate-400" />
+                            <span>Inactive</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="font-extrabold text-slate-900 dark:text-white">{u.full_name}</div>
+                        <div className="text-[11px] text-slate-500">{u.email}</div>
+                      </td>
+                      <td className="py-3 px-4">
+                        {u.phone_number ? (
+                          <a
+                            href={`tel:${u.phone_number}`}
+                            title={`Direct Call ${u.full_name}: ${u.phone_number}`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] shadow-xs cursor-pointer"
+                          >
+                            <PhoneCall className="w-3 h-3 text-white" />
+                            <span>{u.phone_number}</span>
+                          </a>
+                        ) : (
+                          <span className="text-slate-400 font-mono text-[11px]">No Phone</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                          u.role === "Administrator"
+                            ? "bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300"
+                            : "bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300"
+                        }`}>
+                          {u.role}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 font-mono font-bold text-slate-800 dark:text-slate-200">
+                        {u.projects_count} Project(s) · {u.consultations_count} Call(s)
+                      </td>
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px]">
+                        {u.last_active_at
+                          ? new Date(u.last_active_at).toLocaleDateString("en-IN", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : "Never"}
+                      </td>
+                      <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">
+                        {new Date(u.created_at).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* TAB: WEBSITE CONTROLS & PLATFORM SETTINGS                    */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {activeTab === "controls" && (
+        <form onSubmit={handleSavePlatformSettings} className="space-y-6 max-w-4xl">
+          <div className="spatial-card p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl space-y-6">
+            <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div className="inline-flex items-center gap-2 text-xs font-bold text-[#C59B27] uppercase tracking-wider mb-1">
+                <Sliders className="w-4 h-4" />
+                <span>Live Website Controls · Instant Global Propagation</span>
+              </div>
+              <h2 className="text-xl font-extrabold text-[#0B2559] dark:text-white">
+                Platform Contact &amp; Public Desk Configuration
+              </h2>
+              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1">
+                Updating these values instantly updates the header, footer, support links, and consultation communications across the entire portal.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                  Official Support Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600" />
+                  <input
+                    type="text"
+                    value={platformSettings.support_phone}
+                    onChange={(e) => setPlatformSettings({ ...platformSettings, support_phone: e.target.value })}
+                    required
+                    className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl glass-input font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                  Official Advisory Support Email
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="email"
+                    value={platformSettings.support_email}
+                    onChange={(e) => setPlatformSettings({ ...platformSettings, support_email: e.target.value })}
+                    required
+                    className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl glass-input font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                  Advisory Desk Operating Hours
+                </label>
+                <div className="relative">
+                  <Clock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-amber-500" />
+                  <input
+                    type="text"
+                    value={platformSettings.support_hours}
+                    onChange={(e) => setPlatformSettings({ ...platformSettings, support_hours: e.target.value })}
+                    required
+                    className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl glass-input font-bold"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                  Consultation Response SLA
+                </label>
+                <div className="relative">
+                  <Sparkles className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#C59B27]" />
+                  <input
+                    type="text"
+                    value={platformSettings.consultation_turnaround}
+                    onChange={(e) => setPlatformSettings({ ...platformSettings, consultation_turnaround: e.target.value })}
+                    required
+                    className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl glass-input font-bold"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                Corporate Office / Registered Headquarters Address
+              </label>
+              <textarea
+                rows={2}
+                value={platformSettings.office_address}
+                onChange={(e) => setPlatformSettings({ ...platformSettings, office_address: e.target.value })}
+                required
+                className="w-full p-3 text-xs rounded-xl glass-input font-medium"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+                Platform Announcement &amp; Advisory Notice Banner
+              </label>
+              <input
+                type="text"
+                value={platformSettings.announcement_banner}
+                onChange={(e) => setPlatformSettings({ ...platformSettings, announcement_banner: e.target.value })}
+                className="w-full p-3 text-xs rounded-xl glass-input font-medium"
+              />
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
+              <button
+                type="submit"
+                disabled={savingSettings}
+                className="corpsetu-btn-gold text-xs py-2.5 px-6 font-bold shadow-md disabled:opacity-60 cursor-pointer"
+              >
+                {savingSettings ? "Saving Settings..." : "Save & Apply Website Controls"}
+              </button>
+            </div>
+          </div>
+        </form>
       )}
 
       {/* ───────────────────────────────────────────────────────────── */}

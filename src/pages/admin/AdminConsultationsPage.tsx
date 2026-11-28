@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   Clock,
   Phone,
+  PhoneCall,
   Mail,
   Building,
   User,
@@ -326,15 +327,17 @@ export const AdminConsultationsPage: React.FC = () => {
                             <span>{item.company_name}</span>
                           </div>
                         )}
-                        <div className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center gap-2 mt-1">
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-emerald-600" />
-                            <a href={`tel:${item.phone_number}`} className="hover:underline font-bold text-emerald-700 dark:text-emerald-400">
-                              {item.phone_number}
-                            </a>
-                          </span>
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <a
+                            href={`tel:${item.phone_number}`}
+                            title={`Click to direct call ${item.phone_number}`}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-extrabold text-[11px] shadow-xs transition-all cursor-pointer"
+                          >
+                            <PhoneCall className="w-3 h-3 text-white" />
+                            <span>{item.phone_number}</span>
+                          </a>
                         </div>
-                        <div className="text-[11px] text-slate-500 truncate max-w-[180px]">
+                        <div className="text-[11px] text-slate-500 truncate max-w-[180px] mt-1">
                           {item.email}
                         </div>
                       </td>
@@ -417,9 +420,19 @@ export const AdminConsultationsPage: React.FC = () => {
                         </span>
                       </td>
 
-                      {/* Actions: Quick 👍 and 👎 Buttons */}
+                      {/* Actions: Quick Direct Call, 👍 and 👎 Buttons */}
                       <td className="py-4 px-5 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
+                          {/* 📞 Green Direct Call Button */}
+                          <a
+                            href={`tel:${item.phone_number}`}
+                            title={`Direct Call: ${item.phone_number}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-extrabold shadow-xs transition-all cursor-pointer"
+                          >
+                            <PhoneCall className="w-3.5 h-3.5 text-white" />
+                            <span>Call</span>
+                          </a>
+
                           {/* 👍 Consulted Button */}
                           <button
                             type="button"

@@ -301,9 +301,101 @@ export interface NotificationItem {
   created_at: string;
 }
 
+export interface PlatformSettings {
+  platform_name: string;
+  tagline: string;
+  support_phone: string;
+  support_email: string;
+  support_hours: string;
+  office_address: string;
+  announcement_banner: string;
+  consultation_turnaround: string;
+}
+
+export interface UserActivityItem {
+  id: string;
+  full_name: string;
+  email: string;
+  phone_number?: string;
+  role: string;
+  is_active: boolean;
+  is_online: boolean;
+  activity_state: "online" | "recently_active" | "inactive";
+  last_login_at?: string;
+  last_active_at?: string;
+  created_at: string;
+  projects_count: number;
+  consultations_count: number;
+}
+
+export interface UserActivityOverview {
+  total_users: number;
+  online_count: number;
+  recently_active_count: number;
+  inactive_count: number;
+  users: UserActivityItem[];
+}
+
+export interface ClientEnquiryItem {
+  id: string;
+  user_id?: string;
+  full_name: string;
+  email: string;
+  phone_number: string;
+  company_name?: string;
+  service_pillar: "CS" | "CA" | "LAW" | "GENERAL" | string;
+  topic: string;
+  message?: string;
+  source: string;
+  status: "New" | "Contacted" | "Converted" | "Closed" | string;
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const platformApi = {
+  getSettings: () => apiRequest<PlatformSettings>("/platform-settings"),
+};
+
+export const enquiriesApi = {
+  create: (data: {
+    full_name: string;
+    email: string;
+    phone_number: string;
+    company_name?: string;
+    service_pillar?: string;
+    topic: string;
+    message?: string;
+    source?: string;
+  }) => apiRequest<ClientEnquiryItem>("/enquiries", { method: "POST", body: JSON.stringify(data) }),
+};
+
 export const adminApi = {
   getStats: () => apiRequest<any>("/admin/stats"),
   getUsers: () => apiRequest<any[]>("/admin/users"),
+  getPlatformSettings: () => apiRequest<PlatformSettings>("/admin/platform-settings"),
+  updatePlatformSettings: (payload: PlatformSettings) =>
+    apiRequest<PlatformSettings>("/admin/platform-settings", {
+      method: "PUT",
+      body: JSON.stringify(payload),
+    }),
+  getUserActivity: (params?: { search?: string; filter_status?: string }) => {
+    const p = new URLSearchParams();
+    if (params?.search) p.append("search", params.search);
+    if (params?.filter_status) p.append("filter_status", params.filter_status);
+    return apiRequest<UserActivityOverview>(`/admin/user-activity?${p.toString()}`);
+  },
+  getEnquiries: (params?: { pillar?: string; status_filter?: string }) => {
+    const p = new URLSearchParams();
+    if (params?.pillar) p.append("pillar", params.pillar);
+    if (params?.status_filter) p.append("status_filter", params.status_filter);
+    return apiRequest<ClientEnquiryItem[]>(`/admin/enquiries?${p.toString()}`);
+  },
+  updateEnquiryStatus: (id: string, payload: { status?: string; admin_notes?: string }) =>
+    apiRequest<ClientEnquiryItem>(`/admin/enquiries/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
   getServiceTracker: (params?: { search?: string; service_filter?: string }) => {
     const p = new URLSearchParams();
     if (params?.search) p.append("search", params.search);
