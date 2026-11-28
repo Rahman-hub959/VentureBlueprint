@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ShieldAlert,
@@ -39,7 +39,10 @@ import {
   UserX,
   Globe,
   Send,
-  Download
+  Download,
+  ArrowLeftRight,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import {
   adminApi,
@@ -218,6 +221,69 @@ export const AdminPortalPage: React.FC = () => {
       showToast(err?.message || "Failed to send document to client", "warning");
     }
   };
+
+  // Top horizontal scrollbar and navigation synchronization for Consultations
+  const consultTopScrollRef = useRef<HTMLDivElement>(null);
+  const consultTableContainerRef = useRef<HTMLDivElement>(null);
+  const consultTableRef = useRef<HTMLTableElement>(null);
+  const [consultScrollProgress, setConsultScrollProgress] = useState<number>(0);
+  const [consultTableWidth, setConsultTableWidth] = useState<number>(1400);
+
+  const updateConsultScrollProgress = () => {
+    if (consultTableContainerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = consultTableContainerRef.current;
+      const maxScroll = scrollWidth - clientWidth;
+      if (maxScroll > 0) {
+        setConsultScrollProgress(Math.round((scrollLeft / maxScroll) * 100));
+      } else {
+        setConsultScrollProgress(0);
+      }
+    }
+  };
+
+  const handleConsultTopScroll = () => {
+    if (consultTopScrollRef.current && consultTableContainerRef.current) {
+      consultTableContainerRef.current.scrollLeft = consultTopScrollRef.current.scrollLeft;
+      updateConsultScrollProgress();
+    }
+  };
+
+  const handleConsultTableScroll = () => {
+    if (consultTopScrollRef.current && consultTableContainerRef.current) {
+      consultTopScrollRef.current.scrollLeft = consultTableContainerRef.current.scrollLeft;
+      updateConsultScrollProgress();
+    }
+  };
+
+  const scrollConsultTable = (offset: number) => {
+    if (consultTableContainerRef.current) {
+      consultTableContainerRef.current.scrollBy({ left: offset, behavior: "smooth" });
+    }
+  };
+
+  const scrollConsultTableTo = (position: "start" | "end") => {
+    if (consultTableContainerRef.current) {
+      consultTableContainerRef.current.scrollTo({
+        left: position === "start" ? 0 : consultTableContainerRef.current.scrollWidth,
+        behavior: "smooth"
+      });
+    }
+  };
+
+  useEffect(() => {
+    const measureWidth = () => {
+      if (consultTableRef.current) {
+        setConsultTableWidth(Math.max(consultTableRef.current.scrollWidth, 1300));
+      }
+    };
+    measureWidth();
+    const timer = setTimeout(measureWidth, 150);
+    window.addEventListener("resize", measureWidth);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", measureWidth);
+    };
+  }, [consultations, activeTab]);
 
   const handleUpdateEnquiryStatus = async (id: string, newStatus: string) => {
     try {
@@ -1482,9 +1548,84 @@ export const AdminPortalPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="spatial-card rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden p-6">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-slate-800 dark:text-slate-200">
+          <div className="spatial-card rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xl overflow-hidden">
+            {/* ◄► Horizontal Navigation & Moving Control Bar at Top of List */}
+            <div className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-[#C59B27]/15 border border-[#C59B27]/30 flex items-center justify-center text-[#C59B27]">
+                  <ArrowLeftRight className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-extrabold text-slate-800 dark:text-slate-100 text-[11px] uppercase tracking-wider">
+                      Horizontal Navigation Bar
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-[#C59B27] border border-amber-500/20">
+                      Scroll: {consultScrollProgress}%
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                    Drag the top scrollbar or use quick navigation buttons to view all columns
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Jump & Scroll Controls */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => scrollConsultTableTo("start")}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-[11px] font-extrabold flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
+                  title="Jump to Start (Client Contact)"
+                >
+                  <span>⇤ Start</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollConsultTable(-320)}
+                  className="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-extrabold flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
+                  title="Scroll Left"
+                >
+                  <ChevronLeft className="w-3.5 h-3.5" />
+                  <span>Left</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollConsultTable(320)}
+                  className="px-3 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-extrabold flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
+                  title="Scroll Right"
+                >
+                  <span>Right</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollConsultTableTo("end")}
+                  className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-[11px] font-extrabold flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
+                  title="Jump to End (Actions & Triage)"
+                >
+                  <span>Actions ⇥</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Synchronized Top Horizontal Scrollbar (Draggable bar at top of list) */}
+            <div
+              ref={consultTopScrollRef}
+              onScroll={handleConsultTopScroll}
+              className="w-full overflow-x-auto bg-slate-200/90 dark:bg-slate-700/90 border-b border-slate-300 dark:border-slate-600 cursor-ew-resize select-none"
+              style={{ minHeight: "14px" }}
+              title="Top Horizontal Scroll Bar (Drag to scroll table)"
+            >
+              <div style={{ width: `${consultTableWidth}px`, height: "1px" }} />
+            </div>
+
+            <div
+              ref={consultTableContainerRef}
+              onScroll={handleConsultTableScroll}
+              className="overflow-x-auto p-4 sm:p-6"
+            >
+              <table ref={consultTableRef} className="w-full min-w-[1250px] text-left text-xs text-slate-800 dark:text-slate-200">
                 <thead className="bg-slate-50 dark:bg-slate-800/80 uppercase text-[11px] font-extrabold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
                   <tr>
                     <th className="py-3 px-4">Ref ID &amp; Pillar</th>
