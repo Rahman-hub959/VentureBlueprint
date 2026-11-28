@@ -109,6 +109,11 @@ class ProjectResponse(BaseModel):
     founders: List[Dict[str, Any]] = []
     directors: List[Dict[str, Any]] = []
     structure_assessment: Optional[Dict[str, Any]] = None
+    user_id: Optional[str] = None
+    owner_name: Optional[str] = None
+    owner_email: Optional[str] = None
+    owner_phone: Optional[str] = None
+    documents_count: Optional[int] = 0
 
 # ─── VALIDATION SCHEMAS ───
 class NameValidationRequest(BaseModel):

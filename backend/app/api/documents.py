@@ -250,6 +250,19 @@ def generate_document(
     except Exception as email_err:
         logger.error(f"Failed to dispatch blueprint notification email: {email_err}")
 
+    # Notify admin of document generation
+    try:
+        from app.services.notification_service import notify_admin
+        notify_admin(
+            db=db,
+            title=f"Document Generated: {target_doc.title}",
+            message=f"Client {current_user.full_name} ({current_user.email}) generated {target_doc.title} for company '{project.name}'.",
+            category="admin_alert",
+            link="/admin"
+        )
+    except Exception as notify_err:
+        logger.error(f"Failed to notify admin: {notify_err}")
+
     return {
         "id": target_doc.id,
         "project_id": target_doc.project_id,

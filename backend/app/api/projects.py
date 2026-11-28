@@ -9,6 +9,7 @@ from app.models.audit import AuditLog
 from app.schemas.all_schemas import ProjectCreate, ProjectUpdate, ProjectResponse
 from app.api.deps import get_current_user, get_user_project
 from app.rules_engine.structure_evaluator import evaluate_legal_structure
+from app.services.notification_service import notify_admin
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -25,7 +26,12 @@ def list_projects(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    query = db.query(StartupProject).filter(StartupProject.user_id == current_user.id)
+    is_admin = current_user.role and current_user.role.name == "Administrator"
+
+    if is_admin:
+        query = db.query(StartupProject)
+    else:
+        query = db.query(StartupProject).filter(StartupProject.user_id == current_user.id)
     
     if status_filter and status_filter.lower() != "all":
         if status_filter.lower() == "archived":
@@ -51,6 +57,7 @@ def list_projects(
     
     results = []
     for p in projects:
+        owner = p.user
         results.append({
             "id": p.id,
             "name": p.name,
@@ -66,7 +73,12 @@ def list_projects(
             "business_profile": model_to_dict(p.business_profile),
             "founders": [model_to_dict(f) for f in p.founders],
             "directors": [model_to_dict(d) for d in p.directors],
-            "structure_assessment": model_to_dict(p.structure_assessment)
+            "structure_assessment": model_to_dict(p.structure_assessment),
+            "user_id": p.user_id,
+            "owner_name": owner.full_name if owner else "Entrepreneur",
+            "owner_email": owner.email if owner else None,
+            "owner_phone": owner.phone_number if owner else None,
+            "documents_count": len(p.generated_documents) if p.generated_documents else 0
         })
     return results
 
@@ -120,6 +132,15 @@ def create_project(
     db.add(audit)
     db.commit()
     db.refresh(project)
+
+    # Notify administrators about new company creation
+    notify_admin(
+        db=db,
+        title=f"New Company Project: {project.name}",
+        message=f"Client {current_user.full_name} ({current_user.email}) started incorporation setup under {project.preferred_structure}.",
+        category="admin_alert",
+        link="/projects"
+    )
 
     return {
         "id": project.id,

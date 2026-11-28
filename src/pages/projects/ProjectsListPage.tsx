@@ -15,8 +15,10 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { projectsApi } from "../../api/client";
+import { useAuth } from "../../context/AuthContext";
 
 export const ProjectsListPage: React.FC = () => {
+  const { user, isAdmin } = useAuth();
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
@@ -78,13 +80,25 @@ export const ProjectsListPage: React.FC = () => {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">Company Projects</h1>
-          <p className="text-xs text-slate-800 dark:text-slate-300 font-medium">Manage all startup blueprints, assessments, and regulatory dossiers</p>
+          <h1 className="text-2xl font-extrabold text-[#0B2559] dark:text-white tracking-tight">
+            {isAdmin ? "All Client Projects Directory" : "Company Projects"}
+          </h1>
+          <p className="text-xs text-slate-800 dark:text-slate-300 font-medium">
+            {isAdmin
+              ? "Comprehensive registry of all company blueprints created by registered entrepreneurs across India."
+              : "Manage all startup blueprints, assessments, and regulatory dossiers"}
+          </p>
         </div>
-        <Link to="/projects/new" className="corpsetu-btn-navy text-xs py-2.5 px-4 font-bold shadow-sm inline-flex items-center gap-2">
-          <Plus className="w-4 h-4 text-white" />
-          <span>New Company Project</span>
-        </Link>
+        {isAdmin ? (
+          <Link to="/admin" className="corpsetu-btn-gold text-xs py-2.5 px-4 font-bold shadow-sm inline-flex items-center gap-2">
+            <span>Client Service Tracker &rarr;</span>
+          </Link>
+        ) : (
+          <Link to="/projects/new" className="corpsetu-btn-navy text-xs py-2.5 px-4 font-bold shadow-sm inline-flex items-center gap-2">
+            <Plus className="w-4 h-4 text-white" />
+            <span>New Company Project</span>
+          </Link>
+        )}
       </div>
 
       {/* Filters and Search Bar */}
@@ -185,7 +199,24 @@ export const ProjectsListPage: React.FC = () => {
                   {proj.business_profile?.business_description || "Company questionnaire intake in progress."}
                 </p>
 
-                <div className="space-y-1.5 mb-6">
+                {/* Admin Client Ownership Card */}
+                {isAdmin && (
+                  <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs mb-4 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Client / Founder</span>
+                      <span className="text-[10px] font-extrabold text-emerald-700 dark:text-emerald-400 font-mono bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                        {proj.preferred_structure || "Pvt Ltd"}
+                      </span>
+                    </div>
+                    <div className="font-extrabold text-slate-900 dark:text-white">{proj.owner_name || "Client"}</div>
+                    <div className="text-[11px] text-slate-600 dark:text-slate-400 flex items-center justify-between">
+                      <span className="truncate max-w-[150px]">{proj.owner_email}</span>
+                      {proj.owner_phone && <span className="font-bold text-emerald-600">{proj.owner_phone}</span>}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1.5 mb-4">
                   <div className="flex justify-between text-xs text-slate-800 dark:text-slate-300 font-semibold">
                     <span>Intake Progress</span>
                     <span className="text-slate-900 dark:text-white font-bold">{proj.completion_percentage}%</span>
@@ -196,6 +227,18 @@ export const ProjectsListPage: React.FC = () => {
                       style={{ width: `${proj.completion_percentage}%` }}
                     />
                   </div>
+                </div>
+
+                {/* Documents Generated Indicator */}
+                <div className="mb-4 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500 font-medium">Statutory Documents:</span>
+                  <span className={`font-bold px-2 py-0.5 rounded-full text-[10px] border ${
+                    (proj.documents_count || 0) > 0
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300"
+                      : "bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300"
+                  }`}>
+                    {(proj.documents_count || 0) > 0 ? `✓ Generated (${proj.documents_count})` : "Pending Intake"}
+                  </span>
                 </div>
               </div>
 

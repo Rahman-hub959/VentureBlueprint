@@ -180,9 +180,86 @@ export const documentsApi = {
 };
 
 // Admin API
+export interface ClientServiceDossier {
+  user_id: string;
+  full_name: string;
+  email: string;
+  phone_number: string;
+  is_active: boolean;
+  joined_at: string;
+  active_pillars: ("CS" | "CA" | "LAW" | "GENERAL")[];
+  primary_company_name?: string;
+  company_names: string[];
+  preferred_structures: string[];
+  projects_count: number;
+  projects: {
+    id: string;
+    name: string;
+    domain: string;
+    structure?: string;
+    completion_percentage: number;
+    status: string;
+    created_at: string;
+  }[];
+  has_generated_documents: boolean;
+  generated_documents_count: number;
+  generated_documents: {
+    id: string;
+    title: string;
+    document_type: string;
+    file_format: string;
+    project_id: string;
+    status: string;
+    generated_at: string;
+  }[];
+  ca_inquiries_count: number;
+  ca_consultations: {
+    id: string;
+    topic: string;
+    status: string;
+    preferred_time_slot?: string;
+    preferred_date?: string;
+    assigned_expert?: string;
+    created_at: string;
+  }[];
+  law_inquiries_count: number;
+  law_consultations: {
+    id: string;
+    topic: string;
+    status: string;
+    preferred_time_slot?: string;
+    preferred_date?: string;
+    assigned_expert?: string;
+    created_at: string;
+  }[];
+  activity_timeline: {
+    id: string;
+    action: string;
+    entity_type?: string;
+    details?: any;
+    timestamp: string;
+  }[];
+}
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  category: "info" | "success" | "warning" | "danger" | "admin_alert" | string;
+  is_read: boolean;
+  link?: string;
+  created_at: string;
+}
+
 export const adminApi = {
   getStats: () => apiRequest<any>("/admin/stats"),
   getUsers: () => apiRequest<any[]>("/admin/users"),
+  getServiceTracker: (params?: { search?: string; service_filter?: string }) => {
+    const p = new URLSearchParams();
+    if (params?.search) p.append("search", params.search);
+    if (params?.service_filter) p.append("service_filter", params.service_filter);
+    return apiRequest<ClientServiceDossier[]>(`/admin/service-tracker?${p.toString()}`);
+  },
   getAuditLogs: (limit = 50) => apiRequest<any[]>(`/admin/audit-logs?limit=${limit}`),
   transitionRule: (ruleId: string, action: string, comments?: string) =>
     apiRequest<any>(`/admin/rules/${ruleId}/transition`, {
@@ -190,6 +267,12 @@ export const adminApi = {
       body: JSON.stringify({ action, comments }),
     }),
   getHealth: () => apiRequest<any>("/admin/health"),
+};
+
+export const notificationsApi = {
+  list: (limit = 25) => apiRequest<NotificationItem[]>(`/notifications?limit=${limit}`),
+  markAsRead: (id: string) => apiRequest<any>(`/notifications/${id}/read`, { method: "PATCH" }),
+  markAllRead: () => apiRequest<any>("/notifications/read-all", { method: "PATCH" }),
 };
 
 // Consultations API

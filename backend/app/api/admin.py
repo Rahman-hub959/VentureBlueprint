@@ -65,6 +65,7 @@ def list_all_users(
             "id": u.id,
             "email": u.email,
             "full_name": u.full_name,
+            "phone_number": u.phone_number,
             "role": u.role.name if u.role else "Entrepreneur",
             "is_active": u.is_active,
             "created_at": u.created_at,
@@ -72,6 +73,163 @@ def list_all_users(
         }
         for u in users
     ]
+
+@router.get("/service-tracker")
+def get_client_service_tracker(
+    search: Optional[str] = None,
+    service_filter: Optional[str] = None,  # ALL, CS, CA, LAW
+    admin: User = Depends(get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    users = db.query(User).order_by(desc(User.created_at)).all()
+    tracker_list = []
+
+    for u in users:
+        # Exclude administrative system users from client service tracker
+        if u.role and u.role.name == "Administrator":
+            continue
+
+        # CS Projects
+        projects = db.query(StartupProject).filter(StartupProject.user_id == u.id).all()
+        
+        # User Generated Documents
+        docs = db.query(GeneratedDocument).filter(GeneratedDocument.user_id == u.id).order_by(desc(GeneratedDocument.generated_at)).all()
+        
+        # Consultations
+        consults = db.query(Consultation).filter(
+            (Consultation.user_id == u.id) | (Consultation.email == u.email)
+        ).order_by(desc(Consultation.created_at)).all()
+        
+        cs_consults = [c for c in consults if c.pillar == "CS"]
+        ca_consults = [c for c in consults if c.pillar == "CA"]
+        law_consults = [c for c in consults if c.pillar == "LAW"]
+        general_consults = [c for c in consults if c.pillar == "GENERAL"]
+
+        # Audit Logs / Timeline
+        audit_logs = db.query(AuditLog).filter(
+            (AuditLog.user_id == u.id) | (AuditLog.details.like(f"%{u.email}%"))
+        ).order_by(desc(AuditLog.timestamp)).limit(10).all()
+
+        # Compute active services
+        active_pillars = []
+        if len(projects) > 0 or len(cs_consults) > 0:
+            active_pillars.append("CS")
+        if len(ca_consults) > 0:
+            active_pillars.append("CA")
+        if len(law_consults) > 0:
+            active_pillars.append("LAW")
+        if not active_pillars and len(general_consults) > 0:
+            active_pillars.append("GENERAL")
+        if not active_pillars:
+            active_pillars.append("CS")
+
+        company_names = [p.name for p in projects]
+        preferred_structures = list(set([p.preferred_structure for p in projects if p.preferred_structure]))
+
+        doc_items = [
+            {
+                "id": d.id,
+                "title": d.title,
+                "document_type": d.document_type,
+                "file_format": d.file_format,
+                "project_id": d.project_id,
+                "status": d.status,
+                "generated_at": d.generated_at.isoformat() if d.generated_at else None
+            }
+            for d in docs
+        ]
+
+        item = {
+            "user_id": u.id,
+            "full_name": u.full_name,
+            "email": u.email,
+            "phone_number": u.phone_number or "Not Provided",
+            "is_active": u.is_active,
+            "joined_at": u.created_at.isoformat() if u.created_at else None,
+            "active_pillars": active_pillars,
+            
+            # CS Services Dossier
+            "primary_company_name": company_names[0] if company_names else None,
+            "company_names": company_names,
+            "preferred_structures": preferred_structures,
+            "projects_count": len(projects),
+            "projects": [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "domain": p.domain,
+                    "structure": p.preferred_structure,
+                    "completion_percentage": p.completion_percentage,
+                    "status": p.status,
+                    "created_at": p.created_at.isoformat() if p.created_at else None
+                }
+                for p in projects
+            ],
+            
+            # Document Generation Status
+            "has_generated_documents": len(docs) > 0,
+            "generated_documents_count": len(docs),
+            "generated_documents": doc_items,
+
+            # CA Services Dossier
+            "ca_inquiries_count": len(ca_consults),
+            "ca_consultations": [
+                {
+                    "id": c.id,
+                    "topic": c.topic,
+                    "status": c.status,
+                    "preferred_time_slot": c.preferred_time_slot,
+                    "preferred_date": c.preferred_date,
+                    "assigned_expert": c.assigned_expert,
+                    "created_at": c.created_at.isoformat() if c.created_at else None
+                }
+                for c in ca_consults
+            ],
+
+            # LAW Services Dossier
+            "law_inquiries_count": len(law_consults),
+            "law_consultations": [
+                {
+                    "id": c.id,
+                    "topic": c.topic,
+                    "status": c.status,
+                    "preferred_time_slot": c.preferred_time_slot,
+                    "preferred_date": c.preferred_date,
+                    "assigned_expert": c.assigned_expert,
+                    "created_at": c.created_at.isoformat() if c.created_at else None
+                }
+                for c in law_consults
+            ],
+
+            # Activity Log
+            "activity_timeline": [
+                {
+                    "id": l.id,
+                    "action": l.action,
+                    "entity_type": l.entity_type,
+                    "details": l.details,
+                    "timestamp": l.timestamp.isoformat() if l.timestamp else None
+                }
+                for l in audit_logs
+            ]
+        }
+
+        if search:
+            q = search.lower()
+            match_name = q in u.full_name.lower()
+            match_email = q in u.email.lower()
+            match_phone = q in (u.phone_number or "")
+            match_company = any(q in c.lower() for c in company_names)
+            if not (match_name or match_email or match_phone or match_company):
+                continue
+
+        if service_filter and service_filter != "ALL":
+            if service_filter not in active_pillars:
+                continue
+
+        tracker_list.append(item)
+
+    return tracker_list
 
 @router.get("/audit-logs")
 def get_audit_logs(

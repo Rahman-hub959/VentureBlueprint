@@ -8,6 +8,7 @@ from app.models.consultation import Consultation
 from app.models.user import User, Notification
 from app.schemas.consultation import ConsultationCreate, ConsultationResponse, ConsultationStatusUpdate
 from app.api.deps import get_current_user, get_optional_current_user, get_current_admin_user
+from app.services.notification_service import notify_admin, notify_user
 
 router = APIRouter(prefix="/consultations", tags=["consultations"])
 
@@ -123,6 +124,15 @@ def create_consultation(
         )
         db.add(notif)
         db.commit()
+
+    # Alert administrators about new incoming consultation inquiry
+    notify_admin(
+        db=db,
+        title=f"New {consultation.pillar} Inquiry: {consultation.topic}",
+        message=f"Client {consultation.full_name} ({consultation.phone_number}, {consultation.email}) requested {consultation.pillar} advisory.",
+        category="admin_alert",
+        link="/admin/consultations"
+    )
 
     return consultation
 

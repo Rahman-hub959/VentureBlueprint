@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.user import User, Role, UserSession
 from app.models.audit import AuditLog
 from app.services.email_service import send_welcome_email
+from app.services.notification_service import notify_admin
 from app.security import (
     get_password_hash,
     verify_password,
@@ -76,6 +77,15 @@ def register(user_in: UserRegister, db: Session = Depends(get_db)):
     db.add(session)
     db.add(audit)
     db.commit()
+
+    # Alert administrators about new client registration
+    notify_admin(
+        db=db,
+        title=f"New User Registered: {user.full_name}",
+        message=f"{user.full_name} registered with email {user.email} and mobile {user.phone_number or 'Not provided'}.",
+        category="admin_alert",
+        link="/admin"
+    )
 
     # Dispatch Onboarding & Confirmation Email
     try:

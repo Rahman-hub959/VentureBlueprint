@@ -17,11 +17,12 @@ import {
   X,
   MessageSquareWarning,
   Scale,
-  CalendarCheck
+  CalendarCheck,
+  Bell
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { projectsApi } from "../api/client";
+import { projectsApi, notificationsApi, NotificationItem } from "../api/client";
 import { CorpSetuLogo } from "../components/CorpSetuLogo";
 
 export const DashboardLayout: React.FC = () => {
@@ -33,6 +34,41 @@ export const DashboardLayout: React.FC = () => {
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await notificationsApi.list();
+      setNotifications(data || []);
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+
+  const handleMarkAsRead = async (id: string, link?: string) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
+      if (link) {
+        navigate(link);
+        setNotificationsOpen(false);
+      }
+    } catch {}
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await notificationsApi.markAllRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    } catch {}
+  };
 
   useEffect(() => {
     async function fetchProjects() {
@@ -53,7 +89,9 @@ export const DashboardLayout: React.FC = () => {
 
   const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-    { label: "My Projects", path: "/projects", icon: FolderKanban },
+    ...(isAdmin
+      ? [{ label: "All Client Projects", path: "/projects", icon: FolderKanban }]
+      : [{ label: "My Projects", path: "/projects", icon: FolderKanban }]),
     { label: "Create Project", path: "/projects/new", icon: PlusCircle },
     ...(isAdmin
       ? [{ label: "Consultation Requests", path: "/admin/consultations", icon: CalendarCheck }]
@@ -284,6 +322,71 @@ export const DashboardLayout: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Notifications Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setNotificationsOpen(!notificationsOpen)}
+                aria-label="Notifications"
+                title="Notifications & Activity Updates"
+                className="w-9 h-9 rounded-xl flex items-center justify-center border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all text-slate-800 dark:text-slate-100 relative cursor-pointer shadow-xs"
+              >
+                <Bell className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-extrabold flex items-center justify-center animate-pulse">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notificationsOpen && (
+                <div className="absolute right-0 top-11 w-80 sm:w-96 rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-4 z-50 space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-1.5 font-extrabold text-xs text-[#0B2559] dark:text-white">
+                      <Bell className="w-3.5 h-3.5 text-[#C59B27]" />
+                      <span>{isAdmin ? "Admin Live Activity Alerts" : "Your Updates"}</span>
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllRead}
+                        className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                      >
+                        Mark all read
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="max-h-72 overflow-y-auto space-y-2">
+                    {notifications.length === 0 ? (
+                      <div className="text-center py-8 text-xs text-slate-400">
+                        No notifications yet.
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          onClick={() => handleMarkAsRead(n.id, n.link)}
+                          className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all space-y-1 ${
+                            n.is_read
+                              ? "bg-slate-50/60 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-400"
+                              : "bg-blue-50/70 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900 text-slate-900 dark:text-white"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between font-bold">
+                            <span className="truncate pr-2">{n.title}</span>
+                            {!n.is_read && <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />}
+                          </div>
+                          <p className="text-[11px] leading-relaxed line-clamp-2">{n.message}</p>
+                          <div className="text-[10px] text-slate-400">
+                            {new Date(n.created_at).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={toggleTheme}
               aria-label="Toggle Day/Night mode"
